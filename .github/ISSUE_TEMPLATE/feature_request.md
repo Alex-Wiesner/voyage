@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new idea, feature, or improvement for AdventureLog
+about: Suggest a new idea, feature, or improvement for Voyage
 title: "[REQUEST] <short description>"
 labels: enhancement
 assignees: ""
@@ -20,7 +20,7 @@ Is your request related to a specific problem?
 ## 🛠️ Proposed Solution
 
 Describe the solution you’d like.  
-What should AdventureLog do differently?
+What should Voyage do differently?
 
 ## 🔄 Alternatives Considered
 
@@ -36,4 +36,4 @@ Any other details that might help us understand the request (use cases, user sto
 
 ---
 
-✨ Thanks for suggesting improvements to AdventureLog! Your ideas help shape the future of the project.
+✨ Thanks for suggesting improvements to Voyage! Your ideas help shape the future of the project.

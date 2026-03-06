@@ -2,16 +2,16 @@
 set -euo pipefail
 
 # =============================================================================
-# AdventureLog Installer Script
+# Voyage Installer Script
 # (c) 2023-2026 Sean Morley <https://seanmorley.com>
-# https://adventurelog.app
+# https://voyage.app
 # License: GPL-3.0
 # =============================================================================
 
-APP_NAME="AdventureLog"
-INSTALL_DIR="./adventurelog"
-COMPOSE_FILE_URL="https://raw.githubusercontent.com/seanmorley15/AdventureLog/main/docker-compose.yml"
-ENV_FILE_URL="https://raw.githubusercontent.com/seanmorley15/AdventureLog/main/.env.example"
+APP_NAME="Voyage"
+INSTALL_DIR="./voyage"
+COMPOSE_FILE_URL="https://raw.githubusercontent.com/seanmorley15/Voyage/main/docker-compose.yml"
+ENV_FILE_URL="https://raw.githubusercontent.com/seanmorley15/Voyage/main/.env.example"
 
 # Global configuration variables
 declare -g FRONTEND_ORIGIN=""
@@ -260,13 +260,13 @@ create_directory() {
     }
 }
 
-# Check for AdventureLog running as a docker container
+# Check for Voyage running as a docker container
 check_running_container() {
-    if docker ps -a --filter "name=adventurelog" --format '{{.Names}}' | grep -q "adventurelog"; then
-        log_error "AdventureLog is already running as a Docker container (including stopped or restarting states)."
+    if docker ps -a --filter "name=voyage" --format '{{.Names}}' | grep -q "voyage"; then
+        log_error "Voyage is already running as a Docker container (including stopped or restarting states)."
         echo ""
         echo "Running this installer further can break existing installs."
-        echo "Please stop and remove the existing AdventureLog container manually before proceeding."
+        echo "Please stop and remove the existing Voyage container manually before proceeding."
         echo "  • To stop: docker compose down --remove-orphans"
         echo "Installation aborted to prevent data loss."
         exit 1
@@ -294,7 +294,7 @@ prompt_configuration() {
     echo ""
     log_header "🛠️  Configuration Setup"
     echo ""
-    echo "Configure the URLs where AdventureLog will be accessible."
+    echo "Configure the URLs where Voyage will be accessible."
     echo "Press Enter to use the default values shown in brackets."
     echo ""
     echo "⚠️  Note: The installer will automatically configure Docker ports based on your URLs"
@@ -382,8 +382,8 @@ configure_environment_fallback() {
     log_info "Creating minimal .env configuration..."
     cat > .env << EOF
 # Database Configuration
-POSTGRES_DB=adventurelog
-POSTGRES_USER=adventurelog
+POSTGRES_DB=voyage
+POSTGRES_USER=voyage
 POSTGRES_PASSWORD=$DB_PASSWORD
 DATABASE_PASSWORD=$DB_PASSWORD
 
@@ -586,7 +586,7 @@ update_docker_compose_ports() {
 }
 
 start_services() {
-    log_info "Starting AdventureLog services..."
+    log_info "Starting Voyage services..."
     echo ""
     
     # Use docker compose or docker-compose based on availability
@@ -696,7 +696,7 @@ EOF
     echo ""
     echo -e "${BOLD}📁 Important Locations:${NC}"
     echo -e "   🛠️  Config:     ${YELLOW}$(pwd)/.env${NC}"
-    echo -e "   📦 Media Vol:  ${YELLOW}adventurelog_media${NC}"
+    echo -e "   📦 Media Vol:  ${YELLOW}voyage_media${NC}"
     echo -e "   📜 Logs:       ${YELLOW}docker compose logs -f${NC}"
 
     echo ""
@@ -717,11 +717,11 @@ EOF
     echo ""
 
     # Optional donation link
-    echo -e "${BOLD}❤️  Enjoying AdventureLog?${NC}"
+    echo -e "${BOLD}❤️  Enjoying Voyage?${NC}"
     echo -e "   Support future development: ${MAGENTA}https://seanmorley.com/sponsor${NC}"
     echo ""
 
-    echo -e "${BOLD}🌍 Adventure awaits — your journey starts now with AdventureLog!${NC}"
+    echo -e "${BOLD}🌍 Adventure awaits — your journey starts now with Voyage!${NC}"
 }
 
 print_failure_message() {
@@ -736,7 +736,7 @@ print_failure_message() {
     echo "5. Check .env configuration: cat .env"
     echo "6. Check docker-compose.yml ports: grep -A5 ports docker-compose.yml"
     echo ""
-    echo "For support, visit: https://github.com/seanmorley15/AdventureLog"
+    echo "For support, visit: https://github.com/seanmorley15/Voyage"
 }
 
 cleanup_on_failure() {

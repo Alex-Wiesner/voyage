@@ -24,7 +24,7 @@ spec:
             claimName: adventure-journal-db-pvc
       containers:
         - name: adventure-frontend
-          image: ghcr.io/seanmorley15/adventurelog-frontend:latest
+          image: ghcr.io/seanmorley15/voyage-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
@@ -54,11 +54,11 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: adventurelog-secret
+                  name: voyage-secret
                   key: adventure-postgres-password
 
         - name: adventure-backend
-          image: ghcr.io/seanmorley15/adventurelog-backend:latest
+          image: ghcr.io/seanmorley15/voyage-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
@@ -76,12 +76,12 @@ spec:
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: adventurelog-secret
+                  name: voyage-secret
                   key: adventure-postgres-password
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: adventurelog-secret
+                  name: voyage-secret
                   key: adventure-postgres-password
             - name: PUBLIC_URL
               value: "http://internally-and-externally.reachable.io:80" # Match the outward port, used for the creation of image urls

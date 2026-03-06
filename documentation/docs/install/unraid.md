@@ -1,8 +1,8 @@
 # Installation with Unraid
 
-AdventureLog is available in the Unraid Community Applications store. You can install it by searching for `AdventureLog` in the Community Applications store, where you will find the frontend and the backend. The database can be found by searching `PostGIS`.
+Voyage is available in the Unraid Community Applications store. You can install it by searching for `Voyage` in the Community Applications store, where you will find the frontend and the backend. The database can be found by searching `PostGIS`.
 
-Community Applications Page for AdventureLog: [AdventureLog on CA Store](https://unraid.net/community/apps?q=AdventureLog)\
+Community Applications Page for Voyage: [Voyage on CA Store](https://unraid.net/community/apps?q=Voyage)\
 Community Applications Page for PostGIS: [PostGIS on CA Store](https://unraid.net/community/apps?q=PostGIS)
 
 ## Installation Configuration
@@ -18,7 +18,7 @@ docker network create example
 ## Database
 
 - Network type should be set to your **custom network**.
-- There is **no** AdventureLog---Database app, to find the database application search for `PostGIS` on the Unraid App Store then add and fill out the fields as shown below
+- There is **no** Voyage---Database app, to find the database application search for `PostGIS` on the Unraid App Store then add and fill out the fields as shown below
 - Change the repository version to `postgis/postgis:15-3.3`
 - Ensure that the variables `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` are set in the `PostGIS` container. If not, then add them as custom variables. The template should have `POSTGRES_PASSWORD` already and you will simply have to add `POSTGRES_DB` and `POSTGRES_USER`.
 - The forwarded port of `5012` is not needed unless you plan to access the database outside of the container's network.
@@ -72,6 +72,6 @@ docker network create example
 
 ## Additional Resources
 
-Youtuber AlienTech42 has created a helpful video walking through the installation of AdventureLog on Unraid:
+Youtuber AlienTech42 has created a helpful video walking through the installation of Voyage on Unraid:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/hJnoePdAhXg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>

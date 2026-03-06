@@ -1,42 +1,42 @@
 {
 	"backgrounds": [
 		{
-			"url": "backgrounds/adventurelog_showcase_1.webp",
+			"url": "backgrounds/voyage_showcase_1.webp",
 			"author": "Sean Morley",
 			"location": "Franconia Notch State Park, New Hampshire, USA"
 		},
 		{
-			"url": "backgrounds/adventurelog_showcase_2.webp",
+			"url": "backgrounds/voyage_showcase_2.webp",
 			"author": "Sean Morley",
 			"location": "Tumbledown Mountain, Maine, USA"
 		},
 		{
-			"url": "backgrounds/adventurelog_showcase_3.webp",
+			"url": "backgrounds/voyage_showcase_3.webp",
 			"author": "Sean Morley",
 			"location": "Philmont Scout Ranch, New Mexico, USA"
 		},
 		{
-			"url": "backgrounds/adventurelog_showcase_4.webp",
+			"url": "backgrounds/voyage_showcase_4.webp",
 			"author": "Sean Morley",
 			"location": "Great Sand Dunes National Park, Colorado, USA"
 		},
 		{
-			"url": "backgrounds/adventurelog_showcase_5.webp",
+			"url": "backgrounds/voyage_showcase_5.webp",
 			"author": "Sean Morley",
 			"location": "Hoboken, New Jersey, USA"
 		},
 		{
-			"url": "backgrounds/adventurelog_showcase_6.webp",
+			"url": "backgrounds/voyage_showcase_6.webp",
 			"author": "Sean Morley",
 			"location": "Smugglers' Notch Resort, Vermont, USA"
 		},
 		{
-			"url": "backgrounds/adventurelog_showcase_7.webp",
+			"url": "backgrounds/voyage_showcase_7.webp",
 			"author": "Sean Morley",
 			"location": "Davos, Switzerland"
 		},
 		{
-			"url": "backgrounds/adventurelog_showcase_8.webp",
+			"url": "backgrounds/voyage_showcase_8.webp",
 			"author": "Sean Morley",
 			"location": "Saddleback Ski Area, Maine, USA"
 		}

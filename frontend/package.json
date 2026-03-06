@@ -1,5 +1,5 @@
 {
-	"name": "adventurelog-frontend",
+	"name": "voyage-frontend",
 	"version": "0.12.0",
 	"scripts": {
 		"dev": "vite dev",

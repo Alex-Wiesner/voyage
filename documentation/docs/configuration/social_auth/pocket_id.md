@@ -2,15 +2,15 @@
 
 <img src="https://pocket-id.org/logo.png" alt="Pocket ID Logo" width="400" />
 
-Pocket ID is a lightweight, self-hosted OpenID Connect (OIDC) identity provider. AdventureLog can be configured to use Pocket ID for social authentication using its built-in OpenID Connect support.
+Pocket ID is a lightweight, self-hosted OpenID Connect (OIDC) identity provider. Voyage can be configured to use Pocket ID for social authentication using its built-in OpenID Connect support.
 
-Once Pocket ID is configured by an administrator, users can sign in to AdventureLog using their Pocket ID account and optionally link it to an existing AdventureLog account.
+Once Pocket ID is configured by an administrator, users can sign in to Voyage using their Pocket ID account and optionally link it to an existing Voyage account.
 
 ---
 
 # Configuration
 
-To enable Pocket ID as an identity provider, both Pocket ID and AdventureLog must be configured correctly. The most important (and least obvious) part of this setup is the **callback URL**, which must match AdventureLog’s internal OIDC routing.
+To enable Pocket ID as an identity provider, both Pocket ID and Voyage must be configured correctly. The most important (and least obvious) part of this setup is the **callback URL**, which must match Voyage’s internal OIDC routing.
 
 ---
 
@@ -20,29 +20,29 @@ To enable Pocket ID as an identity provider, both Pocket ID and AdventureLog mus
 
 2. Navigate to **Clients** and create a new client.
 
-3. Name the client something like `AdventureLog`.
+3. Name the client something like `Voyage`.
 
 4. Set the **Redirect / Callback URL** to:
 
    ```
-   https://<adventurelog-backend.example.com>/accounts/oidc/<CLIENT_ID>/login/callback/
+   https://<voyage-backend.example.com>/accounts/oidc/<CLIENT_ID>/login/callback/
    ```
 
-   - Replace `<adventurelog-backend.example.com>` with the **backend** URL of your AdventureLog instance.
+   - Replace `<voyage-backend.example.com>` with the **backend** URL of your Voyage instance.
    - Replace `<CLIENT_ID>` with the **Pocket ID client ID** exactly as generated.
-   - This path is required and currently not auto-documented by Pocket ID or AdventureLog.
+   - This path is required and currently not auto-documented by Pocket ID or Voyage.
 
 5. Ensure the client type is **Confidential**.
 
-6. Copy the generated **Client ID** and **Client Secret** — you will need both for AdventureLog.
+6. Copy the generated **Client ID** and **Client Secret** — you will need both for Voyage.
 
 ---
 
-## AdventureLog Configuration
+## Voyage Configuration
 
-This configuration is done in the [Admin Panel](../../guides/admin_panel.md). You can launch it from the `Settings` page or navigate directly to `/admin` on your AdventureLog server.
+This configuration is done in the [Admin Panel](../../guides/admin_panel.md). You can launch it from the `Settings` page or navigate directly to `/admin` on your Voyage server.
 
-1. Log in to AdventureLog as an administrator.
+1. Log in to Voyage as an administrator.
 2. Navigate to **Settings** → **Administration Settings** and launch the admin panel.
 3. Go to **Social Accounts**.
 4. Under **Social applications**, click **Add**.
@@ -67,14 +67,14 @@ This configuration is done in the [Admin Panel](../../guides/admin_panel.md). Yo
 - Replace `<pocketid-url>` with the base URL of your Pocket ID instance.
 
 ::: warning
-Do **not** use `localhost` unless Pocket ID is running on the same machine and is resolvable from inside the AdventureLog container or service. Use a domain name or LAN IP instead.
+Do **not** use `localhost` unless Pocket ID is running on the same machine and is resolvable from inside the Voyage container or service. Use a domain name or LAN IP instead.
 :::
 
 - **Sites**: Move the sites you want Pocket ID enabled on (usually `example.com` and `www.example.com`).
 
 6. Save the configuration.
 
-Ensure Pocket ID is running and reachable by AdventureLog.
+Ensure Pocket ID is running and reachable by Voyage.
 
 ---
 
@@ -82,16 +82,16 @@ Ensure Pocket ID is running and reachable by AdventureLog.
 
 Once configured correctly:
 
-- Pocket ID appears as a login option on the AdventureLog login screen.
-- Logging in redirects to Pocket ID, then back to AdventureLog without errors.
+- Pocket ID appears as a login option on the Voyage login screen.
+- Logging in redirects to Pocket ID, then back to Voyage without errors.
 
 ---
 
 ## Linking to an Existing Account
 
-If a user already has an AdventureLog account:
+If a user already has an Voyage account:
 
-1. Log in to AdventureLog normally.
+1. Log in to Voyage normally.
 2. Go to **Settings**.
 3. Click **Launch Account Connections**.
 4. Choose **Pocket ID** to link the identity to the existing account.
@@ -119,13 +119,13 @@ Ensure that:
 /accounts/oidc/<CLIENT_ID>/login/callback/
 ```
 
-- The `<CLIENT_ID>` must match the value used in the AdventureLog social application.
+- The `<CLIENT_ID>` must match the value used in the Voyage social application.
 
 ---
 
 ### Cannot Reach Pocket ID
 
-- Verify that the `.well-known/openid-configuration` endpoint is accessible from the AdventureLog server.
+- Verify that the `.well-known/openid-configuration` endpoint is accessible from the Voyage server.
 - Test by opening:
 
 ```

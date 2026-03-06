@@ -198,7 +198,7 @@ class ContentImageViewSet(viewsets.ModelViewSet):
             return Response({"error": result}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            headers = {'User-Agent': 'AdventureLog/1.0 (Image Proxy)'}
+            headers = {'User-Agent': 'Voyage/1.0 (Image Proxy)'}
             max_redirects = 3
             current_url = image_url
 

@@ -17,7 +17,7 @@ class GenerateDescription(viewsets.ViewSet):
 
     # User-Agent header required by Wikipedia API, Accept-Language patched in per request
     BASE_HEADERS = {
-        'User-Agent': f'AdventureLog/{getattr(settings, "ADVENTURELOG_RELEASE_VERSION", "unknown")}'
+        'User-Agent': f'Voyage/{getattr(settings, "VOYAGE_RELEASE_VERSION", "unknown")}'
     }
     DEFAULT_LANGUAGE = "en"
     LANGUAGE_PATTERN = re.compile(r"^[a-z0-9-]{2,12}$", re.IGNORECASE)

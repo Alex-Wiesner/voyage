@@ -1,5 +1,5 @@
 """
-AdventureLog Server settings
+Voyage Server settings
 
 Reference:
 - Django settings: https://docs.djangoproject.com/en/stable/ref/settings/
@@ -235,7 +235,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 ACCOUNT_ADAPTER = 'users.adapters.CustomAccountAdapter'
 INVITATIONS_ADAPTER = ACCOUNT_ADAPTER
 INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
-INVITATIONS_EMAIL_SUBJECT_PREFIX = 'AdventureLog: '
+INVITATIONS_EMAIL_SUBJECT_PREFIX = 'Voyage: '
 SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
 ACCOUNT_SIGNUP_FORM_CLASS = 'users.form_overrides.CustomSignupForm'
 
@@ -365,10 +365,10 @@ LOGGING = {
 # ---------------------------------------------------------------------------
 PUBLIC_URL = getenv('PUBLIC_URL', 'http://localhost:8000')
 
-# ADVENTURELOG_CDN_URL = getenv('ADVENTURELOG_CDN_URL', 'https://cdn.adventurelog.app')
+# VOYAGE_CDN_URL = getenv('VOYAGE_CDN_URL', 'https://cdn.voyage.app')
 
-# Major release version of AdventureLog, not including the patch version date.
-ADVENTURELOG_RELEASE_VERSION = 'v0.12.0'
+# Major release version of Voyage, not including the patch version date.
+VOYAGE_RELEASE_VERSION = 'v0.12.0'
 
 # https://github.com/dr5hn/countries-states-cities-database/tags
 COUNTRY_REGION_JSON_VERSION = 'v3.0'

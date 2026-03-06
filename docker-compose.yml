@@ -1,8 +1,8 @@
 services:
   web:
     #build: ./frontend/
-    image: ghcr.io/seanmorley15/adventurelog-frontend:latest
-    container_name: adventurelog-frontend
+    image: ghcr.io/seanmorley15/voyage-frontend:latest
+    container_name: voyage-frontend
     restart: unless-stopped
     env_file: .env
     ports:
@@ -12,7 +12,7 @@ services:
 
   db:
     image: postgis/postgis:16-3.5
-    container_name: adventurelog-db
+    container_name: voyage-db
     restart: unless-stopped
     env_file: .env
     volumes:
@@ -20,8 +20,8 @@ services:
 
   server:
     #build: ./backend/
-    image: ghcr.io/seanmorley15/adventurelog-backend:latest
-    container_name: adventurelog-backend
+    image: ghcr.io/seanmorley15/voyage-backend:latest
+    container_name: voyage-backend
     restart: unless-stopped
     env_file: .env
     ports:
@@ -29,8 +29,8 @@ services:
     depends_on:
       - db
     volumes:
-      - adventurelog_media:/code/media/
+      - voyage_media:/code/media/
 
 volumes:
   postgres_data:
-  adventurelog_media:
+  voyage_media:

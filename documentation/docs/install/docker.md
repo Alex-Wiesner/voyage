@@ -1,6 +1,6 @@
 # Docker 🐋
 
-Docker is the preferred way to run AdventureLog on your local machine. It is a lightweight containerization technology that allows you to run applications in isolated environments called containers.
+Docker is the preferred way to run Voyage on your local machine. It is a lightweight containerization technology that allows you to run applications in isolated environments called containers.
 
 > **Note**: This guide mainly focuses on installation with a Linux-based host machine, but the steps are similar for other operating systems.
 
@@ -10,26 +10,26 @@ Docker is the preferred way to run AdventureLog on your local machine. It is a l
 
 ## Getting Started
 
-Get the `docker-compose.yml` and `.env.example` files from the AdventureLog repository. You can download them here:
+Get the `docker-compose.yml` and `.env.example` files from the Voyage repository. You can download them here:
 
-- [Docker Compose](https://github.com/seanmorley15/AdventureLog/blob/main/docker-compose.yml)
-- [Environment Variables](https://github.com/seanmorley15/AdventureLog/blob/main/.env.example)
+- [Docker Compose](https://github.com/seanmorley15/Voyage/blob/main/docker-compose.yml)
+- [Environment Variables](https://github.com/seanmorley15/Voyage/blob/main/.env.example)
 
 ```bash
-wget https://raw.githubusercontent.com/seanmorley15/AdventureLog/main/docker-compose.yml
-wget https://raw.githubusercontent.com/seanmorley15/AdventureLog/main/.env.example
+wget https://raw.githubusercontent.com/seanmorley15/Voyage/main/docker-compose.yml
+wget https://raw.githubusercontent.com/seanmorley15/Voyage/main/.env.example
 cp .env.example .env
 ```
 
 ::: tip
 
-If running on an ARM based machine, you will need to use a different PostGIS Image. It is recommended to use the `imresamu/postgis:15-3.3-alpine3.21` image or a custom version found [here](https://hub.docker.com/r/imresamu/postgis/tags). The AdventureLog containers are ARM compatible.
+If running on an ARM based machine, you will need to use a different PostGIS Image. It is recommended to use the `imresamu/postgis:15-3.3-alpine3.21` image or a custom version found [here](https://hub.docker.com/r/imresamu/postgis/tags). The Voyage containers are ARM compatible.
 
 :::
 
 ## Configuration
 
-The `.env` file contains all the configuration settings for your AdventureLog instance. Here’s a breakdown of each section:
+The `.env` file contains all the configuration settings for your Voyage instance. Here’s a breakdown of each section:
 
 ### 🌐 Frontend (web)
 
@@ -73,10 +73,10 @@ The `.env` file contains all the configuration settings for your AdventureLog in
 
 ## Running the Containers
 
-Once you've configured `.env`, you can start AdventureLog with:
+Once you've configured `.env`, you can start Voyage with:
 
 ```bash
 docker compose up -d
 ```
 
-Enjoy using AdventureLog! 🎉
+Enjoy using Voyage! 🎉

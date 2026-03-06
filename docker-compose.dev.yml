@@ -1,8 +1,8 @@
 services:
   web:
     build: ./frontend/
-    image: ghcr.io/seanmorley15/adventurelog-frontend:latest
-    container_name: adventurelog-frontend
+    image: ghcr.io/seanmorley15/voyage-frontend:latest
+    container_name: voyage-frontend
     restart: unless-stopped
     user: root
     env_file: .env
@@ -20,7 +20,7 @@ services:
 
   db:
     image: postgis/postgis:16-3.5
-    container_name: adventurelog-db
+    container_name: voyage-db
     restart: unless-stopped
     env_file: .env
     volumes:
@@ -28,8 +28,8 @@ services:
 
   server:
     build: ./backend/
-    image: ghcr.io/seanmorley15/adventurelog-backend:latest
-    container_name: adventurelog-backend
+    image: ghcr.io/seanmorley15/voyage-backend:latest
+    container_name: voyage-backend
     restart: unless-stopped
     env_file: .env
     environment:
@@ -42,7 +42,7 @@ services:
       - db
     volumes:
       - ./backend/server:/code
-      - adventurelog_media:/code/media/
+      - voyage_media:/code/media/
     command: >
       sh -c "memcached -u nobody -m 64 -p 11211 -d;
       until pg_isready -h db -p 5432 >/dev/null 2>&1; do sleep 1; done;
@@ -55,5 +55,5 @@ services:
 
 volumes:
   postgres_data:
-  adventurelog_media:
+  voyage_media:
   pnpm_store:

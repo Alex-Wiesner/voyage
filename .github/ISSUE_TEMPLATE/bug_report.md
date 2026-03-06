@@ -23,7 +23,7 @@ Steps to reproduce the behavior:
 
 ## ✅ Expected Behavior
 
-What did you expect AdventureLog to do?
+What did you expect Voyage to do?
 
 ## 📸 Screenshots / Logs
 
@@ -34,7 +34,7 @@ What did you expect AdventureLog to do?
 
 - **Platform:** (Docker, Synology, Proxmox, TrueNAS, Unraid, etc.)
 - **Install Method:** (Docker Compose, Quick Install Script, Manual, etc.)
-- **AdventureLog Version:** (e.g., v0.12.0)
+- **Voyage Version:** (e.g., v0.12.0)
 - **Reverse Proxy:** (e.g., Nginx, Traefik, Caddy, etc. or None)
 
 If using Docker and the issue is related to the container, it may be helpful to include your `docker-compose.yml` or relevant variables below.  
@@ -46,4 +46,4 @@ Anything else that might be useful (custom configuration, network setup, databas
 
 ---
 
-Thank you for taking the time to report this issue! We appreciate your help in making AdventureLog better. We’ll look into it as soon as we can. 🙌
+Thank you for taking the time to report this issue! We appreciate your help in making Voyage better. We’ll look into it as soon as we can. 🙌

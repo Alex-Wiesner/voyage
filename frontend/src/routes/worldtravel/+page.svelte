@@ -728,7 +728,7 @@
 								</div>
 								<a
 									class="link link-primary mt-4 inline-block"
-									href="https://adventurelog.app/docs/configuration/updating.html#updating-the-region-data"
+									href="https://voyage.app/docs/configuration/updating.html#updating-the-region-data"
 									target="_blank"
 								>
 									{$t('settings.documentation_link')}

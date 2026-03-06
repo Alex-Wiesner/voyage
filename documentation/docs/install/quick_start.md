@@ -1,11 +1,11 @@
 # 🚀 Quick Start Install
 
-Install **AdventureLog** in seconds using our automated script.
+Install **Voyage** in seconds using our automated script.
 
 ## 🧪 One-Liner Install
 
 ```bash
-curl -sSL https://get.adventurelog.app | bash
+curl -sSL https://get.voyage.app | bash
 ```
 
 This will:
@@ -14,7 +14,7 @@ This will:
 - Set up project directory
 - Download required files
 - Prompt for basic configuration (like domain name)
-- Start AdventureLog with Docker Compose
+- Start Voyage with Docker Compose
 
 ## ✅ Requirements
 
@@ -37,9 +37,9 @@ The script automatically:
 To remove everything:
 
 ```bash
-cd adventurelog
+cd voyage
 docker compose down -v
-rm -rf adventurelog
+rm -rf voyage
 ```
 
 Need more control? Explore other [install options](getting_started.md) like Docker, Proxmox, Synology NAS, and more.

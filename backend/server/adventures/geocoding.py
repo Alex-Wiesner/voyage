@@ -129,7 +129,7 @@ def _infer_addresstype(type_):
 def search_osm(query):
     try:
         url = f"https://nominatim.openstreetmap.org/search?q={query}&format=jsonv2"
-        headers = {'User-Agent': 'AdventureLog Server'}
+        headers = {'User-Agent': 'Voyage Server'}
         response = requests.get(url, headers=headers, timeout=(2, 5))
         response.raise_for_status()
         data = response.json()
@@ -370,7 +370,7 @@ def reverse_geocode(lat, lon, user):
 
 def reverse_geocode_osm(lat, lon, user):
     url = f"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={lat}&lon={lon}"
-    headers = {'User-Agent': 'AdventureLog Server'}
+    headers = {'User-Agent': 'Voyage Server'}
     connect_timeout = 1
     read_timeout = 5
 

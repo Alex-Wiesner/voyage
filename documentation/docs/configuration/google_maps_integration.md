@@ -1,6 +1,6 @@
 # Google Maps Integration
 
-To enable Google Maps integration in AdventureLog, you'll need to create a Google Maps API key. This key allows AdventureLog to use Google Maps services such as geocoding and location search throughout the application.
+To enable Google Maps integration in Voyage, you'll need to create a Google Maps API key. This key allows Voyage to use Google Maps services such as geocoding and location search throughout the application.
 
 Follow the steps below to generate your own API key:
 
@@ -10,7 +10,7 @@ Follow the steps below to generate your own API key:
 2. Create an account if you don't have one in order to access the console.
 3. Click on the project dropdown in the top bar.
 4. Click **New Project**.
-5. Name your project (e.g., `AdventureLog Maps`) and click **Create**.
+5. Name your project (e.g., `Voyage Maps`) and click **Create**.
 6. Once the project is created, ensure it is selected in the project dropdown.
 7. Click on the **Navigation menu** (three horizontal lines in the top left corner).
 8. Navigate to **Google Maps Platform**.
@@ -29,14 +29,14 @@ Follow the steps below to generate your own API key:
 1. Click the **Edit icon** next to your new API key.
 2. Under **Application restrictions**, choose one:
    - Choose **Websites** as the restriction type.
-   - Add the domain of the AdventureLog **backend** (e.g., `https://your-adventurelog-backend.com`). -->
+   - Add the domain of the Voyage **backend** (e.g., `https://your-voyage-backend.com`). -->
 
-## Configuration in AdventureLog
+## Configuration in Voyage
 
-Set the API key in your environment file or configuration under the backend service of AdventureLog. This is typically done in the `docker-compose.yml` file or directly in your environment variables `.env` file.
+Set the API key in your environment file or configuration under the backend service of Voyage. This is typically done in the `docker-compose.yml` file or directly in your environment variables `.env` file.
 
 ```env
 GOOGLE_MAPS_API_KEY=your_api_key_here
 ```
 
-Once this is set, AdventureLog will be able to utilize Google Maps services for geocoding and location searches instead of relying on the default OpenStreetMap services.
+Once this is set, Voyage will be able to utilize Google Maps services for geocoding and location searches instead of relying on the default OpenStreetMap services.

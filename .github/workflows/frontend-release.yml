@@ -9,7 +9,7 @@ on:
     types: [released]
 
 env:
-  IMAGE_NAME: "adventurelog-frontend"
+  IMAGE_NAME: "voyage-frontend"
 
 jobs:
   upload:

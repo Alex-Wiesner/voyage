@@ -14,7 +14,7 @@ class RecommendationsViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     OVERPASS_URL = "https://overpass-api.de/api/interpreter"
     NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-    HEADERS = {'User-Agent': 'AdventureLog Server'}
+    HEADERS = {'User-Agent': 'Voyage Server'}
 
     # Quality thresholds
     MIN_GOOGLE_RATING = 3.0  # Minimum rating to include

@@ -164,7 +164,7 @@
 		on:keydown={handleKeydown}
 		tabindex="0"
 	>
-		<!-- Header Section - Following adventurelog pattern -->
+		<!-- Header Section - Following voyage pattern -->
 		<div
 			class="top-0 z-10 bg-base-100/90 backdrop-blur-lg border-b border-base-300 -mx-6 -mt-6 px-6 py-4 mb-6"
 		>

@@ -23,8 +23,8 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard | AdventureLog</title>
-	<meta name="description" content="Home dashboard for AdventureLog." />
+	<title>Dashboard | Voyage</title>
+	<meta name="description" content="Home dashboard for Voyage." />
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200">

@@ -57,15 +57,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build backend Docker image
-        run: docker build -t adventurelog-backend ./backend
+        run: docker build -t voyage-backend ./backend
 
       - name: Build frontend Docker image
-        run: docker build -t adventurelog-frontend ./frontend
+        run: docker build -t voyage-frontend ./frontend
 
       - name: Scan backend Docker image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: adventurelog-backend
+          image-ref: voyage-backend
           format: table
           exit-code: 1
           ignore-unfixed: true
@@ -75,7 +75,7 @@ jobs:
       - name: Scan frontend Docker image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: adventurelog-frontend
+          image-ref: voyage-frontend
           format: table
           exit-code: 1
           ignore-unfixed: true

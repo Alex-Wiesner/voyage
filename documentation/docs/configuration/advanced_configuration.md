@@ -1,6 +1,6 @@
 # Advanced Configuration
 
-In addition to the primary configuration variables listed above, there are several optional environment variables that can be set to further customize your AdventureLog instance. These variables are not required for a basic setup but can enhance functionality and security.
+In addition to the primary configuration variables listed above, there are several optional environment variables that can be set to further customize your Voyage instance. These variables are not required for a basic setup but can enhance functionality and security.
 
 | Name                         | Required | Description                                                                                                                                                                                | Default Value | Variable Location |
 | ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | ----------------- |

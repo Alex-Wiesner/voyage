@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "AdventureLog"
+  name: "Voyage"
   text: "The ultimate travel companion."
   tagline: Discover new places, track your adventures, and share your experiences with friends and family.
   actions:
@@ -12,13 +12,13 @@ hero:
       link: /docs/install/getting_started
     - theme: alt
       text: About
-      link: /docs/intro/adventurelog_overview
+      link: /docs/intro/voyage_overview
     - theme: alt
       text: Demo
-      link: https://demo.adventurelog.app
+      link: https://demo.voyage.app
   image:
-    src: ./adventurelog.svg
-    alt: AdventureLog Map Logo
+    src: ./voyage.svg
+    alt: Voyage Map Logo
 
 features:
   - title: "Track Your Adventures"
@@ -34,10 +34,10 @@ features:
 
 ## ⚡️ Quick Start
 
-Get AdventureLog running in under 60 seconds:
+Get Voyage running in under 60 seconds:
 
 ```bash [One-Line Install]
-curl -sSL https://get.adventurelog.app | bash
+curl -sSL https://get.voyage.app | bash
 ```
 
 You can also explore our [full installation guide](/docs/install/getting_started) for plenty of options, including Docker, Proxmox, Synology NAS, and more.
@@ -46,46 +46,46 @@ You can also explore our [full installation guide](/docs/install/getting_started
 
 ::: details 🗂️ **Location Overview & Management**  
 Manage your full list of locations with ease. View upcoming and past trips, filter and sort by status, date, or category to find exactly what you want quickly.  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/adventures.png" alt="Location Overview" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/adventures.png" alt="Location Overview" style="max-width:100%; margin-top:10px;" />  
 :::
 
 ::: details 📋 **Detailed Adventure Logs**  
 Capture rich details for every location: name, dates, precise locations, vivid descriptions, personal ratings, photos, and customizable categories. Your memories deserve to be more than just map pins — keep them alive with full, organized logs.  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/details.png" alt="Detailed Adventure Logs" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/details.png" alt="Detailed Adventure Logs" style="max-width:100%; margin-top:10px;" />  
 :::
 
 ::: details 🗺️ **Interactive World Map**  
 Track every destination you’ve visited or plan to visit with our beautifully detailed, interactive world map. Easily filter locations by visit status — visited or planned — and add new locations by simply clicking on the map. Watch your travel story unfold visually as your journey grows.  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/map.png" alt="Interactive World Map" style="max-width:100%; margin-top:10px;" />  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/map-satellite.png" alt="Interactive World Map" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/map.png" alt="Interactive World Map" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/map-satellite.png" alt="Interactive World Map" style="max-width:100%; margin-top:10px;" />  
 :::
 
 ::: details ✈️ **Comprehensive Trip Planning**  
 Organize your multi-day trips with detailed itineraries, including flight information, daily activities, collaborative notes, packing checklists, and handy resource links. Stay on top of your plans and ensure every adventure runs smoothly.  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/itinerary.png" alt="Comprehensive Trip Planning" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/itinerary.png" alt="Comprehensive Trip Planning" style="max-width:100%; margin-top:10px;" />  
 :::
 
 ::: details 📊 **Travel Statistics Dashboard**  
 Unlock insights into your travel habits and milestones through elegant, easy-to-understand analytics. Track total countries visited, regions explored, cities logged, and more. Visualize your world travels with ease and celebrate your achievements.
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/dashboard.png" alt="Travel Statistics Dashboard" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/dashboard.png" alt="Travel Statistics Dashboard" style="max-width:100%; margin-top:10px;" />  
 :::
 
 ::: details ✏️ **Edit & Customize Locations**  
 Make quick updates or deep customizations to any location using a clean and intuitive editing interface. Add photos, update notes, adjust dates, and more—keeping your records accurate and personal.  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/edit.png" alt="Edit Location Modal" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/edit.png" alt="Edit Location Modal" style="max-width:100%; margin-top:10px;" />  
 :::
 
 ::: details 🌍 **Countries & Regions Explorer**  
 Explore and manage the countries you’ve visited or plan to visit with an organized list, filtering by visit status. Dive deeper into each country’s regions, complete with interactive maps to help you visually select and track your regional travels.  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/countries.png" alt="Countries List" style="max-width:100%; margin-top:10px;" />  
-<img src="https://raw.githubusercontent.com/seanmorley15/AdventureLog/refs/heads/main/brand/screenshots/regions.png" alt="Regions Explorer" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/countries.png" alt="Countries List" style="max-width:100%; margin-top:10px;" />  
+<img src="https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/brand/screenshots/regions.png" alt="Regions Explorer" style="max-width:100%; margin-top:10px;" />  
 :::
 
 ## 💬 What People Are Saying
 
 ::: details ✈️ **XDA Travel Week Reviews**
 
-> “I stumbled upon AdventureLog. It's an open-source, self-hosted travel planner that's completely free to use and has a bunch of cool features that make it a treat to plan, organize, and log your journey across the world. Safe to say, it's become a mainstay in Docker for me.”
+> “I stumbled upon Voyage. It's an open-source, self-hosted travel planner that's completely free to use and has a bunch of cool features that make it a treat to plan, organize, and log your journey across the world. Safe to say, it's become a mainstay in Docker for me.”
 >
 > — _Sumukh Rao, Senior Author at XDA_
 
@@ -97,7 +97,7 @@ Explore and manage the countries you’ve visited or plan to visit with an organ
 
 **Overall Ranking: #1**
 
-> “The most important part of travelling in this socially connected world is to log everything and showcase all of your adventures. AdventureLog is aptly named, as it allows you to do just that. It just so happens to be one of the best apps for the job and can be fully self-hosted at home.”
+> “The most important part of travelling in this socially connected world is to log everything and showcase all of your adventures. Voyage is aptly named, as it allows you to do just that. It just so happens to be one of the best apps for the job and can be fully self-hosted at home.”
 >
 > — _Rich Edmonds, Lead PC Hardware Editor at XDA_
 
@@ -107,17 +107,17 @@ Explore and manage the countries you’ve visited or plan to visit with an organ
 
 ::: details 📆 **Open Source Daily**
 
-> “Your travel memories are your personal treasures—don’t let them be held hostage by closed platforms, hidden fees, or privacy risks. AdventureLog represents a new era of travel tracking: open, private, comprehensive, and truly yours. Whether you’re a casual traveler, digital nomad, family vacation planner, or anyone who values their adventures, AdventureLog offers a compelling alternative that puts you back in control.”
+> “Your travel memories are your personal treasures—don’t let them be held hostage by closed platforms, hidden fees, or privacy risks. Voyage represents a new era of travel tracking: open, private, comprehensive, and truly yours. Whether you’re a casual traveler, digital nomad, family vacation planner, or anyone who values their adventures, Voyage offers a compelling alternative that puts you back in control.”
 >
 > — _Open Source Daily_
 
-[Article Link](https://opensourcedaily.blog/adventurelog-private-open-source-travel-tracking-trip-planning/)
+[Article Link](https://opensourcedaily.blog/voyage-private-open-source-travel-tracking-trip-planning/)
 
 :::
 
 ::: details 📱 **Android Authority**
 
-> "AdventureLog behaves more like a super-charged travel journal than yet another travel app.”
+> "Voyage behaves more like a super-charged travel journal than yet another travel app.”
 >
 > — _Dhruv Bhutani, Android Authority_
 
@@ -161,7 +161,7 @@ Explore and manage the countries you’ve visited or plan to visit with an organ
 
 ### 🎯 **Active Development**
 
-Regular updates, new features, and community-driven improvements keep AdventureLog at the forefront of travel technology.
+Regular updates, new features, and community-driven improvements keep Voyage at the forefront of travel technology.
 
 </div>
 
@@ -185,12 +185,12 @@ GPL 3.0 licensed, fully transparent, and built for the community. By travelers, 
 
 ## 💖 Support the Project
 
-AdventureLog is lovingly maintained by passionate developers and supported by amazing users like you:
+Voyage is lovingly maintained by passionate developers and supported by amazing users like you:
 
-- ⭐ [Star us on GitHub](https://github.com/seanmorley15/AdventureLog)
+- ⭐ [Star us on GitHub](https://github.com/seanmorley15/Voyage)
 - 💬 [Join our Discord community](https://discord.gg/wRbQ9Egr8C)
-- 💖 [Sponsor The Project](https://seanmorley.com/sponsor) to help us keep improving AdventureLog
-- 🐛 [Report bugs & request features](https://github.com/seanmorley15/AdventureLog/issues)
+- 💖 [Sponsor The Project](https://seanmorley.com/sponsor) to help us keep improving Voyage
+- 🐛 [Report bugs & request features](https://github.com/seanmorley15/Voyage/issues)
 
 ---
 
@@ -200,7 +200,7 @@ AdventureLog is lovingly maintained by passionate developers and supported by am
 
 Stop letting amazing adventures fade from memory. Start documenting, planning, and sharing your travel story today.
 
-[**🚀 Get Started Now**](/docs/install/getting_started) • [**📱 Try the Demo**](https://demo.adventurelog.app) • [**📚 Read the Docs**](/docs/intro/adventurelog_overview)
+[**🚀 Get Started Now**](/docs/install/getting_started) • [**📱 Try the Demo**](https://demo.voyage.app) • [**📚 Read the Docs**](/docs/intro/voyage_overview)
 
 </div>
 

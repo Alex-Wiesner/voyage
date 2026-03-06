@@ -8,7 +8,7 @@ As an example, if you want to add Caddy to your Docker compose configuration, ad
 services:
   caddy:
     image: docker.io/library/caddy:2
-    container_name: adventurelog-caddy
+    container_name: voyage-caddy
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -30,7 +30,7 @@ volumes:
   caddy_config:
 ```
 
-Since all ingress traffic to the AdventureLog containsers now travels through Caddy, we can also remove the external ports configuration from those containsers in the `docker-compose.yml`. Just delete this configuration:
+Since all ingress traffic to the Voyage containsers now travels through Caddy, we can also remove the external ports configuration from those containsers in the `docker-compose.yml`. Just delete this configuration:
 
 ```yaml
   web:
@@ -47,7 +47,7 @@ That's it for the Docker compose changes. Of course, there are other methods to 
 However, we also need to configure Caddy. For this, create a file `./caddy/Caddyfile` in which you configure the requests which are proxied to the frontend and backend respectively and what domain Caddy should request a certificate for:
 
 ```
-adventurelog.example.com {
+voyage.example.com {
 
   @frontend {
     not path /media* /admin* /static* /accounts*
@@ -64,4 +64,4 @@ Once configured, you can start up the containsers:
 docker compose up
 ```
 
-Your AdventureLog should now be up and running.
+Your Voyage should now be up and running.

@@ -1,16 +1,16 @@
-# AdventureLog: Development Timeline & Origin Story
+# Voyage: Development Timeline & Origin Story
 
 By: Sean Morley, Founder & Lead Developer
 
-This is the timeline of **how AdventureLog came to be, how it kept surviving my terrible early design choices, and how it slowly learned to be useful**. I wrote this as a detailed, phase-by-phase story so contributors, users, and future-me can see what decisions were made, why, and what problems we hit (and fixed) along the way.
+This is the timeline of **how Voyage came to be, how it kept surviving my terrible early design choices, and how it slowly learned to be useful**. I wrote this as a detailed, phase-by-phase story so contributors, users, and future-me can see what decisions were made, why, and what problems we hit (and fixed) along the way.
 
-> TL;DR: started as _NextVenture_, learned web dev the hard way, resurrected as _AdventureLog_, switched stacks twice, survived an chaotic Reddit launch, grew through community requests, and today the project is very much alive.
+> TL;DR: started as _NextVenture_, learned web dev the hard way, resurrected as _Voyage_, switched stacks twice, survived an chaotic Reddit launch, grew through community requests, and today the project is very much alive.
 
 ## Quick roadmap
 
 - **Phase 0 — Ideation & Prototyping:** March 2023 → July 2023  
   The seed. Lots of learning, lots of scrapped prototypes.
-- **Phase 1 — AdventureLog, SvelteKit roots:** March 2024 → July 2024  
+- **Phase 1 — Voyage, SvelteKit roots:** March 2024 → July 2024  
   Frontend-first, local-storage MVP, severe Docker struggles, file storage chaos, MinIO pain.
 - **Phase 2 — Django saves the day:** July 2024 → August 2024  
   Backend matured quickly; REST API, Django admin, file storage sanity.
@@ -38,14 +38,14 @@ This phase was basically me being excited, naive, and wildly optimistic.
 
 ### Small but important pivots
 
-- While on break I renamed the project to **AdventureLog** — it felt better, cleaner, and more fitting than the working title.
+- While on break I renamed the project to **Voyage** — it felt better, cleaner, and more fitting than the working title.
 - I played with tiny experiments, tested UI ideas, and tried different stacks mentally so the next attempt wouldn’t be purely guesswork. I was very intrested in the project just lacking the right technical foundation.
 
 ### Takeaway
 
 Phase 0 was less about shipping and more about surviving the learning curve. The project’s DNA (places, visits, memories) was clear; I just needed the right tools and patience to implement it.
 
-## Phase 1 — Initial Development of AdventureLog (SvelteKit era)
+## Phase 1 — Initial Development of Voyage (SvelteKit era)
 
 **Dates:** March 2024 — July 2024  
 **Versions:** v0.1.0-alpha → v0.3.1
@@ -108,12 +108,12 @@ After the SvelteKit experiment I rewired the backend into Django + Django REST F
 
 Switching to Django was the right move, it reduced friction, sped up backend feature development, and made the application more maintainable.
 
-## Phase 3 — Defining AdventureLog & Community-Guided Growth
+## Phase 3 — Defining Voyage & Community-Guided Growth
 
 **Dates:** September 2024 — June 2025  
 **Versions:** v0.7.0 → v0.10.0
 
-This phase is about defining the product: what is AdventureLog, what is it not, and how do we make it useful for other people?
+This phase is about defining the product: what is Voyage, what is it not, and how do we make it useful for other people?
 
 ### Core feature evolution
 
@@ -125,17 +125,17 @@ This phase is about defining the product: what is AdventureLog, what is it not, 
 ### UX polish & identity
 
 - Logo: I swapped out the placeholder Windows map emoji for a proper logo designed by a friend (thanks, Jacob!). It made the app look more “real” and brandable.
-- Localization: Frontend got translations to make AdventureLog accessible to more users.
+- Localization: Frontend got translations to make Voyage accessible to more users.
 - Calendar view: added a calendar to visualize trips over time, another highly requested feature.
 
 ### Integrations & polish
 
-- **Immich integration** (huge win): Sync photos from Immich to AdventureLog adventures. This solved the “where do my travel photos live?” problem for many self-hosters and reduced friction for users who already had an Immich instance.
+- **Immich integration** (huge win): Sync photos from Immich to Voyage adventures. This solved the “where do my travel photos live?” problem for many self-hosters and reduced friction for users who already had an Immich instance.
 - **Backend optimizations:** performance tweaks, PWA support, OIDC support for enterprise-friendly auth, and other server configurability options.
 
 ### Community milestones
 
-- Docker image downloads crossed **100K** — a concrete, surreal milestone. GitHub stars crossed **1K** shortly after. These numbers matter because they mean people are using and relying on AdventureLog.
+- Docker image downloads crossed **100K** — a concrete, surreal milestone. GitHub stars crossed **1K** shortly after. These numbers matter because they mean people are using and relying on Voyage.
 - Collections received “smart recommendations” — algorithmic suggestions for new locations to add to a collection based on existing entries. This added a bit of discovery and delight.
 
 ### Ops & deployment improvements
@@ -144,7 +144,7 @@ This phase is about defining the product: what is AdventureLog, what is it not, 
 
 ### Takeaway
 
-Phase 3 is where AdventureLog stopped being “my little project” and started becoming a community-shaped tool. The roadmap was heavily guided by user requests, and that made the app both more useful and more fun to build.
+Phase 3 is where Voyage stopped being “my little project” and started becoming a community-shaped tool. The roadmap was heavily guided by user requests, and that made the app both more useful and more fun to build.
 
 ## Phase 4 — Solidification & Expansion of the Core Platform
 
@@ -179,7 +179,7 @@ Now the project focuses on _polish, robustness, and expanding the core platform_
 
 ### Takeaway
 
-This phase is about turning AdventureLog from “a promising tool” into “a dependable tool.” It’s less about big rewrites and more about incremental, meaningful improvements.
+This phase is about turning Voyage from “a promising tool” into “a dependable tool.” It’s less about big rewrites and more about incremental, meaningful improvements.
 
 ## Lessons, patterns, and a few thoughts
 
@@ -193,16 +193,16 @@ This phase is about turning AdventureLog from “a promising tool” into “a d
    - UUIDs as primary keys were scary, but doing it early saved headaches. Plan big breaking changes early; avoid them once people rely on your software.
 
 4. **Simplicity wins in deployment**
-   - Removing extra containers and simplifying deployment options made AdventureLog more approachable for hobbyist hosts — which is the core audience.
+   - Removing extra containers and simplifying deployment options made Voyage more approachable for hobbyist hosts — which is the core audience.
 
 5. **Iterate visibly**
    - Small, visible wins (better login flow, calendar, Immich sync) build momentum and community trust.
 
 ## Current state & what’s next
 
-AdventureLog is alive, maintained, and focused on being the best self-hosted travel app it can be: accessible, performant, and useful for trip planning and personal travel history.
+Voyage is alive, maintained, and focused on being the best self-hosted travel app it can be: accessible, performant, and useful for trip planning and personal travel history.
 
-Writing this made me realize how much of AdventureLog’s identity came from mistakes, feedback, and stubbornness. It’s the result of learning, throwing away things that didn’t work, embracing tools that did, and listening to people who actually used it. I’m proud of how it’s evolved and excited for the next phase.
+Writing this made me realize how much of Voyage’s identity came from mistakes, feedback, and stubbornness. It’s the result of learning, throwing away things that didn’t work, embracing tools that did, and listening to people who actually used it. I’m proud of how it’s evolved and excited for the next phase.
 
 If you made it this far: thanks. If you want to help — issues, PRs, ideas, or design feedback are always welcome. The project is alive because of an amazing community of users and contributors!
 

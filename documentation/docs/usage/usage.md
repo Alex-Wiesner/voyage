@@ -1,6 +1,6 @@
-# How to use AdventureLog
+# How to use Voyage
 
-Welcome to AdventureLog! This guide will help you get started with AdventureLog and provide you with an overview of the features available to you.
+Welcome to Voyage! This guide will help you get started with Voyage and provide you with an overview of the features available to you.
 
 ## Key Terms
 
@@ -11,7 +11,7 @@ Welcome to AdventureLog! This guide will help you get started with AdventureLog 
 The term "Location" is now used instead of "Adventure" - the usage remains the same, just the name has changed to better reflect the purpose of the feature.
 :::
 
-- **Location**: think of a location as a point on a map, a place you want to visit, have visited, or a place you want to explore. A location can be anything you want it to be, from a local park to a famous landmark. These are the building blocks of AdventureLog and are the fundamental unit of information in the app.
+- **Location**: think of a location as a point on a map, a place you want to visit, have visited, or a place you want to explore. A location can be anything you want it to be, from a local park to a famous landmark. These are the building blocks of Voyage and are the fundamental unit of information in the app.
 - **Visit**: a visit is added to an location. It contains a date and notes about when the location was visited. If a location is visited multiple times, multiple visits can be added. If there are no visits on a location or the date of all visits is in the future, the location is considered planned. If the date of the visit is in the past, the location is considered completed.
 - **Category**: a category is a way to group locations together. For example, you could have a category for parks, a category for museums, and a category for restaurants.
 - **Tag**: a tag is a way to add additional information to a location. For example, you could have a tag for the type of cuisine at a restaurant or the type of art at a museum. Multiple tags can be added to a location.
@@ -30,7 +30,7 @@ The term "Location" is now used instead of "Adventure" - the usage remains the s
 
 #### World Travel
 
-- **World Travel**: the world travel feature of AdventureLog allows you to track the countries, regions, and cities you have visited during your lifetime. You can add visits to countries, regions, and cities, and view statistics about your travels. The world travel feature is a fun way to visualize where you have been and where you want to go next.
+- **World Travel**: the world travel feature of Voyage allows you to track the countries, regions, and cities you have visited during your lifetime. You can add visits to countries, regions, and cities, and view statistics about your travels. The world travel feature is a fun way to visualize where you have been and where you want to go next.
   - **Country**: a country is a geographical area that is recognized as an independent nation. You can add visits to countries to track where you have been.
   - **Region**: a region is a geographical area that is part of a country. You can add visits to regions to track where you have been within a country.
   - **City**: a city is a geographical area that is a populated urban center. You can add visits to cities to track where you have been within a region.

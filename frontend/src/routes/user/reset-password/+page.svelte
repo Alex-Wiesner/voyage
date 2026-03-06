@@ -46,5 +46,5 @@
 
 <svelte:head>
 	<title>Reset Password</title>
-	<meta name="description" content="Reset your password for AdventureLog." />
+	<meta name="description" content="Reset your password for Voyage." />
 </svelte:head>

@@ -64,7 +64,7 @@
 							<!-- Header -->
 							<div class="text-center mb-8">
 								<div class="mb-4">
-									<h1 class="text-3xl font-bold text-primary mb-1">AdventureLog</h1>
+									<h1 class="text-3xl font-bold text-primary mb-1">Voyage</h1>
 									<div class="w-12 h-1 bg-primary mx-auto rounded"></div>
 								</div>
 								<h2 class="text-4xl font-bold text-base-content mb-2">{$t('auth.login')}</h2>
@@ -238,10 +238,10 @@
 </div>
 
 <svelte:head>
-	<title>Login | AdventureLog</title>
+	<title>Login | Voyage</title>
 	<meta
 		name="description"
-		content="Login to your AdventureLog account to start logging your adventures!"
+		content="Login to your Voyage account to start logging your adventures!"
 	/>
 </svelte:head>
 

@@ -1,12 +1,12 @@
-# 🚀 Install Options for AdventureLog
+# 🚀 Install Options for Voyage
 
-AdventureLog can be installed in a variety of ways, depending on your platform or preference.
+Voyage can be installed in a variety of ways, depending on your platform or preference.
 
 ## 📦 Docker Quick Start
 
 ::: tip Quick Start Script
 **The fastest way to get started:**  
-[Install AdventureLog with a single command →](quick_start.md)  
+[Install Voyage with a single command →](quick_start.md)  
 Perfect for Docker beginners.
 :::
 
@@ -17,8 +17,8 @@ Perfect for Docker beginners.
 - [Synology NAS](synology_nas.md) — Self-host on your home NAS
 - [Kubernetes + Kustomize](kustomize.md) — Advanced, scalable deployment
 - [Unraid](unraid.md) — Easy integration for homelabbers
-- [Umbrel](https://apps.umbrel.com/app/adventurelog) — Home server app store
-- [TrueNAS](https://apps.truenas.com/catalog/adventurelog/) — TrueNAS app catalog
+- [Umbrel](https://apps.umbrel.com/app/voyage) — Home server app store
+- [TrueNAS](https://apps.truenas.com/catalog/voyage/) — TrueNAS app catalog
 
 ## ⚙️ Advanced & Alternative Setups
 

@@ -1,8 +1,8 @@
-# Troubleshooting: Images Not Displayed in AdventureLog
+# Troubleshooting: Images Not Displayed in Voyage
 
-The AdventureLog backend container uses a built-in Nginx container to serve media to the frontend. The `PUBLIC_URL` environment variable is set to the external URL of the **backend** container. This URL is used to generate the URLs for the images in the frontend. If this URL is not set correctly or not accessible from the frontend, the images will not be displayed.
+The Voyage backend container uses a built-in Nginx container to serve media to the frontend. The `PUBLIC_URL` environment variable is set to the external URL of the **backend** container. This URL is used to generate the URLs for the images in the frontend. If this URL is not set correctly or not accessible from the frontend, the images will not be displayed.
 
-If you're experiencing issues with images not displaying in AdventureLog, follow these troubleshooting steps to resolve the issue.
+If you're experiencing issues with images not displaying in Voyage, follow these troubleshooting steps to resolve the issue.
 
 1. **Check the `PUBLIC_URL` Environment Variable**:
 

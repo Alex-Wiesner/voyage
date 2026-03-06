@@ -1,6 +1,6 @@
-# AdventureLog Development Instructions
+# Voyage Development Instructions
 
-AdventureLog is a self-hosted travel companion web application built with SvelteKit frontend and Django backend, deployed via Docker.
+Voyage is a self-hosted travel companion web application built with SvelteKit frontend and Django backend, deployed via Docker.
 
 **ALWAYS follow these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
@@ -76,7 +76,7 @@ Run these commands in order:
 
 ### Repository Structure
 ```
-AdventureLog/
+Voyage/
 ├── frontend/           # SvelteKit web application
 │   ├── src/           # Source code
 │   ├── package.json   # Node.js dependencies and scripts
@@ -87,7 +87,7 @@ AdventureLog/
 │   └── requirements.txt # Python dependencies
 ├── docker-compose.yml # Main deployment configuration
 ├── .env.example       # Environment template
-└── install_adventurelog.sh # Production installer
+└── install_voyage.sh # Production installer
 ```
 
 ### Key Scripts and Files
@@ -98,7 +98,7 @@ AdventureLog/
 
 ### Development vs Production
 - **Development**: Use `docker compose up -d` with .env file
-- **Production**: Use `./install_adventurelog.sh` installer script
+- **Production**: Use `./install_voyage.sh` installer script
 - **CI/CD**: GitHub Actions in `.github/workflows/` handle testing and deployment
 
 ### Common Error Patterns

@@ -418,9 +418,9 @@ export function getRandomBackground() {
 	newYearsEnd.setHours(23, 59, 59, 999);
 	if (today >= newYearsStart && today <= newYearsEnd) {
 		return {
-			url: 'backgrounds/adventurelog_new_year.webp',
+			url: 'backgrounds/voyage_new_year.webp',
 			author: 'Roven Images',
-			location: "Happy New Year's from the AdventureLog team!"
+			location: "Happy New Year's from the Voyage team!"
 		} as Background;
 	}
 
@@ -432,9 +432,9 @@ export function getRandomBackground() {
 
 	if (today >= christmasStart && today <= christmasEnd) {
 		return {
-			url: 'backgrounds/adventurelog_christmas.webp',
+			url: 'backgrounds/voyage_christmas.webp',
 			author: 'Annie Spratt',
-			location: 'Merry Christmas from the AdventureLog team!'
+			location: 'Merry Christmas from the Voyage team!'
 		} as Background;
 	}
 

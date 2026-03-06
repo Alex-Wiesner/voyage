@@ -12,7 +12,7 @@ on:
       - "backend/**"
 
 env:
-  IMAGE_NAME: "adventurelog-backend"
+  IMAGE_NAME: "voyage-backend"
 
 jobs:
   upload:

@@ -1,6 +1,6 @@
-# Contributing to AdventureLog
+# Contributing to Voyage
 
-We’re excited to have you contribute to AdventureLog! To ensure that this community remains welcoming and productive for all users and developers, please follow this simple Code of Conduct.
+We’re excited to have you contribute to Voyage! To ensure that this community remains welcoming and productive for all users and developers, please follow this simple Code of Conduct.
 
 ## Pull Request Process
 
@@ -14,7 +14,7 @@ We’re excited to have you contribute to AdventureLog! To ensure that this comm
 
 ### Our Pledge
 
-At AdventureLog, we are committed to creating a community that fosters adventure, exploration, and innovation. We encourage diverse participation and strive to maintain a space where everyone feels welcome to contribute, regardless of their background or experience level. We ask that you contribute with respect and kindness, making sure to prioritize collaboration and mutual growth.
+At Voyage, we are committed to creating a community that fosters adventure, exploration, and innovation. We encourage diverse participation and strive to maintain a space where everyone feels welcome to contribute, regardless of their background or experience level. We ask that you contribute with respect and kindness, making sure to prioritize collaboration and mutual growth.
 
 ### Our Standards
 
@@ -23,7 +23,7 @@ In order to maintain a positive environment, we encourage the following behavior
 - **Inclusivity**: Use welcoming and inclusive language that fosters collaboration across all perspectives and experiences.
 - **Respect**: Respect differing opinions and engage with empathy, understanding that each person’s perspective is valuable.
 - **Constructive Feedback**: Offer feedback that helps improve the project and allows contributors to grow from it.
-- **Adventure Spirit**: Bring the same sense of curiosity, discovery, and positivity that drives AdventureLog into all interactions with the community.
+- **Adventure Spirit**: Bring the same sense of curiosity, discovery, and positivity that drives Voyage into all interactions with the community.
 
 Examples of unacceptable behavior include:
 
@@ -35,18 +35,18 @@ Examples of unacceptable behavior include:
 
 ### Our Responsibilities
 
-As maintainers of AdventureLog, we are committed to enforcing this Code of Conduct and taking corrective action when necessary. This may involve moderating comments, pulling code, or banning users who engage in harmful behaviors.
+As maintainers of Voyage, we are committed to enforcing this Code of Conduct and taking corrective action when necessary. This may involve moderating comments, pulling code, or banning users who engage in harmful behaviors.
 
 We strive to foster a community that balances open collaboration with respect for all contributors.
 
 ### Scope
 
-This Code of Conduct applies in all spaces related to AdventureLog. This includes our GitHub repository, discussions, documentation, social media accounts, and events—both online and in person.
+This Code of Conduct applies in all spaces related to Voyage. This includes our GitHub repository, discussions, documentation, social media accounts, and events—both online and in person.
 
 ### Enforcement
 
-If you experience or witness unacceptable behavior, please report it to the project team at `contact@adventurelog.app`. All reports will be confidential and handled swiftly. The maintainers will investigate the issue and take appropriate action as needed.
+If you experience or witness unacceptable behavior, please report it to the project team at `contact@voyage.app`. All reports will be confidential and handled swiftly. The maintainers will investigate the issue and take appropriate action as needed.
 
 ### Attribution
 
-This Code of Conduct is inspired by the [Contributor Covenant](http://contributor-covenant.org), version 1.4, and adapted to fit the unique spirit of AdventureLog.
+This Code of Conduct is inspired by the [Contributor Covenant](http://contributor-covenant.org), version 1.4, and adapted to fit the unique spirit of Voyage.

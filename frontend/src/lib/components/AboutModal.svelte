@@ -46,11 +46,11 @@
 		<div class="flex items-center justify-between mb-6">
 			<div class="flex items-center gap-3">
 				<div class="p-2 bg-primary/10 rounded-lg">
-					<img src="/favicon.png" alt="AdventureLog" class="w-12 h-12" />
+					<img src="/favicon.png" alt="Voyage" class="w-12 h-12" />
 				</div>
 				<div>
 					<h1 class="text-2xl font-bold text-primary">
-						{$t('about.about')} AdventureLog
+						{$t('about.about')} Voyage
 					</h1>
 				</div>
 			</div>
@@ -176,7 +176,7 @@
 					</p>
 
 					<a
-						href="https://github.com/seanmorley15/AdventureLog/blob/main/LICENSE"
+						href="https://github.com/seanmorley15/Voyage/blob/main/LICENSE"
 						target="_blank"
 						rel="noopener noreferrer"
 						class="link link-primary mt-2"
@@ -191,7 +191,7 @@
 				<div class="card-body p-4">
 					<div class="flex flex-wrap gap-3">
 						<a
-							href="https://github.com/seanmorley15/AdventureLog"
+							href="https://github.com/seanmorley15/Voyage"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="btn btn-outline btn-sm"
@@ -208,7 +208,7 @@
 						</a>
 						<!-- documentation -->
 						<a
-							href="https://adventurelog.app"
+							href="https://voyage.app"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="btn btn-outline btn-sm"

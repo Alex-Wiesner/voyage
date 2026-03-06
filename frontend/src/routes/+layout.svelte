@@ -85,10 +85,10 @@
 <UmamiAnalyticsEnv />
 
 <svelte:head>
-	<title>AdventureLog</title>
+	<title>Voyage</title>
 	<meta
 		name="description"
-		content="Embark, explore, remember with AdventureLog. AdventureLog is the ultimate travel companion."
+		content="Embark, explore, remember with Voyage. Voyage is the ultimate travel companion."
 	/>
 </svelte:head>
 

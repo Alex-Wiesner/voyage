@@ -82,6 +82,6 @@ if [ $? -eq 137 ]; then
   exit 1
 fi
 
-cat /code/adventurelog.txt
+cat /code/voyage.txt
 
 exec "$@"

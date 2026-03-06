@@ -232,10 +232,10 @@
 </div>
 
 <svelte:head>
-	<title>Home | AdventureLog</title>
+	<title>Home | Voyage</title>
 	<meta
 		name="description"
-		content="AdventureLog is a platform to log your adventures and plan your travel."
+		content="Voyage is a platform to log your adventures and plan your travel."
 	/>
 </svelte:head>
 

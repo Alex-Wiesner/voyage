@@ -196,6 +196,6 @@ admin.site.register(Activity, ActivityAdmin)
 admin.site.register(CollectionItineraryItem, CollectionItineraryItemAdmin)
 admin.site.register(CollectionItineraryDay)
 
-admin.site.site_header = 'AdventureLog Admin'
-admin.site.site_title = 'AdventureLog Admin Site'
-admin.site.index_title = 'Welcome to AdventureLog Admin Page'
+admin.site.site_header = 'Voyage Admin'
+admin.site.site_title = 'Voyage Admin Site'
+admin.site.index_title = 'Welcome to Voyage Admin Page'

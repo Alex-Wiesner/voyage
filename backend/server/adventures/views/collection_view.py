@@ -481,7 +481,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
         collection = self.get_object()
 
         export_data = {
-            'version': getattr(settings, 'ADVENTURELOG_RELEASE_VERSION', 'unknown'),
+            'version': getattr(settings, 'VOYAGE_RELEASE_VERSION', 'unknown'),
             # Omit export_date to keep template-friendly exports (no dates)
             'collection': {
                 'id': str(collection.id),

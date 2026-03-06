@@ -1074,7 +1074,7 @@
 										📖 {$t('immich.need_help')}
 										<a
 											class="link link-primary"
-											href="https://adventurelog.app/docs/configuration/immich_integration.html"
+											href="https://voyage.app/docs/configuration/immich_integration.html"
 											target="_blank">{$t('navbar.documentation')}</a
 										>
 									</p>
@@ -1104,7 +1104,7 @@
 												📖 {$t('immich.need_help')}
 												<a
 													class="link link-primary"
-													href="https://adventurelog.app/docs/configuration/google_maps_integration.html"
+													href="https://voyage.app/docs/configuration/google_maps_integration.html"
 													target="_blank">{$t('navbar.documentation')}</a
 												>
 											</p>
@@ -1167,7 +1167,7 @@
 												📖 {$t('immich.need_help')}
 												<a
 													class="link link-primary"
-													href="https://adventurelog.app/docs/configuration/strava_integration.html"
+													href="https://voyage.app/docs/configuration/strava_integration.html"
 													target="_blank">{$t('navbar.documentation')}</a
 												>
 											</p>
@@ -1281,7 +1281,7 @@
 											📖 {$t('immich.need_help')}
 											<a
 												class="link link-primary"
-												href="https://adventurelog.app/docs/configuration/wanderer_integration.html"
+												href="https://voyage.app/docs/configuration/wanderer_integration.html"
 												target="_blank">{$t('navbar.documentation')}</a
 											>
 										</p>
@@ -1590,7 +1590,7 @@
 											<div>
 												<span>{$t('settings.social_auth_desc_2')}</span>
 												<a
-													href="https://adventurelog.app/docs/configuration/social_auth.html"
+													href="https://voyage.app/docs/configuration/social_auth.html"
 													class="link link-neutral font-medium"
 													target="_blank">{$t('settings.documentation_link')}</a
 												>
@@ -1651,7 +1651,7 @@
 									<!-- Developer message and thanks -->
 									<div class="p-6 bg-base-200 rounded-xl">
 										<div class="text-center space-y-3">
-											<h4 class="font-medium">{$t('about.about')} AdventureLog</h4>
+											<h4 class="font-medium">{$t('about.about')} Voyage</h4>
 											<p>
 												{$t('about.license')}
 											</p>
@@ -1662,14 +1662,14 @@
 											</p>
 											<div class="flex justify-center gap-3 mt-2">
 												<a
-													href="https://github.com/seanmorley15/AdventureLog"
+													href="https://github.com/seanmorley15/Voyage"
 													target="_blank"
 													class="link link-primary text-sm"
 												>
 													GitHub
 												</a>
 												<a
-													href="https://github.com/seanmorley15/AdventureLog/blob/main/LICENSE"
+													href="https://github.com/seanmorley15/Voyage/blob/main/LICENSE"
 													target="_blank"
 													class="link link-secondary text-sm"
 												>
@@ -1689,7 +1689,7 @@
 </div>
 
 <svelte:head>
-	<title>User Settings | AdventureLog</title>
+	<title>User Settings | Voyage</title>
 	<meta
 		name="description"
 		content="Comprehensive user settings dashboard. Manage your profile, security, emails, integrations, and more in one organized interface."

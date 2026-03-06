@@ -1,21 +1,15 @@
 <div align="center">
 
-  <img src="brand/adventurelog.png" alt="logo" width="200" height="auto" />
-  <h1>AdventureLog</h1>
+  <img src="brand/voyage.png" alt="logo" width="200" height="auto" />
+  <h1>Voyage</h1>
   
   <p>
     The ultimate travel companion for the modern-day explorer.
   </p>
-   
-<h4>
-    <a href="https://demo.adventurelog.app">View Demo</a>
-  <span> · </span>
-    <a href="https://adventurelog.app">Documentation</a>
-  <span> · </span>
-    <a href="https://discord.gg/wRbQ9Egr8C">Discord</a>
-  <span> · </span>
-    <a href="https://buymeacoffee.com/seanmorley15">Support 💖</a>
-  </h4>
+
+  <p>
+    <strong>A fork of <a href="https://github.com/seanmorley15/AdventureLog">AdventureLog</a> by Sean Morley.</strong>
+  </p>
 </div>
 
 <br />
@@ -39,9 +33,11 @@
 
 ## ⭐ About the Project
 
-Starting from a simple idea of tracking travel locations, AdventureLog has grown into a full-fledged travel companion. With AdventureLog, you can log your adventures, keep track of where you've been on the world map, plan your next trip collaboratively, and share your experiences with friends and family.
+> **Voyage is a fork of [AdventureLog](https://github.com/seanmorley15/AdventureLog)**, the open-source travel companion created by [Sean Morley](https://seanmorley.com). This fork builds on top of AdventureLog's foundation to make additional changes and improvements.
 
-AdventureLog was created to solve a problem: the lack of a modern, open-source, user-friendly travel companion. Many existing travel apps are either too complex, too expensive, or too closed-off to be useful for the average traveler. AdventureLog aims to be the opposite: simple, beautiful, and open to everyone.
+Starting from a simple idea of tracking travel locations, Voyage is a full-fledged travel companion. With Voyage, you can log your adventures, keep track of where you've been on the world map, plan your next trip collaboratively, and share your experiences with friends and family.
+
+Voyage aims to be simple, beautiful, and open to everyone — inheriting AdventureLog's commitment to being a modern, open-source, user-friendly alternative to overly complex or expensive travel apps.
 
 <!-- Screenshots -->
 
@@ -105,21 +101,21 @@ AdventureLog was created to solve a problem: the lack of a modern, open-source, 
   - Itineraries include many planning features like flight information, notes, checklists, and links to external resources.
   - Itineraries can be shared with friends and family for collaborative planning.
 - **Share Your Experiences** 📸: Share your adventures with friends and family and collaborate on trips together.
-  - Locations and itineraries can be shared via a public link or directly with other AdventureLog users.
+  - Locations and itineraries can be shared via a public link or directly with other Voyage users.
   - Collaborators can view and edit shared itineraries (collections), making planning a breeze.
 
 <!-- Roadmap -->
 
 ## 🧭 Roadmap
 
-The AdventureLog Roadmap can be found [here](https://github.com/users/seanmorley15/projects/5)
+The Voyage Roadmap can be found [here](https://github.com/users/seanmorley15/projects/5)
 
 <!-- Contributing -->
 
 ## 👋 Contributing
 
-<a href="https://github.com/seanmorley15/AdventureLog/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=seanmorley15/AdventureLog" />
+<a href="https://github.com/seanmorley15/Voyage/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=seanmorley15/Voyage" />
 </a>
 
 Contributions are always welcome!
@@ -128,10 +124,10 @@ See `contributing.md` for ways to get started.
 
 ### Translation
 
-AdventureLog is available on [Weblate](https://hosted.weblate.org/projects/adventurelog/). If you would like to help translate AdventureLog into your language, please visit the link and contribute!
+Voyage is available on [Weblate](https://hosted.weblate.org/projects/voyage/). If you would like to help translate Voyage into your language, please visit the link and contribute!
 
-<a href="https://hosted.weblate.org/engage/adventurelog/">
-<img src="https://hosted.weblate.org/widget/adventurelog/multi-auto.svg" alt="Translation status" />
+<a href="https://hosted.weblate.org/engage/voyage/">
+<img src="https://hosted.weblate.org/widget/voyage/multi-auto.svg" alt="Translation status" />
 </a>
 
 <!-- License -->
@@ -146,12 +142,13 @@ Distributed under the GNU General Public License v3.0. See `LICENSE` for more in
 
 Sean Morley - [website](https://seanmorley.com)
 
-Hi! I'm Sean, the creator of AdventureLog. I'm a college student and software developer with a passion for travel and adventure. I created AdventureLog to help people like me document their adventures and plan new ones effortlessly. As a student, I am always looking for more opportunities to learn and grow, so feel free to reach out via the contact on my website if you would like to collaborate or chat!
+Hi! I'm Sean, the creator of Voyage. I'm a college student and software developer with a passion for travel and adventure. I created Voyage to help people like me document their adventures and plan new ones effortlessly. As a student, I am always looking for more opportunities to learn and grow, so feel free to reach out via the contact on my website if you would like to collaborate or chat!
 
 <!-- Acknowledgments -->
 
 ## 💎 Acknowledgements
 
+- **[AdventureLog](https://github.com/seanmorley15/AdventureLog)** — the original project this fork is based on, created by [Sean Morley](https://seanmorley.com)
 - Logo Design by [nordtektiger](https://github.com/nordtektiger)
 - WorldTravel Dataset [dr5hn/countries-states-cities-database](https://github.com/dr5hn/countries-states-cities-database)
 

@@ -12,7 +12,7 @@ on:
       - "cdn/**"
 
 env:
-  IMAGE_NAME: "adventurelog-cdn"
+  IMAGE_NAME: "voyage-cdn"
 
 jobs:
   upload:

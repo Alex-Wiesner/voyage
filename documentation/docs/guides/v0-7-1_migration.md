@@ -1,6 +1,6 @@
-# AdventureLog v0.7.1 Migration
+# Voyage v0.7.1 Migration
 
-In order to make installation easier, the AdventureLog v0.7.1 release has **removed the need for a separate nginx container** and config to serve the media files. Instead, the media files are now served by an instance of nginx running in the same container as the Django application.
+In order to make installation easier, the Voyage v0.7.1 release has **removed the need for a separate nginx container** and config to serve the media files. Instead, the media files are now served by an instance of nginx running in the same container as the Django application.
 
 ## Docker Compose Changes
 
@@ -30,8 +30,8 @@ You can also just use the new `docker-compose.yml` file in the repository and ch
 
 That's it! You should now be able to run the application with the new configuration! This update also includes some performance enhancements so there should be a slight speed increase as well, especially with multiple users.
 
-Enjoy the new version of AdventureLog! 🎉
+Enjoy the new version of Voyage! 🎉
 
-View the full changelog [here](https://github.com/seanmorley15/AdventureLog/releases/tag/v0.7.1)
+View the full changelog [here](https://github.com/seanmorley15/Voyage/releases/tag/v0.7.1)
 
-Report any bugs [GitHub repository](https://github.com/seanmorley15/adventurelog) or ask for help in the [Discord server](https://discord.gg/wRbQ9Egr8C).
+Report any bugs [GitHub repository](https://github.com/seanmorley15/voyage) or ask for help in the [Discord server](https://discord.gg/wRbQ9Egr8C).

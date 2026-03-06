@@ -1,6 +1,6 @@
 # Dev Container + WSL 🧰
 
-Running AdventureLog in a **Dev Container** allows you to contribute to the project or work on features locally in a fully reproducible development environment with hot reloading, debugging, and tooling isolated inside Docker.
+Running Voyage in a **Dev Container** allows you to contribute to the project or work on features locally in a fully reproducible development environment with hot reloading, debugging, and tooling isolated inside Docker.
 
 This guide focuses on **Windows using WSL 2**, but the workflow is similar on other platforms.
 
@@ -53,15 +53,15 @@ Open a WSL terminal (search for "WSL" in the Windows Start menu and open the WSL
 
 ```bash
 cd ~
-git clone https://github.com/seanmorley15/AdventureLog.git
-cd AdventureLog
+git clone https://github.com/seanmorley15/Voyage.git
+cd Voyage
 ```
 
 > **TIP**
 > If you plan to contribute changes, fork the repository on GitHub and clone your fork instead:
 >
 > ```bash
-> git clone https://github.com/<your-username>/AdventureLog.git
+> git clone https://github.com/<your-username>/Voyage.git
 > ```
 
 ### 2. Create the Development `.env` File (via WSL)
@@ -159,7 +159,7 @@ Ensure:
 If the project lives under `/mnt/c/...`, move it to:
 
 ```bash
-/home/<user>/AdventureLog
+/home/<user>/Voyage
 ```
 
 This avoids performance issues and file watcher bugs.
@@ -176,5 +176,5 @@ This avoids performance issues and file watcher bugs.
 For production or personal hosting, follow the standard
 [**Docker 🐋 installation guide**](docker.md).
 
-Enjoy contributing to AdventureLog! 🎉
+Enjoy contributing to Voyage! 🎉
 If you run into issues not covered here, please open a discussion or issue so the docs can be improved.

@@ -41,7 +41,7 @@ class BackupViewSet(viewsets.ViewSet):
         
         # Build export data structure
         export_data = {
-            'version': settings.ADVENTURELOG_RELEASE_VERSION,
+            'version': settings.VOYAGE_RELEASE_VERSION,
             'export_date': datetime.now().isoformat(),
             'user_email': user.email,
             'user_username': user.username,
@@ -390,7 +390,7 @@ class BackupViewSet(viewsets.ViewSet):
         # Return ZIP file as response
         with open(tmp_file.name, 'rb') as zip_file:
             response = HttpResponse(zip_file.read(), content_type='application/zip')
-            filename = f"adventurelog_backup_{user.username}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+            filename = f"voyage_backup_{user.username}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
             response['Content-Disposition'] = f'attachment; filename="{filename}"'
         
         # Clean up

@@ -1,7 +1,7 @@
 services:
   cdn:
     build: .
-    container_name: adventurelog-cdn
+    container_name: voyage-cdn
     ports:
       - "8080:80"
     restart: unless-stopped

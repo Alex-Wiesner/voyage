@@ -1,6 +1,6 @@
 ---
 name: Deployment Issue
-about: Request help deploying AdventureLog. For faster support, please use our Discord community!
+about: Request help deploying Voyage. For faster support, please use our Discord community!
 title: "[DEPLOYMENT] <short description>"
 labels: deployment
 assignees: ""

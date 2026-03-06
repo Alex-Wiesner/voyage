@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Periodic sync runner for AdventureLog.
+Periodic sync runner for Voyage.
 Runs sync_visited_regions management command every 60 seconds.
 Managed by supervisord to ensure it inherits container environment variables.
 """

@@ -11,19 +11,19 @@ Immich is a self-hosted, open-source platform that allows users to backup and ma
 - [Immich Website and Documentation](https://immich.app/)
 - [GitHub Repository](https://github.com/immich-app/immich)
 
-### How to integrate Immich with AdventureLog?
+### How to integrate Immich with Voyage?
 
-To integrate Immich with AdventureLog, you need to have an Immich server running and accessible from where AdventureLog is running.
+To integrate Immich with Voyage, you need to have an Immich server running and accessible from where Voyage is running.
 
 1. Obtain the Immich API Key from the Immich server.
    - In the Immich web interface, click on your user profile picture, go to `Account Settings` > `API Keys`.
-   - Click `New API Key` and name it something like `AdventureLog`.
+   - Click `New API Key` and name it something like `Voyage`.
    - Make sure the key has the following permissions: `asset.read, album.read, asset.view, library.read, user.read`
    - Copy the generated API Key, you will need it in the next step.
-2. Go to the AdventureLog web interface, click on your user profile picture, go to `Settings` and scroll down to the `Immich Integration` section.
-   - Enter the URL of your Immich server, e.g. `https://immich.example.com/api`. Note that `localhost` or `127.0.0.1` will probably not work because Immich and AdventureLog are running on different docker networks. It is recommended to use the IP address of the server where Immich is running ex `http://my-server-ip:port` or a domain name.
+2. Go to the Voyage web interface, click on your user profile picture, go to `Settings` and scroll down to the `Immich Integration` section.
+   - Enter the URL of your Immich server, e.g. `https://immich.example.com/api`. Note that `localhost` or `127.0.0.1` will probably not work because Immich and Voyage are running on different docker networks. It is recommended to use the IP address of the server where Immich is running ex `http://my-server-ip:port` or a domain name.
    - Paste the API Key you obtained in the previous step.
    - Click `Enable Immich` to save the settings.
 3. Now, when you are adding images to an adventure, you will see an option to search for images in Immich or upload from an album.
 
-Enjoy the privacy and control of managing your travel media with Immich and AdventureLog! 🎉
+Enjoy the privacy and control of managing your travel media with Immich and Voyage! 🎉

@@ -3,7 +3,7 @@ import json
 import os
 
 # The version of the CDN, this should be updated when the CDN data is updated so the client can check if it has the latest version
-ADVENTURELOG_CDN_VERSION = 'v0.0.1'
+VOYAGE_CDN_VERSION = 'v0.0.1'
 
 # https://github.com/dr5hn/countries-states-cities-database/tags
 COUNTRY_REGION_JSON_VERSION = 'v2.5' # Test on past and latest versions to ensure that the data schema is consistent before updating
@@ -22,7 +22,7 @@ def saveCdnVersion():
     """
     path = os.path.join(os.path.dirname(__file__), 'data', 'version.json')
     with open(path, 'w') as f:
-        json.dump({'version': ADVENTURELOG_CDN_VERSION}, f)
+        json.dump({'version': VOYAGE_CDN_VERSION}, f)
         print('CDN Version saved')
 
 def downloadCountriesStateCities():

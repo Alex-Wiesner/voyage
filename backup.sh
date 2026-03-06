@@ -1,7 +1,7 @@
-# This script will create a backup of the adventurelog_media volume and store it in the current directory as adventurelog-backup.tar.gz
+# This script will create a backup of the voyage_media volume and store it in the current directory as voyage-backup.tar.gz
 
 docker run --rm \
-  -v adventurelog_adventurelog_media:/backup-volume \
+  -v voyage_voyage_media:/backup-volume \
   -v "$(pwd)":/backup \
   busybox \
-  tar -zcvf /backup/adventurelog-backup.tar.gz /backup-volume
+  tar -zcvf /backup/voyage-backup.tar.gz /backup-volume

@@ -1,6 +1,6 @@
 # Troubleshooting: Login and Registration Unresponsive
 
-When you encounter issues with the login and registration pages being unresponsive in AdventureLog, it can be due to various reasons. This guide will help you troubleshoot and resolve the unresponsive login and registration pages in AdventureLog.
+When you encounter issues with the login and registration pages being unresponsive in Voyage, it can be due to various reasons. This guide will help you troubleshoot and resolve the unresponsive login and registration pages in Voyage.
 
 1. Check to make sure the backend container is running and accessible.
 
@@ -15,4 +15,4 @@ When you encounter issues with the login and registration pages being unresponsi
    - Check that the `ORIGIN` variable in the frontend is set to the URL where the frontend is access and you are accessing the app from currently.
    - Check that the `CSRF_TRUSTED_ORIGINS` variable in the backend is set to a comma separated list of the origins where you use your backend server and frontend. One of these values should match the `ORIGIN` variable in the frontend.
 
-4. If you are still experiencing issues, please refer to the [AdventureLog Discord Server](https://discord.gg/wRbQ9Egr8C) for further assistance, providing as much detail as possible about the issue you are experiencing!
+4. If you are still experiencing issues, please refer to the [Voyage Discord Server](https://discord.gg/wRbQ9Egr8C) for further assistance, providing as much detail as possible about the issue you are experiencing!

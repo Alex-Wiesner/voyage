@@ -40,7 +40,7 @@
 			</h1>
 
 			<p class="mt-4">
-				AdventureLog server encountered an error while processing your request.
+				Voyage server encountered an error while processing your request.
 				<br />
 				Please check the server logs for more information.
 			</p>
@@ -48,7 +48,7 @@
 			<div class="alert alert-warning mt-4">
 				<p class="text-muted-foreground">
 					<strong>Administrators:</strong> Please check your setup using the
-					<a class="link link-primary" target="_blank" href="https://adventurelog.app"
+					<a class="link link-primary" target="_blank" href="https://voyage.app"
 						>documentation</a
 					>.
 				</p>

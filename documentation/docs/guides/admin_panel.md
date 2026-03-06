@@ -1,6 +1,6 @@
-# AdventureLog Admin Panel
+# Voyage Admin Panel
 
-The AdventureLog Admin Panel, powered by Django, is a web-based interface that allows administrators to manage objects in the AdventureLog database. The Admin Panel is accessible at the `/admin` endpoint of the AdventureLog server. Example: `https://al-server.yourdomain.com/admin`.
+The Voyage Admin Panel, powered by Django, is a web-based interface that allows administrators to manage objects in the Voyage database. The Admin Panel is accessible at the `/admin` endpoint of the Voyage server. Example: `https://al-server.yourdomain.com/admin`.
 
 Features of the Admin Panel include:
 
