@@ -12,12 +12,12 @@ Docker is the preferred way to run Voyage on your local machine. It is a lightwe
 
 Get the `docker-compose.yml` and `.env.example` files from the Voyage repository. You can download them here:
 
-- [Docker Compose](https://github.com/seanmorley15/Voyage/blob/main/docker-compose.yml)
-- [Environment Variables](https://github.com/seanmorley15/Voyage/blob/main/.env.example)
+- [Docker Compose](https://github.com/Alex-Wiesner/voyage/blob/main/docker-compose.yml)
+- [Environment Variables](https://github.com/Alex-Wiesner/voyage/blob/main/.env.example)
 
 ```bash
-wget https://raw.githubusercontent.com/seanmorley15/Voyage/main/docker-compose.yml
-wget https://raw.githubusercontent.com/seanmorley15/Voyage/main/.env.example
+wget https://raw.githubusercontent.com/Alex-Wiesner/voyage/main/docker-compose.yml
+wget https://raw.githubusercontent.com/Alex-Wiesner/voyage/main/.env.example
 cp .env.example .env
 ```
 

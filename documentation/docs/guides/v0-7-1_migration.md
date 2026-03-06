@@ -32,6 +32,6 @@ That's it! You should now be able to run the application with the new configurat
 
 Enjoy the new version of Voyage! 🎉
 
-View the full changelog [here](https://github.com/seanmorley15/Voyage/releases/tag/v0.7.1)
+View the full changelog [here](https://github.com/Alex-Wiesner/voyage/releases/tag/v0.7.1)
 
-Report any bugs [GitHub repository](https://github.com/seanmorley15/voyage) or ask for help in the [Discord server](https://discord.gg/wRbQ9Egr8C).
+Report any bugs [GitHub repository](https://github.com/Alex-Wiesner/voyage) or ask for help in the [Discord server](https://discord.gg/wRbQ9Egr8C).

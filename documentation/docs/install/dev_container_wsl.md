@@ -53,7 +53,7 @@ Open a WSL terminal (search for "WSL" in the Windows Start menu and open the WSL
 
 ```bash
 cd ~
-git clone https://github.com/seanmorley15/Voyage.git
+git clone https://github.com/Alex-Wiesner/voyage.git
 cd Voyage
 ```
 

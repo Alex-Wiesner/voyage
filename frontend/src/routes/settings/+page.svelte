@@ -14,7 +14,7 @@
 	import StravaLogo from '$lib/assets/strava.svg';
 	import WandererLogoSrc from '$lib/assets/wanderer.svg';
 
-	export let data;
+	export let data: any;
 	console.log(data);
 	let user: User;
 	let emails: typeof data.props.emails;
@@ -309,7 +309,7 @@
 			addToast('success', $t('settings.mfa_disabled'));
 			data.props.authenticators = false;
 		} else {
-			if (res.status == 401) {
+			if (res.status === 401) {
 				addToast('error', $t('settings.reset_session_error'));
 			}
 			addToast('error', $t('settings.generic_error'));
@@ -1657,19 +1657,18 @@
 											</p>
 											<p class="text-sm text-base-content/70">
 												© {copyrightYear}
-												<a href="https://seanmorley.com" target="_blank" class="link">Sean Morley</a
-												>. {$t('settings.all_rights_reserved')}
+												Sean Morley. {$t('settings.all_rights_reserved')}
 											</p>
 											<div class="flex justify-center gap-3 mt-2">
 												<a
-													href="https://github.com/seanmorley15/Voyage"
+													href="https://github.com/Alex-Wiesner/voyage"
 													target="_blank"
 													class="link link-primary text-sm"
 												>
 													GitHub
 												</a>
 												<a
-													href="https://github.com/seanmorley15/Voyage/blob/main/LICENSE"
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
 													target="_blank"
 													class="link link-secondary text-sm"
 												>

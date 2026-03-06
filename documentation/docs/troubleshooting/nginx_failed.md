@@ -16,7 +16,7 @@ If you're experiencing issues with the Nginx service failing to start in the bac
 - The service name should be set to `server` in the `docker-compose.yml` file. For example:
   ```yaml
   server:
-    image: ghcr.io/seanmorley15/voyage-backend:latest
+    image: ghcr.io/alex-wiesner/voyage-backend:latest
     container_name: voyage-backend
   ```
 
@@ -27,14 +27,14 @@ If you're experiencing issues with the Nginx service failing to start in the bac
   - Get the default Nginx configuration file from the Voyage repository:
 
   ```bash
-  wget https://raw.githubusercontent.com/seanmorley15/Voyage/refs/heads/main/backend/nginx.conf
+  wget https://raw.githubusercontent.com/Alex-Wiesner/voyage/refs/heads/main/backend/nginx.conf
   ```
 
   - Update the `nginx.conf` file to replace all occurrences of `server` with your custom service name.
   - Mount the custom Nginx configuration file to the backend container in the `docker-compose.yml` file. For example:
     ```yaml
     server:
-      image: ghcr.io/seanmorley15/voyage-backend:latest
+      image: ghcr.io/alex-wiesner/voyage-backend:latest
       container_name: voyage-backend
       volumes:
         - ./nginx.conf:/etc/nginx/nginx.conf

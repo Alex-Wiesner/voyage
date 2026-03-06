@@ -4,4 +4,4 @@ Traefik is a modern HTTP reverse proxy and load balancer that makes deploying mi
 
 Voyage has a built-in Traefik configuration that makes it easy to deploy and manage your Voyage instance.
 
-The most recent version of the Traefik `docker-compose.yml` file can be found in the [Voyage GitHub repository](https://github.com/seanmorley15/Voyage/blob/main/docker-compose-traefik.yaml).
+The most recent version of the Traefik `docker-compose.yml` file can be found in the [Voyage GitHub repository](https://github.com/Alex-Wiesner/voyage/blob/main/docker-compose-traefik.yaml).

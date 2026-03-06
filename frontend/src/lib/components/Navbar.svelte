@@ -12,7 +12,7 @@
 	import FormatListBulletedSquare from '~icons/mdi/format-list-bulleted-square';
 	import Earth from '~icons/mdi/earth';
 	import Magnify from '~icons/mdi/magnify';
-	import Map from '~icons/mdi/map';
+	import MapIcon from '~icons/mdi/map';
 	import Menu from '~icons/mdi/menu';
 	import Avatar from './Avatar.svelte';
 	import { page } from '$app/stores';
@@ -114,7 +114,7 @@
 		{ path: '/locations', icon: MapMarker, label: 'locations.locations' },
 		{ path: '/collections', icon: FormatListBulletedSquare, label: 'navbar.collections' },
 		{ path: '/worldtravel', icon: Earth, label: 'navbar.worldtravel' },
-		{ path: '/map', icon: Map, label: 'navbar.map' },
+		{ path: '/map', icon: MapIcon, label: 'navbar.map' },
 		{ path: '/calendar', icon: Calendar, label: 'navbar.calendar' },
 		{ path: '/users', icon: AccountMultiple, label: 'navbar.users' }
 	];
@@ -298,12 +298,6 @@
 						on:click={() => (window.location.href = 'https://discord.gg/wRbQ9Egr8C')}
 					>
 						Discord
-					</button>
-					<button
-						class="btn btn-ghost w-full justify-start gap-3"
-						on:click={() => (window.location.href = 'https://seanmorley.com/sponsor')}
-					>
-						{$t('navbar.support')} 💖
 					</button>
 				</div>
 

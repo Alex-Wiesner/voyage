@@ -31,7 +31,7 @@ services:
       - postgres-data:/var/lib/postgresql/data/
 
   web:
-    image: ghcr.io/seanmorley15/voyage-frontend:latest
+    image: ghcr.io/alex-wiesner/voyage-frontend:latest
     restart: unless-stopped
     environment:
       PUBLIC_SERVER_URL: "http://server:8000"
@@ -46,7 +46,7 @@ services:
       - server
 
   server:
-    image: ghcr.io/seanmorley15/voyage-backend:latest
+    image: ghcr.io/alex-wiesner/voyage-backend:latest
     restart: unless-stopped
     environment:
       PGHOST: "db"

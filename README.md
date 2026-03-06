@@ -108,14 +108,14 @@ Voyage aims to be simple, beautiful, and open to everyone — inheriting Adventu
 
 ## 🧭 Roadmap
 
-The Voyage Roadmap can be found [here](https://github.com/users/seanmorley15/projects/5)
+The Voyage Roadmap can be found in [GitHub Issues](https://github.com/Alex-Wiesner/voyage/issues)
 
 <!-- Contributing -->
 
 ## 👋 Contributing
 
-<a href="https://github.com/seanmorley15/Voyage/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=seanmorley15/Voyage" />
+<a href="https://github.com/Alex-Wiesner/voyage/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Alex-Wiesner/voyage" />
 </a>
 
 Contributions are always welcome!

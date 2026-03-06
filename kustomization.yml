@@ -24,7 +24,7 @@ spec:
             claimName: adventure-journal-db-pvc
       containers:
         - name: adventure-frontend
-          image: ghcr.io/seanmorley15/voyage-frontend:latest
+          image: ghcr.io/alex-wiesner/voyage-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
@@ -58,7 +58,7 @@ spec:
                   key: adventure-postgres-password
 
         - name: adventure-backend
-          image: ghcr.io/seanmorley15/voyage-backend:latest
+          image: ghcr.io/alex-wiesner/voyage-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

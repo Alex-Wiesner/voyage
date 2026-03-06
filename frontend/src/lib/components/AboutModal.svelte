@@ -88,7 +88,7 @@
 						<div>
 							<div class="text-sm text-base-content/60">{$t('about.developer')}</div>
 							<a
-								href="https://seanmorley.com"
+								href="https://github.com/Alex-Wiesner/voyage"
 								target="_blank"
 								rel="noopener noreferrer"
 								class="text-lg font-semibold link link-primary"
@@ -163,7 +163,7 @@
 					<p class="text-sm text-base-content/60 mb-2">
 						© {copyrightYear}
 						<a
-							href="https://seanmorley.com"
+							href="https://github.com/Alex-Wiesner/voyage"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="link link-primary"
@@ -176,7 +176,7 @@
 					</p>
 
 					<a
-						href="https://github.com/seanmorley15/Voyage/blob/main/LICENSE"
+						href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
 						target="_blank"
 						rel="noopener noreferrer"
 						class="link link-primary mt-2"
@@ -191,20 +191,12 @@
 				<div class="card-body p-4">
 					<div class="flex flex-wrap gap-3">
 						<a
-							href="https://github.com/seanmorley15/Voyage"
+							href="https://github.com/Alex-Wiesner/voyage"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="btn btn-outline btn-sm"
 						>
 							GitHub →
-						</a>
-						<a
-							href="https://seanmorley.com/sponsor"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="btn btn-outline btn-sm"
-						>
-							{$t('about.sponsor')} →
 						</a>
 						<!-- documentation -->
 						<a
