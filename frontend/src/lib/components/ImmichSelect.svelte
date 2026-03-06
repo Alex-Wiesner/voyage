@@ -3,6 +3,7 @@
 	import { t } from 'svelte-i18n';
 	import CheckIcon from '~icons/mdi/check';
 	import CloseIcon from '~icons/mdi/close';
+	import DateInput from '$lib/components/DateInput.svelte';
 	import type { ImmichAlbum } from '$lib/types';
 	import { debounce } from '$lib';
 
@@ -26,16 +27,18 @@
 	const dispatch = createEventDispatcher();
 
 	// Reactive statements
-	$: {
-		if (searchCategory === 'album' && currentAlbum) {
-			immichImages = [];
-			fetchAlbumAssets(currentAlbum);
-		} else if (searchCategory === 'date' && selectedDate) {
-			clearAlbumSelection();
-			searchImmich();
-		} else if (searchCategory === 'search') {
-			clearAlbumSelection();
-		}
+	$: if (searchCategory === 'album' && currentAlbum) {
+		immichImages = [];
+		fetchAlbumAssets(currentAlbum);
+	}
+
+	$: if (searchCategory === 'date' && selectedDate) {
+		clearAlbumSelection();
+		searchImmich();
+	}
+
+	$: if (searchCategory === 'search') {
+		clearAlbumSelection();
 	}
 
 	// Helper functions
@@ -149,7 +152,11 @@
 	}
 
 	// Event handlers
-	const searchImmich = debounce(() => {
+	function searchImmich() {
+		debouncedSearchImmich();
+	}
+
+	const debouncedSearchImmich = debounce(() => {
 		_searchImmich();
 	}, 500);
 
@@ -245,11 +252,10 @@
 	</div>
 {:else if searchCategory === 'date'}
 	<div class="flex gap-2 items-center">
-		<input
+		<DateInput
 			id="date-picker"
-			type="date"
 			bind:value={selectedDate}
-			class="input input-bordered flex-1"
+			inputClass="input input-bordered flex-1"
 			disabled={loading}
 		/>
 	</div>

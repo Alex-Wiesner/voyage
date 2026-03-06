@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 	import { t } from 'svelte-i18n';
 	import MarkdownEditor from './MarkdownEditor.svelte';
+	import DateInput from '$lib/components/DateInput.svelte';
 	let modal: HTMLDialogElement;
 	import { marked } from 'marked'; // Import the markdown parser
 
@@ -306,15 +307,14 @@
 											>
 										</div>
 									{/if}
-									<input
-										type="date"
+									<DateInput
 										id="date"
 										name="date"
 										readonly={isReadOnly}
 										min={constrainDates ? collection.start_date : ''}
 										max={constrainDates ? collection.end_date : ''}
 										bind:value={newNote.date}
-										class="input input-bordered w-full bg-base-100/80 focus:bg-base-100"
+										inputClass="input input-bordered w-full bg-base-100/80 focus:bg-base-100"
 									/>
 								</div>
 							</div>

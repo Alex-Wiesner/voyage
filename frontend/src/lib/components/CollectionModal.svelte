@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { t } from 'svelte-i18n';
 	import MarkdownEditor from './MarkdownEditor.svelte';
+	import DateInput from '$lib/components/DateInput.svelte';
 	import { addToast } from '$lib/toasts';
 	import { copyToClipboard } from '$lib/index';
 	import type { Collection, ContentImage, SlimCollection } from '$lib/types';
@@ -343,12 +344,10 @@
 											{$t('adventures.start_date')}
 										</span>
 									</label>
-									<input
-										type="date"
+									<DateInput
 										id="start_date"
 										name="start_date"
 										bind:value={collection.start_date}
-										class="input input-bordered w-full"
 									/>
 								</div>
 
@@ -360,12 +359,10 @@
 											{$t('adventures.end_date')}
 										</span>
 									</label>
-									<input
-										type="date"
+									<DateInput
 										id="end_date"
 										name="end_date"
 										bind:value={collection.end_date}
-										class="input input-bordered w-full"
 									/>
 								</div>
 

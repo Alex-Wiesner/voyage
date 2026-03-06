@@ -10,6 +10,7 @@
 	import PinIcon from '~icons/mdi/map-marker';
 	import Clear from '~icons/mdi/close';
 	import NewLocationModal from '$lib/components/locations/LocationModal.svelte';
+	import DateInput from '$lib/components/DateInput.svelte';
 	import { t } from 'svelte-i18n';
 	import { get as getStore } from 'svelte/store';
 	import type { Collection, Location, User } from '$lib/types';
@@ -855,26 +856,28 @@
 
 				<!-- Date Range Filter -->
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					<label class="form-control">
+					<div class="form-control">
 						<span class="label label-text text-xs">{$t('adventures.start_date')}</span>
-						<input
-							type="date"
+						<DateInput
+							id="start-date-filter"
+							name="start-date-filter"
 							bind:value={startDateFilter}
-							class="input input-sm input-bordered w-full"
+							inputClass="input input-sm input-bordered w-full"
 							min={collectionStartDateISO}
 							max={collectionEndDateISO}
 						/>
-					</label>
-					<label class="form-control">
+					</div>
+					<div class="form-control">
 						<span class="label label-text text-xs">{$t('adventures.end_date')}</span>
-						<input
-							type="date"
+						<DateInput
+							id="end-date-filter"
+							name="end-date-filter"
 							bind:value={endDateFilter}
-							class="input input-sm input-bordered w-full"
+							inputClass="input input-sm input-bordered w-full"
 							min={collectionStartDateISO}
 							max={collectionEndDateISO}
 						/>
-					</label>
+					</div>
 				</div>
 
 				<!-- Routes & Activities Filter -->

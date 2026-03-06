@@ -17,6 +17,8 @@
 	import MarkdownEditor from '../MarkdownEditor.svelte';
 	import TimezoneSelector from '../TimezoneSelector.svelte';
 	import MoneyInput from '../shared/MoneyInput.svelte';
+	import DateInput from '$lib/components/DateInput.svelte';
+	import DateTimeInput from '$lib/components/DateTimeInput.svelte';
 	import { DEFAULT_CURRENCY, normalizeMoneyPayload, toMoneyValue } from '$lib/money';
 	// @ts-ignore
 	import { DateTime } from 'luxon';
@@ -868,20 +870,18 @@
 								<span class="label-text font-medium">{$t('transportation.departure_date')}</span>
 							</label>
 							{#if allDay}
-								<input
+								<DateInput
 									id="departure-date"
-									type="date"
-									class="input input-bordered bg-base-100/80 focus:bg-base-100"
+									inputClass="input input-bordered bg-base-100/80 focus:bg-base-100"
 									bind:value={localStartDate}
 									on:change={handleLocalDateChange}
 									min={constrainDates ? constraintStartDate : undefined}
 									max={constrainDates ? constraintEndDate : undefined}
 								/>
 							{:else}
-								<input
+								<DateTimeInput
 									id="departure-date"
-									type="datetime-local"
-									class="input input-bordered bg-base-100/80 focus:bg-base-100"
+									inputClass="input input-bordered bg-base-100/80 focus:bg-base-100"
 									bind:value={localStartDate}
 									on:change={handleLocalDateChange}
 									min={constrainDates ? constraintStartDate : undefined}
@@ -896,20 +896,18 @@
 								<span class="label-text font-medium">{$t('transportation.arrival_date')}</span>
 							</label>
 							{#if allDay}
-								<input
+								<DateInput
 									id="arrival-date"
-									type="date"
-									class="input input-bordered bg-base-100/80 focus:bg-base-100"
+									inputClass="input input-bordered bg-base-100/80 focus:bg-base-100"
 									bind:value={localEndDate}
 									on:change={handleLocalDateChange}
 									min={constrainDates ? constraintStartDate : undefined}
 									max={constrainDates ? constraintEndDate : undefined}
 								/>
 							{:else}
-								<input
+								<DateTimeInput
 									id="arrival-date"
-									type="datetime-local"
-									class="input input-bordered bg-base-100/80 focus:bg-base-100"
+									inputClass="input input-bordered bg-base-100/80 focus:bg-base-100"
 									bind:value={localEndDate}
 									on:change={handleLocalDateChange}
 									min={constrainDates ? constraintStartDate : undefined}

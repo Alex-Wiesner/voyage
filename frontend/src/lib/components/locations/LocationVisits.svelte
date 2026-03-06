@@ -8,6 +8,8 @@
 		TransportationVisit
 	} from '$lib/types';
 	import TimezoneSelector from '../TimezoneSelector.svelte';
+	import DateInput from '$lib/components/DateInput.svelte';
+	import DateTimeInput from '$lib/components/DateTimeInput.svelte';
 	import { t } from 'svelte-i18n';
 	import { updateLocalDate, updateUTCDate, validateDateRange, formatUTCDate } from '$lib/dateUtils';
 	import { onMount } from 'svelte';
@@ -818,20 +820,18 @@
 								{typeConfig.startLabel}
 							</label>
 							{#if allDay}
-								<input
+								<DateInput
 									id="start-date-input"
-									type="date"
-									class="input input-bordered w-full mt-1"
+									inputClass="input input-bordered w-full mt-1"
 									bind:value={localStartDate}
 									on:change={handleLocalDateChange}
 									min={constrainDates ? constraintStartDate : ''}
 									max={constrainDates ? constraintEndDate : ''}
 								/>
 							{:else}
-								<input
+								<DateTimeInput
 									id="start-date-input"
-									type="datetime-local"
-									class="input input-bordered w-full mt-1"
+									inputClass="input input-bordered w-full mt-1"
 									bind:value={localStartDate}
 									on:change={handleLocalDateChange}
 									min={constrainDates ? constraintStartDate : ''}
@@ -847,20 +847,18 @@
 									{typeConfig.endLabel}
 								</label>
 								{#if allDay}
-									<input
+									<DateInput
 										id="end-date-input"
-										type="date"
-										class="input input-bordered w-full mt-1"
+										inputClass="input input-bordered w-full mt-1"
 										bind:value={localEndDate}
 										on:change={handleLocalDateChange}
 										min={constrainDates ? localStartDate : ''}
 										max={constrainDates ? constraintEndDate : ''}
 									/>
 								{:else}
-									<input
+									<DateTimeInput
 										id="end-date-input"
-										type="datetime-local"
-										class="input input-bordered w-full mt-1"
+										inputClass="input input-bordered w-full mt-1"
 										bind:value={localEndDate}
 										on:change={handleLocalDateChange}
 										min={constrainDates ? localStartDate : ''}
@@ -1193,13 +1191,12 @@
 															class="label-text text-xs font-medium"
 															for="start-date-{visit.id}">{$t('adventures.start_date')}</label
 														>
-														<input
-															id="start-date-{visit.id}"
-															type="datetime-local"
-															class="input input-bordered input-sm w-full mt-1"
-															bind:value={activityForm.start_date}
-															readonly={!!pendingStravaImport[visit.id]}
-														/>
+													<DateTimeInput
+														id="start-date-{visit.id}"
+														inputClass="input input-bordered input-sm w-full mt-1"
+														bind:value={activityForm.start_date}
+														readonly={!!pendingStravaImport[visit.id]}
+													/>
 													</div>
 
 													<!-- Elevation Gain -->
