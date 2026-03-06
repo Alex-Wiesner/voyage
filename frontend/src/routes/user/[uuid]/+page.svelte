@@ -25,7 +25,7 @@
 
 <div class="flex justify-center mt-4">
 	<p class="text-sm text-neutral-content">
-		{user.date_joined ? 'Joined ' + new Date(user.date_joined).toLocaleDateString() : ''}
+		{user.date_joined ? 'Joined ' + new Date(user.date_joined).toLocaleDateString('en-GB') : ''}
 	</p>
 </div>
 

@@ -79,7 +79,7 @@
 	}
 
 	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString();
+		return new Date(dateString).toLocaleDateString('en-GB');
 	}
 
 	onMount(() => {

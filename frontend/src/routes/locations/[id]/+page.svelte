@@ -528,22 +528,24 @@
 															<div class="text-sm">
 																{#if visit.timezone}
 																	<strong>{$t('adventures.start')}:</strong>
-																	{DateTime.fromISO(visit.start_date, { zone: 'utc' })
-																		.setZone(visit.timezone)
-																		.toLocaleString(DateTime.DATETIME_MED)}<br />
-																	<strong>{$t('adventures.end')}:</strong>
-																	{DateTime.fromISO(visit.end_date, { zone: 'utc' })
-																		.setZone(visit.timezone)
-																		.toLocaleString(DateTime.DATETIME_MED)}
-																{:else}
-																	<strong>Start:</strong>
-																	{DateTime.fromISO(visit.start_date).toLocaleString(
-																		DateTime.DATETIME_MED
-																	)}<br />
-																	<strong>End:</strong>
-																	{DateTime.fromISO(visit.end_date).toLocaleString(
-																		DateTime.DATETIME_MED
-																	)}
+													{DateTime.fromISO(visit.start_date, { zone: 'utc' })
+														.setZone(visit.timezone)
+														.toLocaleString(DateTime.DATETIME_MED, { locale: 'en-GB' })}<br />
+													<strong>{$t('adventures.end')}:</strong>
+													{DateTime.fromISO(visit.end_date, { zone: 'utc' })
+														.setZone(visit.timezone)
+														.toLocaleString(DateTime.DATETIME_MED, { locale: 'en-GB' })}
+												{:else}
+													<strong>Start:</strong>
+													{DateTime.fromISO(visit.start_date).toLocaleString(
+														DateTime.DATETIME_MED,
+														{ locale: 'en-GB' }
+													)}<br />
+													<strong>End:</strong>
+													{DateTime.fromISO(visit.end_date).toLocaleString(
+														DateTime.DATETIME_MED,
+														{ locale: 'en-GB' }
+													)}
 																{/if}
 															</div>
 														</div>
@@ -900,7 +902,7 @@
 								{#each adventure.sun_times as sun_time}
 									<div class="border-l-4 border-warning pl-3">
 										<div class="font-semibold text-sm">
-											{new Date(sun_time.date).toLocaleDateString()}
+											{new Date(sun_time.date).toLocaleDateString('en-GB')}
 										</div>
 										<div class="text-xs opacity-70">
 											{$t('adventures.sunrise')}: {sun_time.sunrise} • {$t('adventures.sunset')}: {sun_time.sunset}

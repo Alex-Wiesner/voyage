@@ -178,7 +178,7 @@
 							<div class="flex items-center gap-2">
 								<Calendar class="w-4 h-4 text-primary" />
 								<span>
-									{new Date(checklist.date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
+									{new Date(checklist.date).toLocaleDateString('en-GB', { timeZone: 'UTC' })}
 								</span>
 							</div>
 						{/if}
@@ -440,7 +440,7 @@
 			{#if checklist.date && checklist.date !== ''}
 				<div class="flex items-center gap-1">
 					<Calendar class="w-4 h-4 text-primary" />
-					<span>{new Date(checklist.date).toLocaleDateString(undefined, { timeZone: 'UTC' })}</span>
+					<span>{new Date(checklist.date).toLocaleDateString('en-GB', { timeZone: 'UTC' })}</span>
 				</div>
 			{/if}
 

@@ -285,12 +285,12 @@
 		<!-- Date Range (if exists) -->
 		{#if collection.start_date && collection.end_date}
 			<div class="text-xs text-base-content/60">
-				{new Date(collection.start_date).toLocaleDateString(undefined, {
+				{new Date(collection.start_date).toLocaleDateString('en-GB', {
 					timeZone: 'UTC',
 					month: 'short',
 					day: 'numeric',
 					year: 'numeric'
-				})} – {new Date(collection.end_date).toLocaleDateString(undefined, {
+				})} – {new Date(collection.end_date).toLocaleDateString('en-GB', {
 					timeZone: 'UTC',
 					month: 'short',
 					day: 'numeric',

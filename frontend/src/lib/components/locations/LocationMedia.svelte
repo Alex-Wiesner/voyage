@@ -152,7 +152,7 @@
 	}
 
 	function formatDate(dateString: string | number | Date) {
-		return new Date(dateString).toLocaleDateString();
+		return new Date(dateString).toLocaleDateString('en-GB');
 	}
 
 	async function fetchWandererTrails(filter = '') {

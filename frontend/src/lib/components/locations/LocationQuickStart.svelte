@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { MapLibre, Marker, MapEvents } from 'svelte-maplibre';
-	import { t } from 'svelte-i18n';
+	import { locale, t } from 'svelte-i18n';
 	import { getBasemapUrl } from '$lib';
 
 	// Icons
@@ -44,7 +44,7 @@
 		isSearching = true;
 		try {
 			const response = await fetch(
-				`/api/reverse-geocode/search/?query=${encodeURIComponent(query)}`
+				`/api/reverse-geocode/search/?query=${encodeURIComponent(query)}&lang=${encodeURIComponent($locale ?? 'en')}`
 			);
 			const results = await response.json();
 
@@ -105,7 +105,9 @@
 
 		try {
 			// Using a coordinate-based search query for reverse geocoding
-			const response = await fetch(`/api/reverse-geocode/search/?query=${lat},${lng}`);
+			const response = await fetch(
+				`/api/reverse-geocode/search/?query=${lat},${lng}&lang=${encodeURIComponent($locale ?? 'en')}`
+			);
 			const results = await response.json();
 
 			if (results && results.length > 0) {

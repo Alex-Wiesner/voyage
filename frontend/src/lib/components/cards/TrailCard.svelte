@@ -32,7 +32,7 @@
 	}
 
 	function formatDate(date: string | number | Date) {
-		return new Date(date).toLocaleDateString();
+		return new Date(date).toLocaleDateString('en-GB');
 	}
 </script>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { MapLibre, Marker, MapEvents } from 'svelte-maplibre';
-	import { t } from 'svelte-i18n';
+	import { locale, t } from 'svelte-i18n';
 	import { getBasemapUrl } from '$lib';
 
 	import SearchIcon from '~icons/mdi/magnify';
@@ -200,7 +200,7 @@
 		try {
 			const searchTerm = airportMode ? `${query} Airport` : query;
 			const response = await fetch(
-				`/api/reverse-geocode/search/?query=${encodeURIComponent(searchTerm)}`
+				`/api/reverse-geocode/search/?query=${encodeURIComponent(searchTerm)}&lang=${encodeURIComponent($locale ?? 'en')}`
 			);
 			const results = await response.json();
 
@@ -233,7 +233,7 @@
 		try {
 			const searchTerm = airportMode ? `${query} Airport` : query;
 			const response = await fetch(
-				`/api/reverse-geocode/search/?query=${encodeURIComponent(searchTerm)}`
+				`/api/reverse-geocode/search/?query=${encodeURIComponent(searchTerm)}&lang=${encodeURIComponent($locale ?? 'en')}`
 			);
 			const results = await response.json();
 
@@ -266,7 +266,7 @@
 		try {
 			const searchTerm = airportMode ? `${query} Airport` : query;
 			const response = await fetch(
-				`/api/reverse-geocode/search/?query=${encodeURIComponent(searchTerm)}`
+				`/api/reverse-geocode/search/?query=${encodeURIComponent(searchTerm)}&lang=${encodeURIComponent($locale ?? 'en')}`
 			);
 			const results = await response.json();
 

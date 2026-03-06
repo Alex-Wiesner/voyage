@@ -101,7 +101,9 @@
 			if (!dateStr || isAllDay(dateStr)) return null;
 			const dt = DateTime.fromISO(dateStr, { zone: timezone ?? 'UTC' });
 			if (!dt.isValid) return null;
-			return dt.setZone(localTimeZone).toLocaleString(DateTime.DATETIME_MED);
+			return dt.setZone(localTimeZone).toLocaleString(DateTime.DATETIME_MED, {
+				locale: 'en-GB'
+			});
 		};
 
 		const inLocal = formatLocal(checkIn);

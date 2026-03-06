@@ -83,7 +83,7 @@
 			<Calendar class="w-4 h-4 text-primary" />
 			<span>
 				{user.date_joined
-					? `${$t('adventures.joined')} ` + new Date(user.date_joined).toLocaleDateString()
+					? `${$t('adventures.joined')} ` + new Date(user.date_joined).toLocaleDateString('en-GB')
 					: ''}
 			</span>
 		</div>

@@ -684,7 +684,7 @@
 
 	function formatDate(dateString: string | null) {
 		if (!dateString) return '';
-		return DateTime.fromISO(dateString).toLocaleString(DateTime.DATE_MED);
+		return DateTime.fromISO(dateString).toLocaleString(DateTime.DATE_MED, { locale: 'en-GB' });
 	}
 
 	function collaboratorDisplayName(person: Collaborator | null | undefined): string {

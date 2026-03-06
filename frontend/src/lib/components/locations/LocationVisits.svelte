@@ -147,17 +147,17 @@
 	// Helper functions
 	function formatDateInTimezone(utcDate: string, timezone: string): string {
 		try {
-			return new Intl.DateTimeFormat(undefined, {
+			return new Intl.DateTimeFormat('en-GB', {
 				timeZone: timezone,
 				year: 'numeric',
 				month: 'short',
 				day: 'numeric',
 				hour: '2-digit',
 				minute: '2-digit',
-				hour12: true
+				hour12: false
 			}).format(new Date(utcDate));
 		} catch {
-			return new Date(utcDate).toLocaleString();
+			return new Date(utcDate).toLocaleString('en-GB');
 		}
 	}
 
@@ -957,8 +957,8 @@
 														{formatDateInTimezone(visit.start_date, visit.timezone)}
 														– {formatDateInTimezone(visit.end_date, visit.timezone)}
 													{:else}
-														{new Date(visit.start_date).toLocaleString()}
-														– {new Date(visit.end_date).toLocaleString()}
+														{new Date(visit.start_date).toLocaleString('en-GB')}
+														– {new Date(visit.end_date).toLocaleString('en-GB')}
 													{/if}
 												</div>
 											</div>

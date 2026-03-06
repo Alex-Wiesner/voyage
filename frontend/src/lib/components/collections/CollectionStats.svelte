@@ -264,7 +264,7 @@
 
 	$: windowLabel =
 		tripStart && tripEnd
-			? `${tripStart.toLocaleString(DateTime.DATE_MED)} - ${tripEnd.toLocaleString(DateTime.DATE_MED)}`
+			? `${tripStart.toLocaleString(DateTime.DATE_MED, { locale: 'en-GB' })} - ${tripEnd.toLocaleString(DateTime.DATE_MED, { locale: 'en-GB' })}`
 			: null;
 
 	function normalizeTransportType(type?: string | null): string {

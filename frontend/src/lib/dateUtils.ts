@@ -92,17 +92,17 @@ export function validateDateRange(
 export function formatDateInTimezone(utcDate: string, timezone: string | null): string {
 	if (!utcDate) return '';
 	try {
-		return new Intl.DateTimeFormat(undefined, {
+		return new Intl.DateTimeFormat('en-GB', {
 			timeZone: timezone || undefined,
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
 			hour: '2-digit',
 			minute: '2-digit',
-			hour12: true
+			hour12: false
 		}).format(new Date(utcDate));
 	} catch {
-		return new Date(utcDate).toLocaleString();
+		return new Date(utcDate).toLocaleString('en-GB');
 	}
 }
 
@@ -117,7 +117,7 @@ export function formatAllDayDate(dateString: string): string {
 	if (!dateString) return '';
 	const datePart = dateString.split('T')[0];
 	const dateWithMidday = `${datePart}T12:00:00`;
-	return new Intl.DateTimeFormat('en-US', {
+	return new Intl.DateTimeFormat('en-GB', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric'
