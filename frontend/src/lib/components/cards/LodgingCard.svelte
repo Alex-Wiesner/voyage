@@ -101,6 +101,7 @@
 	export let readOnly: boolean = false;
 	export let itineraryItem: CollectionItineraryItem | null = null;
 	export let showImage: boolean = true;
+	export let compact: boolean = false;
 
 	let isWarningModalOpen: boolean = false;
 
@@ -154,13 +155,17 @@
 {/if}
 
 <div
-	class="card w-full max-w-md bg-base-300 shadow hover:shadow-md transition-all duration-200 border border-base-300 group"
+	class="card w-full bg-base-300 shadow hover:shadow-md transition-all duration-200 border border-base-300 group"
 	aria-label="lodging-card"
 >
 	{#if showImage}
 		<!-- Image Section with Overlay -->
 		<div class="relative overflow-hidden rounded-t-2xl">
-			<CardCarousel images={lodging.images} icon={getLodgingIcon(lodging.type)} name={lodging.name} />
+			<CardCarousel
+				images={lodging.images}
+				icon={getLodgingIcon(lodging.type)}
+				name={lodging.name}
+			/>
 
 			<!-- Privacy Indicator -->
 			<div class="absolute top-2 right-4">
@@ -193,12 +198,22 @@
 			{/if}
 		</div>
 	{/if}
-	<div class="card-body p-4 space-y-3 min-w-0">
+	<div
+		class="card-body min-w-0"
+		class:p-3={compact}
+		class:p-4={!compact}
+		class:space-y-2={compact}
+		class:space-y-3={!compact}
+	>
 		<!-- Header -->
 		<div class="flex items-start justify-between gap-3">
 			<a
 				href="/lodging/{lodging.id}"
-				class="hover:text-primary transition-colors duration-200 line-clamp-2 text-lg font-semibold"
+				class="hover:text-primary transition-colors duration-200 line-clamp-2"
+				class:text-base={compact}
+				class:text-lg={!compact}
+				class:font-medium={compact}
+				class:font-semibold={!compact}
 			>
 				{lodging.name}
 			</a>

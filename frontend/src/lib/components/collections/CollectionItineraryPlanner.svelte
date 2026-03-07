@@ -576,6 +576,10 @@
 		return day.items.filter((item) => item.id !== day.boundaryLodgingItem?.id);
 	}
 
+	function shouldShowOvernightSummary(day: DayGroup): boolean {
+		return day.overnightLodging.length > 0 && !day.boundaryLodgingItem?.resolvedObject;
+	}
+
 	function reinsertBoundaryLodgingItem(
 		day: DayGroup,
 		timelineItems: ResolvedItineraryItem[]
@@ -1111,18 +1115,18 @@
 			targetPendingDate &&
 			!addedToItinerary.has(lodgingBeingUpdated.id)
 		) {
-		// Normalize check_in to date-only (YYYY-MM-DD) if present
-		const lodgingCheckInDate = lodgingBeingUpdated.check_in
-			? String(lodgingBeingUpdated.check_in).split('T')[0]
-			: null;
-		const targetDate = lodgingCheckInDate || targetPendingDate;
+			// Normalize check_in to date-only (YYYY-MM-DD) if present
+			const lodgingCheckInDate = lodgingBeingUpdated.check_in
+				? String(lodgingBeingUpdated.check_in).split('T')[0]
+				: null;
+			const targetDate = lodgingCheckInDate || targetPendingDate;
 
-		addItineraryItemForObject('lodging', lodgingBeingUpdated.id, targetDate);
-		// Mark this lodging as added to prevent duplicates
-		addedToItinerary.add(lodgingBeingUpdated.id);
-		addedToItinerary = addedToItinerary; // trigger reactivity
-		pendingAddDate = null;
-		pendingLodgingAddDate = null;
+			addItineraryItemForObject('lodging', lodgingBeingUpdated.id, targetDate);
+			// Mark this lodging as added to prevent duplicates
+			addedToItinerary.add(lodgingBeingUpdated.id);
+			addedToItinerary = addedToItinerary; // trigger reactivity
+			pendingAddDate = null;
+			pendingLodgingAddDate = null;
 		}
 	}
 
@@ -2330,11 +2334,12 @@
 												lodging={resolvedObj}
 												{user}
 												{collection}
-														itineraryItem={item}
-														showImage={false}
-														on:delete={handleItemDelete}
-														on:removeFromItinerary={handleRemoveItineraryItem}
-														on:edit={handleEditLodging}
+												itineraryItem={item}
+												showImage={false}
+												compact={true}
+												on:delete={handleItemDelete}
+												on:removeFromItinerary={handleRemoveItineraryItem}
+												on:edit={handleEditLodging}
 												on:moveToGlobal={(e) => moveItemToGlobal(e.detail.type, e.detail.id)}
 											/>
 										{:else if objectType === 'note'}
@@ -2555,6 +2560,7 @@
 									{collection}
 									itineraryItem={boundaryLodgingItem}
 									showImage={false}
+									compact={true}
 									on:delete={handleItemDelete}
 									on:removeFromItinerary={handleRemoveItineraryItem}
 									on:edit={handleEditLodging}
@@ -2821,11 +2827,12 @@
 																lodging={resolvedObj}
 																{user}
 																{collection}
-														itineraryItem={item}
-														showImage={false}
-														on:delete={handleItemDelete}
-														on:removeFromItinerary={handleRemoveItineraryItem}
-														on:edit={handleEditLodging}
+																itineraryItem={item}
+																showImage={false}
+																compact={true}
+																on:delete={handleItemDelete}
+																on:removeFromItinerary={handleRemoveItineraryItem}
+																on:edit={handleEditLodging}
 																on:moveToGlobal={(e) =>
 																	moveItemToGlobal(e.detail.type, e.detail.id)}
 																on:changeDay={(e) =>
@@ -2887,26 +2894,28 @@
 																		<LocationMarker class="w-3.5 h-3.5" />
 																		{locationConnector.durationLabel}
 																	</span>
-												<span class="text-base-content/40">•</span>
-												{#if directionsUrl}
-													<a
-														href={directionsUrl}
-														target="_blank"
-														rel="noopener noreferrer"
-														class="inline-flex items-center gap-1 text-primary/80 font-medium underline underline-offset-2"
-													>
-														<LocationMarker class="w-3.5 h-3.5" />
-														{getI18nText('itinerary.directions', 'Directions')}
-													</a>
-												{:else}
-													<span class="inline-flex items-center gap-1 text-primary/80 font-medium underline underline-offset-2">
-														<LocationMarker class="w-3.5 h-3.5" />
-														{getI18nText('itinerary.directions', 'Directions')}
-													</span>
-												{/if}
-											</div>
-										{:else}
-											<div class="flex items-center gap-2 flex-wrap text-base-content">
+																	<span class="text-base-content/40">•</span>
+																	{#if directionsUrl}
+																		<a
+																			href={directionsUrl}
+																			target="_blank"
+																			rel="noopener noreferrer"
+																			class="inline-flex items-center gap-1 text-primary/80 font-medium underline underline-offset-2"
+																		>
+																			<LocationMarker class="w-3.5 h-3.5" />
+																			{getI18nText('itinerary.directions', 'Directions')}
+																		</a>
+																	{:else}
+																		<span
+																			class="inline-flex items-center gap-1 text-primary/80 font-medium underline underline-offset-2"
+																		>
+																			<LocationMarker class="w-3.5 h-3.5" />
+																			{getI18nText('itinerary.directions', 'Directions')}
+																		</span>
+																	{/if}
+																</div>
+															{:else}
+																<div class="flex items-center gap-2 flex-wrap text-base-content">
 																	<span class="inline-flex items-center gap-1 font-medium">
 																		{#if locationConnector.mode === 'driving'}
 																			<Car class="w-3.5 h-3.5" />
@@ -2917,26 +2926,28 @@
 																	</span>
 																	<span class="text-base-content/50">•</span>
 																	<span class="font-medium">{locationConnector.distanceLabel}</span>
-												<span class="text-base-content/50">•</span>
-												{#if directionsUrl}
-													<a
-														href={directionsUrl}
-														target="_blank"
-														rel="noopener noreferrer"
-														class="inline-flex items-center gap-1 text-primary font-medium underline underline-offset-2"
-													>
-														<LocationMarker class="w-3.5 h-3.5" />
-														{getI18nText('itinerary.directions', 'Directions')}
-													</a>
-												{:else}
-													<span class="inline-flex items-center gap-1 text-primary font-medium underline underline-offset-2">
-														<LocationMarker class="w-3.5 h-3.5" />
-														{getI18nText('itinerary.directions', 'Directions')}
-													</span>
-												{/if}
-											</div>
-										{/if}
-									</div>
+																	<span class="text-base-content/50">•</span>
+																	{#if directionsUrl}
+																		<a
+																			href={directionsUrl}
+																			target="_blank"
+																			rel="noopener noreferrer"
+																			class="inline-flex items-center gap-1 text-primary font-medium underline underline-offset-2"
+																		>
+																			<LocationMarker class="w-3.5 h-3.5" />
+																			{getI18nText('itinerary.directions', 'Directions')}
+																		</a>
+																	{:else}
+																		<span
+																			class="inline-flex items-center gap-1 text-primary font-medium underline underline-offset-2"
+																		>
+																			<LocationMarker class="w-3.5 h-3.5" />
+																			{getI18nText('itinerary.directions', 'Directions')}
+																		</span>
+																	{/if}
+																</div>
+															{/if}
+														</div>
 													{/if}
 												</div>
 											</div>
@@ -3011,6 +3022,7 @@
 									{collection}
 									itineraryItem={boundaryLodgingItem}
 									showImage={false}
+									compact={true}
 									on:delete={handleItemDelete}
 									on:removeFromItinerary={handleRemoveItineraryItem}
 									on:edit={handleEditLodging}
@@ -3075,13 +3087,13 @@
 												<button
 													type="button"
 													role="menuitem"
-												on:click={() => {
-													pendingAddDate = day.date;
-													pendingLodgingAddDate = day.date;
-													lodgingToEdit = null;
-													lodgingBeingUpdated = null;
-													isLodgingModalOpen = true;
-												}}
+													on:click={() => {
+														pendingAddDate = day.date;
+														pendingLodgingAddDate = day.date;
+														lodgingToEdit = null;
+														lodgingBeingUpdated = null;
+														isLodgingModalOpen = true;
+													}}
 												>
 													{$t('adventures.lodging')}
 												</button>
@@ -3130,10 +3142,10 @@
 					</div>
 
 					<!-- Overnight Lodging + Dated Trip-wide Indicators (share row to save space) -->
-					{#if day.overnightLodging.length > 0 || day.globalDatedItems.length > 0}
+					{#if shouldShowOvernightSummary(day) || day.globalDatedItems.length > 0}
 						<div class="mt-4 pt-4 border-t border-base-300 border-dashed">
 							<div class="flex flex-wrap gap-6 items-start">
-								{#if day.overnightLodging.length > 0}
+								{#if shouldShowOvernightSummary(day)}
 									<div class="space-y-2 min-w-[240px] flex-1">
 										<div class="flex items-center gap-2 mb-1 opacity-70">
 											<Bed class="w-4 h-4" />
@@ -3352,12 +3364,13 @@
 									/>
 								{:else if type === 'lodging'}
 									<LodgingCard
-											lodging={item}
-											{user}
-											{collection}
-											showImage={false}
-											on:delete={handleItemDelete}
-											on:edit={handleEditLodging}
+										lodging={item}
+										{user}
+										{collection}
+										showImage={false}
+										compact={true}
+										on:delete={handleItemDelete}
+										on:edit={handleEditLodging}
 									/>
 								{:else if type === 'note'}
 									<NoteCard
