@@ -560,12 +560,28 @@
 		};
 	}
 
+	function findNextLocationItem(
+		items: ResolvedItineraryItem[],
+		currentIndex: number
+	): ResolvedItineraryItem | null {
+		for (let index = currentIndex + 1; index < items.length; index += 1) {
+			const candidate = items[index];
+			if ((candidate?.item?.type || '') === 'location') {
+				return candidate;
+			}
+		}
+
+		return null;
+	}
+
 	function getConnectorPairs(dayGroups: DayGroup[]): ConnectorPair[] {
 		const pairs: ConnectorPair[] = [];
 
 		for (const dayGroup of dayGroups) {
 			for (let index = 0; index < dayGroup.items.length - 1; index += 1) {
-				const pair = getConnectorPair(dayGroup.items[index], dayGroup.items[index + 1]);
+				const currentItem = dayGroup.items[index];
+				const nextLocationItem = findNextLocationItem(dayGroup.items, index);
+				const pair = getConnectorPair(currentItem, nextLocationItem);
 				if (pair) pairs.push(pair);
 			}
 		}
@@ -2366,8 +2382,8 @@
 									{@const objectType = item.item?.type || ''}
 									{@const resolvedObj = item.resolvedObject}
 									{@const multiDay = isMultiDay(item)}
-									{@const nextItem = index < day.items.length - 1 ? day.items[index + 1] : null}
-									{@const locationConnector = getLocationConnector(item, nextItem)}
+									{@const nextLocationItem = findNextLocationItem(day.items, index)}
+									{@const locationConnector = getLocationConnector(item, nextLocationItem)}
 									{@const isDraggingShadow = item[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
 
 									<div

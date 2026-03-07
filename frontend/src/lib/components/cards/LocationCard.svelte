@@ -276,7 +276,7 @@
 {/if}
 
 <div
-	class="card w-full max-w-md bg-base-300 shadow hover:shadow-md transition-all duration-200 border border-base-300 group"
+	class="card w-full bg-base-300 shadow hover:shadow-md transition-all duration-200 border border-base-300 group"
 	aria-label="location-card"
 >
 	{#if showImage}
