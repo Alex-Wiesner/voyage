@@ -576,6 +576,9 @@
 	): ResolvedItineraryItem | null {
 		for (let index = currentIndex + 1; index < items.length; index += 1) {
 			const candidate = items[index];
+			if (candidate?.[SHADOW_ITEM_MARKER_PROPERTY_NAME]) {
+				continue;
+			}
 			if ((candidate?.item?.type || '') === 'location') {
 				return candidate;
 			}
@@ -590,6 +593,9 @@
 		for (const dayGroup of dayGroups) {
 			for (let index = 0; index < dayGroup.items.length - 1; index += 1) {
 				const currentItem = dayGroup.items[index];
+				if (currentItem?.[SHADOW_ITEM_MARKER_PROPERTY_NAME]) {
+					continue;
+				}
 				const nextLocationItem = findNextLocationItem(dayGroup.items, index);
 				const pair = getConnectorPair(currentItem, nextLocationItem);
 				if (pair) pairs.push(pair);
@@ -696,7 +702,9 @@
 		} catch (error) {
 			if (fetchVersion !== activeConnectorFetchVersion) return;
 			console.error('Failed to fetch connector route metrics:', error);
-			connectorMetricsMap = {};
+			if (connectorPairs.length === 0) {
+				connectorMetricsMap = {};
+			}
 		}
 	}
 
@@ -752,6 +760,41 @@
 		}
 
 		return getFallbackLocationConnector(currentItem, nextItem);
+	}
+
+	function buildDirectionsUrl(
+		currentItem: ResolvedItineraryItem,
+		nextItem: ResolvedItineraryItem | null,
+		mode: 'walking' | 'driving' = 'walking'
+	): string | null {
+		if (!nextItem) return null;
+
+		const currentType = currentItem.item?.type || '';
+		const nextType = nextItem.item?.type || '';
+		if (currentType !== 'location' || nextType !== 'location') return null;
+
+		const currentLocation = currentItem.resolvedObject as Location | null;
+		const nextLocation = nextItem.resolvedObject as Location | null;
+		if (!currentLocation || !nextLocation) return null;
+
+		const fromLatitude = normalizeCoordinate(currentLocation.latitude);
+		const fromLongitude = normalizeCoordinate(currentLocation.longitude);
+		const toLatitude = normalizeCoordinate(nextLocation.latitude);
+		const toLongitude = normalizeCoordinate(nextLocation.longitude);
+
+		if (
+			fromLatitude === null ||
+			fromLongitude === null ||
+			toLatitude === null ||
+			toLongitude === null
+		) {
+			return null;
+		}
+
+		const engine = mode === 'driving' ? 'car' : 'foot';
+		const route = `${fromLatitude},${fromLongitude};${toLatitude},${toLongitude}`;
+
+		return `https://www.openstreetmap.org/directions?engine=fossgis_osrm_${engine}&route=${encodeURIComponent(route)}`;
 	}
 
 	function getI18nText(key: string, fallback: string): string {
@@ -1413,6 +1456,13 @@
 				return it;
 			});
 			collection.itinerary = updatedItinerary;
+
+			// Rebuild canonical local state immediately after persisting reorder
+			days = groupItemsByDay(collection);
+			globalItems = (collection.itinerary || [])
+				.filter((it) => it.is_global)
+				.map((it) => resolveItineraryItem(it, collection))
+				.sort((a, b) => a.order - b.order);
 		} catch (error) {
 			console.error('Error saving itinerary order:', error);
 			// Optionally show error notification to user
@@ -2406,6 +2456,11 @@
 									{@const multiDay = isMultiDay(item)}
 									{@const nextLocationItem = findNextLocationItem(day.items, index)}
 									{@const locationConnector = getLocationConnector(item, nextLocationItem)}
+									{@const directionsUrl = buildDirectionsUrl(
+										item,
+										nextLocationItem,
+										locationConnector?.mode || 'walking'
+									)}
 									{@const isDraggingShadow = item[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
 
 									<div
@@ -2637,14 +2692,26 @@
 																		<LocationMarker class="w-3.5 h-3.5" />
 																		{locationConnector.durationLabel}
 																	</span>
-																	<span class="text-base-content/40">•</span>
-																	<span class="inline-flex items-center gap-1 text-primary/80 font-medium underline underline-offset-2">
-																		<LocationMarker class="w-3.5 h-3.5" />
-																		{getI18nText('itinerary.directions', 'Directions')}
-																	</span>
-																</div>
-															{:else}
-																<div class="flex items-center gap-2 flex-wrap text-base-content">
+												<span class="text-base-content/40">•</span>
+												{#if directionsUrl}
+													<a
+														href={directionsUrl}
+														target="_blank"
+														rel="noopener noreferrer"
+														class="inline-flex items-center gap-1 text-primary/80 font-medium underline underline-offset-2"
+													>
+														<LocationMarker class="w-3.5 h-3.5" />
+														{getI18nText('itinerary.directions', 'Directions')}
+													</a>
+												{:else}
+													<span class="inline-flex items-center gap-1 text-primary/80 font-medium underline underline-offset-2">
+														<LocationMarker class="w-3.5 h-3.5" />
+														{getI18nText('itinerary.directions', 'Directions')}
+													</span>
+												{/if}
+											</div>
+										{:else}
+											<div class="flex items-center gap-2 flex-wrap text-base-content">
 																	<span class="inline-flex items-center gap-1 font-medium">
 																		{#if locationConnector.mode === 'driving'}
 																			<Car class="w-3.5 h-3.5" />
@@ -2655,14 +2722,26 @@
 																	</span>
 																	<span class="text-base-content/50">•</span>
 																	<span class="font-medium">{locationConnector.distanceLabel}</span>
-																	<span class="text-base-content/50">•</span>
-																	<span class="inline-flex items-center gap-1 text-primary font-medium underline underline-offset-2">
-																		<LocationMarker class="w-3.5 h-3.5" />
-																		{getI18nText('itinerary.directions', 'Directions')}
-																	</span>
-																</div>
-															{/if}
-														</div>
+												<span class="text-base-content/50">•</span>
+												{#if directionsUrl}
+													<a
+														href={directionsUrl}
+														target="_blank"
+														rel="noopener noreferrer"
+														class="inline-flex items-center gap-1 text-primary font-medium underline underline-offset-2"
+													>
+														<LocationMarker class="w-3.5 h-3.5" />
+														{getI18nText('itinerary.directions', 'Directions')}
+													</a>
+												{:else}
+													<span class="inline-flex items-center gap-1 text-primary font-medium underline underline-offset-2">
+														<LocationMarker class="w-3.5 h-3.5" />
+														{getI18nText('itinerary.directions', 'Directions')}
+													</span>
+												{/if}
+											</div>
+										{/if}
+									</div>
 													{/if}
 												</div>
 											</div>
