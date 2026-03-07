@@ -1,7 +1,7 @@
 services:
   web:
     build: ./frontend/
-    image: ghcr.io/alex-wiesner/voyage-frontend:latest
+    # image: ghcr.io/alex-wiesner/voyage-frontend:latest
     container_name: voyage-frontend
     restart: unless-stopped
     user: root
@@ -28,9 +28,10 @@ services:
 
   server:
     build: ./backend/
-    image: ghcr.io/alex-wiesner/voyage-backend:latest
+    # image: ghcr.io/alex-wiesner/voyage-backend:latest
     container_name: voyage-backend
     restart: unless-stopped
+    entrypoint: []
     env_file: .env
     environment:
       - DJANGO_SUPERUSER_USERNAME=${DJANGO_ADMIN_USERNAME}
