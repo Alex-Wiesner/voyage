@@ -45,13 +45,37 @@
 	};
 	let userApiKeys: UserAPIKey[] = data.props.apiKeys ?? [];
 	let apiKeysConfigError: string | null = data.props.apiKeysConfigError ?? null;
-	let newApiKeyProvider = 'google_maps';
+	let newApiKeyProvider = 'anthropic';
 	let newApiKeyValue = '';
 	let isSavingApiKey = false;
 	let deletingApiKeyId: string | null = null;
 	let mcpToken: string | null = null;
 	let isLoadingMcpToken = false;
 	let activeSection: string = 'profile';
+
+	const API_KEY_PROVIDER_OPTIONS = [
+		{ value: 'anthropic', labelKey: 'settings.api_key_provider_anthropic' },
+		{ value: 'openai', labelKey: 'settings.api_key_provider_openai' },
+		{ value: 'gemini', labelKey: 'settings.api_key_provider_gemini' },
+		{ value: 'ollama', labelKey: 'settings.api_key_provider_ollama' },
+		{ value: 'groq', labelKey: 'settings.api_key_provider_groq' },
+		{ value: 'mistral', labelKey: 'settings.api_key_provider_mistral' },
+		{ value: 'github_models', labelKey: 'settings.api_key_provider_github_models' },
+		{ value: 'openrouter', labelKey: 'settings.api_key_provider_openrouter' }
+	];
+
+	function getApiKeyProviderLabel(provider: string): string {
+		const option = API_KEY_PROVIDER_OPTIONS.find((entry) => entry.value === provider);
+		if (option) {
+			return $t(option.labelKey);
+		}
+
+		if (provider === 'google_maps') {
+			return $t('settings.api_key_provider_google_places');
+		}
+
+		return provider;
+	}
 
 	// typed alias for social providers to satisfy TypeScript
 	let socialProviders: Provider[] = data.props.socialProviders ?? [];
@@ -1586,7 +1610,7 @@
 										{#each userApiKeys as apiKey}
 											<div class="flex items-center justify-between gap-4 p-4 bg-base-100 rounded-lg">
 												<div>
-													<div class="font-medium">{apiKey.provider}</div>
+													<div class="font-medium">{getApiKeyProviderLabel(apiKey.provider)}</div>
 													<div class="text-sm text-base-content/70 font-mono">
 														{apiKey.masked_api_key}
 													</div>
@@ -1619,9 +1643,11 @@
 											class="select select-bordered select-primary w-full"
 											bind:value={newApiKeyProvider}
 										>
-										<option value="google_maps">{$t('settings.api_key_provider_google_places')}</option>
-									</select>
-								</div>
+											{#each API_KEY_PROVIDER_OPTIONS as option}
+												<option value={option.value}>{$t(option.labelKey)}</option>
+											{/each}
+										</select>
+									</div>
 									<div class="form-control">
 										<label class="label" for="api-key-value">
 											<span class="label-text font-medium">{$t('settings.api_key_value')}</span>

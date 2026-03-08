@@ -1191,8 +1191,22 @@
 			return !getCoordinatesFromItineraryItem(item);
 		});
 
-		days[dayIndex].items = [...optimizedPath, ...nonCoordinateItems, ...shadowItems];
+		const newDayItems = [...optimizedPath, ...nonCoordinateItems, ...shadowItems];
+
+		// Patch collection.itinerary order values so the reactive $: days rebuild
+		// uses the new order when it eventually fires.
+		newDayItems.forEach((item, index) => {
+			const itineraryItem = collection.itinerary?.find((it) => it.id === item.id);
+			if (itineraryItem) {
+				itineraryItem.order = index;
+			}
+		});
+		// Also directly set days so saveReorderedItems() reads the correct order synchronously
+		// (Svelte 4 batches reactive statements; days isn't updated yet when saveReorderedItems runs)
+		days[dayIndex].items = newDayItems;
 		days = [...days];
+		// Trigger collection reactivity so the eventual reactive rebuild uses new orders
+		collection = { ...collection, itinerary: [...(collection.itinerary || [])] };
 
 		isSavingOrder = true;
 		savingDay = day.date;
