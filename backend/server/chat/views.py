@@ -9,7 +9,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .agent_tools import AGENT_TOOLS, execute_tool, serialize_tool_result
-from .llm_client import get_system_prompt, stream_chat_completion
+from .llm_client import (
+    get_provider_catalog,
+    get_system_prompt,
+    is_chat_provider_available,
+    stream_chat_completion,
+)
 from .models import ChatConversation, ChatMessage
 from .serializers import ChatConversationSerializer
 
@@ -106,6 +111,11 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
 
         provider = (request.data.get("provider") or "openai").strip().lower()
+        if not is_chat_provider_available(provider):
+            return Response(
+                {"error": f"Provider is not available for chat: {provider}."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         ChatMessage.objects.create(
             conversation=conversation,
@@ -262,3 +272,10 @@ class ChatViewSet(viewsets.ModelViewSet):
         response["Cache-Control"] = "no-cache"
         response["X-Accel-Buffering"] = "no"
         return response
+
+
+class ChatProviderCatalogViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        return Response(get_provider_catalog())
