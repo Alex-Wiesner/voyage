@@ -16,6 +16,8 @@
 		name?: string;
 	};
 
+	export let embedded = false;
+
 	let conversations: Conversation[] = [];
 	let activeConversation: Conversation | null = null;
 	let messages: ChatMessage[] = [];
@@ -208,147 +210,164 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{$t('chat.title')} | Voyage</title>
-</svelte:head>
-
-<div class="flex h-[calc(100vh-64px)]">
-	<div class="w-72 bg-base-200 flex flex-col border-r border-base-300 {sidebarOpen ? '' : 'hidden'} lg:flex">
-		<div class="p-3 flex items-center justify-between border-b border-base-300">
-			<h2 class="text-lg font-semibold">{$t('chat.conversations')}</h2>
-			<button class="btn btn-sm btn-ghost" on:click={createConversation} title={$t('chat.new_conversation')}>
-				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-					<path d={mdiPlus}></path>
-				</svg>
-			</button>
-		</div>
-		<div class="flex-1 overflow-y-auto">
-			{#each conversations as conv}
-				<div
-					class="w-full p-3 hover:bg-base-300 flex items-center gap-2 {activeConversation?.id === conv.id
-						? 'bg-base-300'
-						: ''}"
-				>
-					<button class="flex-1 text-left truncate text-sm" on:click={() => selectConversation(conv)}>
-						{conv.title || $t('chat.untitled')}
-					</button>
+<div class="card bg-base-200 shadow-xl">
+	<div class="card-body p-0">
+		<div class="flex" class:h-[calc(100vh-64px)]={!embedded} class:h-[70vh]={embedded}>
+			<div
+				class="w-72 bg-base-200 flex flex-col border-r border-base-300 {sidebarOpen
+					? ''
+					: 'hidden'} lg:flex"
+			>
+				<div class="p-3 flex items-center justify-between border-b border-base-300">
+					<h2 class="text-lg font-semibold">{$t('chat.conversations')}</h2>
 					<button
-						class="btn btn-xs btn-ghost"
-						on:click={() => deleteConversation(conv)}
-						title={$t('chat.delete_conversation')}
+						class="btn btn-sm btn-ghost"
+						on:click={createConversation}
+						title={$t('chat.new_conversation')}
 					>
-						<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-							<path d={mdiDelete}></path>
+						<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d={mdiPlus}></path>
 						</svg>
 					</button>
 				</div>
-			{/each}
-			{#if conversations.length === 0}
-				<p class="p-4 text-sm opacity-60">{$t('chat.no_conversations')}</p>
-			{/if}
-		</div>
-	</div>
-
-	<div class="flex-1 flex flex-col">
-		<div class="p-3 border-b border-base-300 flex items-center gap-3">
-			<button class="btn btn-sm btn-ghost lg:hidden" on:click={() => (sidebarOpen = !sidebarOpen)}>
-				{#if sidebarOpen}
-					<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-						<path d={mdiClose}></path>
-					</svg>
-				{:else}
-					<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-						<path d={mdiMenu}></path>
-					</svg>
-				{/if}
-			</button>
-			<svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-				<path d={mdiRobot}></path>
-			</svg>
-			<h1 class="text-lg font-semibold">{$t('chat.title')}</h1>
-			<div class="ml-auto">
-				<select
-					class="select select-bordered select-sm"
-					bind:value={selectedProvider}
-					disabled={chatProviders.length === 0}
-				>
-					{#each chatProviders as provider}
-						<option value={provider.id}>{provider.label}</option>
+				<div class="flex-1 overflow-y-auto">
+					{#each conversations as conv}
+						<div
+							class="w-full p-3 hover:bg-base-300 flex items-center gap-2 {activeConversation?.id ===
+							conv.id
+								? 'bg-base-300'
+								: ''}"
+						>
+							<button
+								class="flex-1 text-left truncate text-sm"
+								on:click={() => selectConversation(conv)}
+							>
+								{conv.title || $t('chat.untitled')}
+							</button>
+							<button
+								class="btn btn-xs btn-ghost"
+								on:click={() => deleteConversation(conv)}
+								title={$t('chat.delete_conversation')}
+							>
+								<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+									<path d={mdiDelete}></path>
+								</svg>
+							</button>
+						</div>
 					{/each}
-				</select>
+					{#if conversations.length === 0}
+						<p class="p-4 text-sm opacity-60">{$t('chat.no_conversations')}</p>
+					{/if}
+				</div>
 			</div>
-		</div>
 
-		<div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={messagesContainer}>
-			{#if messages.length === 0 && !activeConversation}
-				<div class="flex flex-col items-center justify-center h-full text-center">
+			<div class="flex-1 flex flex-col min-w-0">
+				<div class="p-3 border-b border-base-300 flex items-center gap-3">
+					<button
+						class="btn btn-sm btn-ghost lg:hidden"
+						on:click={() => (sidebarOpen = !sidebarOpen)}
+					>
+						{#if sidebarOpen}
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+								<path d={mdiClose}></path>
+							</svg>
+						{:else}
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+								<path d={mdiMenu}></path>
+							</svg>
+						{/if}
+					</button>
 					<svg
-						class="w-16 h-16 text-primary opacity-40 mb-4"
+						class="w-6 h-6 text-primary"
 						viewBox="0 0 24 24"
 						fill="currentColor"
 						aria-hidden="true"
 					>
 						<path d={mdiRobot}></path>
 					</svg>
-					<h2 class="text-2xl font-bold mb-2">{$t('chat.welcome_title')}</h2>
-					<p class="text-base-content/60 max-w-md">{$t('chat.welcome_message')}</p>
-				</div>
-			{:else}
-				{#each messages as msg}
-					<div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
-						{#if msg.role === 'tool'}
-							<div class="max-w-2xl w-full">
-								<div class="bg-base-200 rounded-lg p-3 text-xs">
-									<div class="font-semibold mb-1 text-primary">🔧 {msg.name}</div>
-									<pre class="whitespace-pre-wrap overflow-x-auto">{msg.content}</pre>
-								</div>
-							</div>
-						{:else}
-							<div class="chat {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
-								<div
-									class="chat-bubble {msg.role === 'user'
-										? 'chat-bubble-primary'
-										: 'chat-bubble-neutral'}"
-								>
-									<div class="whitespace-pre-wrap">{msg.content}</div>
-									{#if msg.role === 'assistant' &&
-									isStreaming &&
-									msg.id === messages[messages.length - 1]?.id &&
-									!msg.content}
-										<span class="loading loading-dots loading-sm"></span>
-									{/if}
-								</div>
-							</div>
-						{/if}
+					<h2 class="text-lg font-semibold">{$t('chat.title')}</h2>
+					<div class="ml-auto">
+						<select
+							class="select select-bordered select-sm"
+							bind:value={selectedProvider}
+							disabled={chatProviders.length === 0}
+						>
+							{#each chatProviders as provider}
+								<option value={provider.id}>{provider.label}</option>
+							{/each}
+						</select>
 					</div>
-				{/each}
-			{/if}
-		</div>
+				</div>
 
-		<div class="p-4 border-t border-base-300">
-			<div class="flex gap-2 max-w-4xl mx-auto">
-				<textarea
-					class="textarea textarea-bordered flex-1 resize-none"
-					placeholder={$t('chat.input_placeholder')}
-					bind:value={inputMessage}
-					on:keydown={handleKeydown}
-					rows="1"
-					disabled={isStreaming}
-				></textarea>
-				<button
-					class="btn btn-primary"
-					on:click={sendMessage}
-					disabled={isStreaming || !inputMessage.trim() || chatProviders.length === 0}
-					title={$t('chat.send')}
-				>
-					{#if isStreaming}
-						<span class="loading loading-spinner loading-sm"></span>
+				<div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={messagesContainer}>
+					{#if messages.length === 0 && !activeConversation}
+						<div class="flex flex-col items-center justify-center h-full text-center">
+							<svg
+								class="w-16 h-16 text-primary opacity-40 mb-4"
+								viewBox="0 0 24 24"
+								fill="currentColor"
+								aria-hidden="true"
+							>
+								<path d={mdiRobot}></path>
+							</svg>
+							<h3 class="text-2xl font-bold mb-2">{$t('chat.welcome_title')}</h3>
+							<p class="text-base-content/60 max-w-md">{$t('chat.welcome_message')}</p>
+						</div>
 					{:else}
-						<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-							<path d={mdiSend}></path>
-						</svg>
+						{#each messages as msg}
+							<div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+								{#if msg.role === 'tool'}
+									<div class="max-w-2xl w-full">
+										<div class="bg-base-200 rounded-lg p-3 text-xs">
+											<div class="font-semibold mb-1 text-primary">🔧 {msg.name}</div>
+											<pre class="whitespace-pre-wrap overflow-x-auto">{msg.content}</pre>
+										</div>
+									</div>
+								{:else}
+									<div class="chat {msg.role === 'user' ? 'chat-end' : 'chat-start'}">
+										<div
+											class="chat-bubble {msg.role === 'user'
+												? 'chat-bubble-primary'
+												: 'chat-bubble-neutral'}"
+										>
+											<div class="whitespace-pre-wrap">{msg.content}</div>
+											{#if msg.role === 'assistant' && isStreaming && msg.id === messages[messages.length - 1]?.id && !msg.content}
+												<span class="loading loading-dots loading-sm"></span>
+											{/if}
+										</div>
+									</div>
+								{/if}
+							</div>
+						{/each}
 					{/if}
-				</button>
+				</div>
+
+				<div class="p-4 border-t border-base-300">
+					<div class="flex gap-2 max-w-4xl mx-auto">
+						<textarea
+							class="textarea textarea-bordered flex-1 resize-none"
+							placeholder={$t('chat.input_placeholder')}
+							bind:value={inputMessage}
+							on:keydown={handleKeydown}
+							rows="1"
+							disabled={isStreaming}
+						></textarea>
+						<button
+							class="btn btn-primary"
+							on:click={sendMessage}
+							disabled={isStreaming || !inputMessage.trim() || chatProviders.length === 0}
+							title={$t('chat.send')}
+						>
+							{#if isStreaming}
+								<span class="loading loading-spinner loading-sm"></span>
+							{:else}
+								<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+									<path d={mdiSend}></path>
+								</svg>
+							{/if}
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

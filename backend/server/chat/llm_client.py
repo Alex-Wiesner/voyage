@@ -75,9 +75,10 @@ def _safe_get(obj, key, default=None):
 
 def _normalize_provider_id(provider_id):
     value = str(provider_id or "").strip()
-    if value.startswith("LlmProviders."):
-        value = value.split(".", 1)[1]
-    return value.lower()
+    lowered = value.lower()
+    if lowered.startswith("llmproviders."):
+        return lowered.split(".", 1)[1]
+    return lowered
 
 
 def _default_provider_label(provider_id):

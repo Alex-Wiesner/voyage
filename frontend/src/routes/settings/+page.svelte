@@ -497,7 +497,9 @@
 					updated[existingIndex] = payload;
 					userApiKeys = updated.sort((a, b) => a.provider.localeCompare(b.provider));
 				} else {
-					userApiKeys = [...userApiKeys, payload].sort((a, b) => a.provider.localeCompare(b.provider));
+					userApiKeys = [...userApiKeys, payload].sort((a, b) =>
+						a.provider.localeCompare(b.provider)
+					);
 				}
 				newApiKeyValue = '';
 				apiKeysConfigError = null;
@@ -1276,14 +1278,14 @@
 								<div class="mt-4 p-4 bg-info/10 rounded-lg">
 									<p class="text-sm">
 										📖 {$t('immich.need_help')}
-									<a
-										class="link link-primary"
-										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/immich_integration.md"
-										target="_blank"
-										rel="noopener noreferrer">{$t('navbar.documentation')}</a
-									>
-								</p>
-							</div>
+										<a
+											class="link link-primary"
+											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/immich_integration.md"
+											target="_blank"
+											rel="noopener noreferrer">{$t('navbar.documentation')}</a
+										>
+									</p>
+								</div>
 							</div>
 
 							<!-- Google maps integration - displayt only if its connected -->
@@ -1307,14 +1309,14 @@
 										{#if user.is_staff}
 											<p class="text-sm">
 												📖 {$t('immich.need_help')}
-										<a
-											class="link link-primary"
-											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/google_maps_integration.md"
-											target="_blank"
-											rel="noopener noreferrer">{$t('navbar.documentation')}</a
-										>
-									</p>
-								{:else if !googleMapsEnabled}
+												<a
+													class="link link-primary"
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/google_maps_integration.md"
+													target="_blank"
+													rel="noopener noreferrer">{$t('navbar.documentation')}</a
+												>
+											</p>
+										{:else if !googleMapsEnabled}
 											<p class="text-sm">
 												ℹ️ {$t('google_maps.google_maps_integration_desc_no_staff')}
 											</p>
@@ -1371,14 +1373,14 @@
 										{#if user.is_staff}
 											<p class="text-sm">
 												📖 {$t('immich.need_help')}
-										<a
-											class="link link-primary"
-											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/strava_integration.md"
-											target="_blank"
-											rel="noopener noreferrer">{$t('navbar.documentation')}</a
-										>
-									</p>
-								{:else if !stravaGlobalEnabled}
+												<a
+													class="link link-primary"
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/strava_integration.md"
+													target="_blank"
+													rel="noopener noreferrer">{$t('navbar.documentation')}</a
+												>
+											</p>
+										{:else if !stravaGlobalEnabled}
 											<p class="text-sm">
 												ℹ️ {$t('google_maps.google_maps_integration_desc_no_staff')}
 											</p>
@@ -1486,14 +1488,14 @@
 									<div class="mt-4 p-4 bg-info/10 rounded-lg">
 										<p class="text-sm">
 											📖 {$t('immich.need_help')}
-									<a
-										class="link link-primary"
-										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/wanderer_integration.md"
-										target="_blank"
-										rel="noopener noreferrer">{$t('navbar.documentation')}</a
-									>
-								</p>
-							</div>
+											<a
+												class="link link-primary"
+												href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/wanderer_integration.md"
+												target="_blank"
+												rel="noopener noreferrer">{$t('navbar.documentation')}</a
+											>
+										</p>
+									</div>
 								{/if}
 							</div>
 						</div>
@@ -1560,10 +1562,9 @@
 										>
 										<a
 											class="link link-primary"
-										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/guides/travel_agent.md"
+											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/guides/travel_agent.md"
 											target="_blank"
-											rel="noopener noreferrer"
-											>{$t('settings.travel_agent_help_setup_guide')}</a
+											rel="noopener noreferrer">{$t('settings.travel_agent_help_setup_guide')}</a
 										>
 									</p>
 								</div>
@@ -1572,8 +1573,8 @@
 							<div class="p-6 bg-base-200 rounded-xl mb-6">
 								<h3 class="text-lg font-semibold mb-2">MCP Access Token</h3>
 								<p class="text-sm text-base-content/70 mb-4">
-									Create or fetch your personal token for MCP clients. The same token is reused if one
-									already exists.
+									Create or fetch your personal token for MCP clients. The same token is reused if
+									one already exists.
 								</p>
 
 								<div class="flex flex-wrap gap-3 mb-4">
@@ -1587,11 +1588,7 @@
 										{/if}
 										{mcpToken ? 'Refresh token' : 'Get MCP token'}
 									</button>
-									<button
-										class="btn btn-outline"
-										on:click={copyMcpAuthHeader}
-										disabled={!mcpToken}
-									>
+									<button class="btn btn-outline" on:click={copyMcpAuthHeader} disabled={!mcpToken}>
 										{$t('settings.copy')}
 									</button>
 								</div>
@@ -1616,7 +1613,9 @@
 								{:else}
 									<div class="space-y-3">
 										{#each userApiKeys as apiKey}
-											<div class="flex items-center justify-between gap-4 p-4 bg-base-100 rounded-lg">
+											<div
+												class="flex items-center justify-between gap-4 p-4 bg-base-100 rounded-lg"
+											>
 												<div>
 													<div class="font-medium">{getApiKeyProviderLabel(apiKey.provider)}</div>
 													<div class="text-sm text-base-content/70 font-mono">
@@ -1643,20 +1642,20 @@
 								<h3 class="text-lg font-semibold mb-4">{$t('settings.add_api_key')}</h3>
 								<form class="space-y-4" on:submit={addUserApiKey}>
 									<div class="form-control">
-										<label class="label" for="api-key-provider">
-											<span class="label-text font-medium">{$t('settings.provider')}</span>
-										</label>
-									<select
-										id="api-key-provider"
-										class="select select-bordered select-primary w-full"
-										bind:value={newApiKeyProvider}
-										disabled={providerCatalog.length === 0}
-									>
-										{#each providerCatalog as provider}
-											<option value={provider.id}>{provider.label}</option>
-										{/each}
-									</select>
-								</div>
+									<label class="label" for="api-key-provider">
+										<span class="label-text font-medium">{$t('settings.provider')}</span>
+									</label>
+										<select
+											id="api-key-provider"
+											class="select select-bordered select-primary w-full"
+											bind:value={newApiKeyProvider}
+											disabled={providerCatalog.length === 0}
+										>
+											{#each providerCatalog as provider}
+												<option value={provider.id}>{provider.label}</option>
+											{/each}
+										</select>
+									</div>
 									<div class="form-control">
 										<label class="label" for="api-key-value">
 											<span class="label-text font-medium">{$t('settings.api_key_value')}</span>
@@ -1987,14 +1986,14 @@
 											</svg>
 											<div>
 												<span>{$t('settings.social_auth_desc_2')}</span>
-										<a
-											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/social_auth.md"
-											class="link link-neutral font-medium"
-											target="_blank"
-											rel="noopener noreferrer">{$t('settings.documentation_link')}</a
-										>
-									</div>
-								</div>
+												<a
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/social_auth.md"
+													class="link link-neutral font-medium"
+													target="_blank"
+													rel="noopener noreferrer">{$t('settings.documentation_link')}</a
+												>
+											</div>
+										</div>
 									</div>
 
 									<!-- Debug Information -->
@@ -2059,21 +2058,21 @@
 												Sean Morley. {$t('settings.all_rights_reserved')}
 											</p>
 											<div class="flex justify-center gap-3 mt-2">
-											<a
-												href="https://github.com/Alex-Wiesner/voyage"
-												target="_blank"
-												rel="noopener noreferrer"
-												class="link link-primary text-sm"
-											>
-												GitHub
+												<a
+													href="https://github.com/Alex-Wiesner/voyage"
+													target="_blank"
+													rel="noopener noreferrer"
+													class="link link-primary text-sm"
+												>
+													GitHub
 												</a>
-											<a
-												href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
-												target="_blank"
-												rel="noopener noreferrer"
-												class="link link-secondary text-sm"
-											>
-												{$t('settings.license')}
+												<a
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
+													target="_blank"
+													rel="noopener noreferrer"
+													class="link link-secondary text-sm"
+												>
+													{$t('settings.license')}
 												</a>
 											</div>
 										</div>

@@ -108,6 +108,15 @@ Voyage aims to be simple, beautiful, and open to everyone — inheriting Adventu
   - Collaborators can view and edit shared itineraries (collections), making planning a breeze.
 - **Customizable Themes** 🎨: Choose from 10 built-in themes including Light, Dark, Dim, Night, Forest, Aqua, Catppuccin Mocha, Aesthetic Light, Aesthetic Dark, and Northern Lights. Theme selection persists across sessions.
 
+### AI Chat (Collections Recommendations)
+
+Voyage includes an AI-powered travel chat assistant embedded in the Collections → Recommendations view. The chat uses LLM providers configured by the user (API keys set in Settings) and supports conversational trip planning within the context of a collection.
+
+- **Provider catalog**: The backend dynamically lists all supported LLM providers via `GET /api/chat/providers/`, sourced from LiteLLM's runtime provider list plus custom entries.
+- **Supported providers include**: OpenAI, Anthropic, Google Gemini, Ollama, Groq, Mistral, GitHub Models, OpenRouter, and OpenCode Zen.
+- **OpenCode Zen**: An OpenAI-compatible provider (`opencode_zen`) routed through `https://opencode.ai/zen/v1`.
+- **Configuration**: Users add API keys for their chosen provider in Settings → API Keys. No server-side environment variables required for chat providers — all keys are per-user.
+
 ### Travel Agent (MCP)
 
 Voyage provides an authenticated Travel Agent MCP endpoint for programmatic itinerary workflows (list collections, inspect itinerary details, create items, reorder timelines). See the guide: [`documentation/docs/guides/travel_agent.md`](documentation/docs/guides/travel_agent.md).

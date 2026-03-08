@@ -23,7 +23,8 @@ Voyage is a full-fledged travel companion. With Voyage, you can log your adventu
   - Locations and itineraries can be shared via a public link or directly with other Voyage users.
   - Collaborators can view and edit shared itineraries (collections), making planning a breeze.
 - **Customizable Themes** 🎨: Choose from 10 built-in themes including Light, Dark, Dim, Night, Forest, Aqua, Catppuccin Mocha, Aesthetic Light, Aesthetic Dark, and Northern Lights. Theme selection persists across sessions.
-- **Travel Agent (MCP) access** 🤖: Voyage exposes an authenticated MCP endpoint so external clients can list collections, inspect itineraries, create itinerary items, and reorder trip timelines. See the [Travel Agent (MCP) guide](../guides/travel_agent.md).
+- **AI Travel Chat** 🤖: An AI-powered chat assistant lives inside Collections → Recommendations, letting you brainstorm destinations and plan trips conversationally. The provider list is dynamic — backed by LiteLLM's full provider catalog — and includes OpenAI, Anthropic, Gemini, Ollama, Groq, Mistral, GitHub Models, OpenRouter, and OpenCode Zen. Configure your preferred provider's API key in Settings.
+- **Travel Agent (MCP) access** 🔧: Voyage exposes an authenticated MCP endpoint so external clients can list collections, inspect itineraries, create itinerary items, and reorder trip timelines. See the [Travel Agent (MCP) guide](../guides/travel_agent.md).
 
 ## Why Voyage?
 
