@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { addToast } from '$lib/toasts';
 	import { CURRENCY_LABELS, CURRENCY_OPTIONS } from '$lib/money';
-	import type { ImmichIntegration, User } from '$lib/types.js';
+	import type { ChatProviderCatalogEntry, ImmichIntegration, User } from '$lib/types.js';
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
@@ -46,6 +46,7 @@
 	let userApiKeys: UserAPIKey[] = data.props.apiKeys ?? [];
 	let apiKeysConfigError: string | null = data.props.apiKeysConfigError ?? null;
 	let newApiKeyProvider = 'anthropic';
+	let providerCatalog: ChatProviderCatalogEntry[] = [];
 	let newApiKeyValue = '';
 	let isSavingApiKey = false;
 	let deletingApiKeyId: string | null = null;
@@ -53,21 +54,26 @@
 	let isLoadingMcpToken = false;
 	let activeSection: string = 'profile';
 
-	const API_KEY_PROVIDER_OPTIONS = [
-		{ value: 'anthropic', labelKey: 'settings.api_key_provider_anthropic' },
-		{ value: 'openai', labelKey: 'settings.api_key_provider_openai' },
-		{ value: 'gemini', labelKey: 'settings.api_key_provider_gemini' },
-		{ value: 'ollama', labelKey: 'settings.api_key_provider_ollama' },
-		{ value: 'groq', labelKey: 'settings.api_key_provider_groq' },
-		{ value: 'mistral', labelKey: 'settings.api_key_provider_mistral' },
-		{ value: 'github_models', labelKey: 'settings.api_key_provider_github_models' },
-		{ value: 'openrouter', labelKey: 'settings.api_key_provider_openrouter' }
-	];
+	async function loadProviderCatalog() {
+		const res = await fetch('/api/chat/providers/');
+		if (!res.ok) {
+			return;
+		}
+
+		providerCatalog = await res.json();
+		if (!providerCatalog.length) {
+			return;
+		}
+
+		if (!providerCatalog.some((provider) => provider.id === newApiKeyProvider)) {
+			newApiKeyProvider = providerCatalog[0].id;
+		}
+	}
 
 	function getApiKeyProviderLabel(provider: string): string {
-		const option = API_KEY_PROVIDER_OPTIONS.find((entry) => entry.value === provider);
-		if (option) {
-			return $t(option.labelKey);
+		const catalogProvider = providerCatalog.find((entry) => entry.id === provider);
+		if (catalogProvider) {
+			return catalogProvider.label;
 		}
 
 		if (provider === 'google_maps') {
@@ -127,6 +133,8 @@
 	];
 
 	onMount(async () => {
+		void loadProviderCatalog();
+
 		if (browser) {
 			const queryParams = new URLSearchParams($page.url.search);
 			const pageParam = queryParams.get('page');
@@ -1638,16 +1646,17 @@
 										<label class="label" for="api-key-provider">
 											<span class="label-text font-medium">{$t('settings.provider')}</span>
 										</label>
-										<select
-											id="api-key-provider"
-											class="select select-bordered select-primary w-full"
-											bind:value={newApiKeyProvider}
-										>
-											{#each API_KEY_PROVIDER_OPTIONS as option}
-												<option value={option.value}>{$t(option.labelKey)}</option>
-											{/each}
-										</select>
-									</div>
+									<select
+										id="api-key-provider"
+										class="select select-bordered select-primary w-full"
+										bind:value={newApiKeyProvider}
+										disabled={providerCatalog.length === 0}
+									>
+										{#each providerCatalog as provider}
+											<option value={provider.id}>{provider.label}</option>
+										{/each}
+									</select>
+								</div>
 									<div class="form-control">
 										<label class="label" for="api-key-value">
 											<span class="label-text font-medium">{$t('settings.api_key_value')}</span>
@@ -1665,7 +1674,11 @@
 											{$t('settings.api_key_write_only_hint')}
 										</p>
 									</div>
-									<button class="btn btn-primary" type="submit" disabled={isSavingApiKey}>
+									<button
+										class="btn btn-primary"
+										type="submit"
+										disabled={isSavingApiKey || providerCatalog.length === 0}
+									>
 										{#if isSavingApiKey}
 											<span class="loading loading-spinner loading-sm"></span>
 										{/if}

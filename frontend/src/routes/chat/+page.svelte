@@ -2,11 +2,7 @@
 	import { onMount } from 'svelte';
 	import { t } from 'svelte-i18n';
 	import { mdiRobot, mdiSend, mdiPlus, mdiDelete, mdiMenu, mdiClose } from '@mdi/js';
-
-	type Provider = {
-		value: string;
-		label: string;
-	};
+	import type { ChatProviderCatalogEntry } from '$lib/types.js';
 
 	type Conversation = {
 		id: string;
@@ -29,18 +25,30 @@
 	let streamingContent = '';
 
 	let selectedProvider = 'openai';
-	const providers: Provider[] = [
-		{ value: 'openai', label: 'OpenAI' },
-		{ value: 'anthropic', label: 'Anthropic' },
-		{ value: 'gemini', label: 'Google Gemini' },
-		{ value: 'ollama', label: 'Ollama' },
-		{ value: 'groq', label: 'Groq' },
-		{ value: 'mistral', label: 'Mistral' },
-		{ value: 'github_models', label: 'GitHub Models' },
-		{ value: 'openrouter', label: 'OpenRouter' }
-	];
+	let providerCatalog: ChatProviderCatalogEntry[] = [];
+	$: chatProviders = providerCatalog.filter((provider) => provider.available_for_chat);
 
-	onMount(loadConversations);
+	onMount(async () => {
+		await Promise.all([loadConversations(), loadProviderCatalog()]);
+	});
+
+	async function loadProviderCatalog() {
+		const res = await fetch('/api/chat/providers/');
+		if (!res.ok) {
+			return;
+		}
+
+		const catalog = (await res.json()) as ChatProviderCatalogEntry[];
+		providerCatalog = catalog;
+		const availableProviders = catalog.filter((provider) => provider.available_for_chat);
+		if (!availableProviders.length) {
+			return;
+		}
+
+		if (!availableProviders.some((provider) => provider.id === selectedProvider)) {
+			selectedProvider = availableProviders[0].id;
+		}
+	}
 
 	async function loadConversations() {
 		const res = await fetch('/api/chat/conversations/');
@@ -86,6 +94,7 @@
 
 	async function sendMessage() {
 		if (!inputMessage.trim() || isStreaming) return;
+		if (!chatProviders.some((provider) => provider.id === selectedProvider)) return;
 
 		let conversation = activeConversation;
 		if (!conversation) {
@@ -258,9 +267,13 @@
 			</svg>
 			<h1 class="text-lg font-semibold">{$t('chat.title')}</h1>
 			<div class="ml-auto">
-				<select class="select select-bordered select-sm" bind:value={selectedProvider}>
-					{#each providers as provider}
-						<option value={provider.value}>{provider.label}</option>
+				<select
+					class="select select-bordered select-sm"
+					bind:value={selectedProvider}
+					disabled={chatProviders.length === 0}
+				>
+					{#each chatProviders as provider}
+						<option value={provider.id}>{provider.label}</option>
 					{/each}
 				</select>
 			</div>
@@ -325,7 +338,7 @@
 				<button
 					class="btn btn-primary"
 					on:click={sendMessage}
-					disabled={isStreaming || !inputMessage.trim()}
+					disabled={isStreaming || !inputMessage.trim() || chatProviders.length === 0}
 					title={$t('chat.send')}
 				>
 					{#if isStreaming}

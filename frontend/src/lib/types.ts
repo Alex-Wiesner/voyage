@@ -566,6 +566,15 @@ export type RecommendationResponse = {
 	};
 };
 
+export type ChatProviderCatalogEntry = {
+	id: string;
+	label: string;
+	available_for_chat: boolean;
+	needs_api_key: boolean | null;
+	default_model: string | null;
+	api_base: string | null;
+};
+
 export type CollectionItineraryDay = {
 	id: string;
 	collection: string; // UUID of the collection
