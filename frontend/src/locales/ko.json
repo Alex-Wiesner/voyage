@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accept": "수용하다",
 		"accept_failed": "초대를 수락하지 못했습니다",
+		"fetch_failed": "초대를 불러오지 못했습니다",
 		"accepted": "허가를 초대하십시오",
 		"by": "~에 의해",
 		"decline": "감소",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "세부정보 숨기기",
-		"show_more": "더 보기"
+		"show_more": "더 보기",
+		"refresh": "새로고침"
 	},
 	"currencies": {
 		"AED": "UAE 디르함",

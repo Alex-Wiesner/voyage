@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accepted": "Pozvánka prijatá",
 		"accept_failed": "Nepodarilo sa prijať pozvánku",
+		"fetch_failed": "Nepodarilo sa načítať pozvánky",
 		"declined": "Pozvánka zamietnutá",
 		"decline_failed": "Nepodarilo sa zamietnuť pozvánku",
 		"title": "Pozvánky",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Skryť podrobnosti",
-		"show_more": "Ukáž viac"
+		"show_more": "Ukáž viac",
+		"refresh": "Obnoviť"
 	},
 	"currencies": {
 		"AED": "Dirham SAE",

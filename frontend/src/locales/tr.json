@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accepted": "Davet kabul edildi",
 		"accept_failed": "Davet kabul edilemedi",
+		"fetch_failed": "Davetler alınamadı",
 		"declined": "Davet reddedildi",
 		"decline_failed": "Davet reddedilemedi",
 		"title": "Davetler",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Ayrıntıları gizle",
-		"show_more": "Daha fazlasını göster"
+		"show_more": "Daha fazlasını göster",
+		"refresh": "Yenile"
 	},
 	"currencies": {
 		"AED": "BAE Dirhemi",

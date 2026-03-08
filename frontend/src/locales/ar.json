@@ -626,6 +626,7 @@
 	"invites": {
 		"accept": "يقبل",
 		"accept_failed": "فشل في قبول الدعوة",
+		"fetch_failed": "فشل في جلب الدعوات",
 		"accepted": "دعوة مقبولة",
 		"by": "بواسطة",
 		"decline": "انخفاض",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "إخفاء التفاصيل",
-		"show_more": "عرض المزيد"
+		"show_more": "عرض المزيد",
+		"refresh": "تحديث"
 	},
 	"currencies": {
 		"AED": "درهم اماراتي",

@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accepted": "Meghívó elfogadva",
 		"accept_failed": "Nem sikerült elfogadni a meghívót",
+		"fetch_failed": "Nem sikerült lekérni a meghívókat",
 		"declined": "Meghívó elutasítva",
 		"decline_failed": "Nem sikerült elutasítani a meghívót",
 		"title": "Meghívók",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Részletek elrejtése",
-		"show_more": "Mutasson többet"
+		"show_more": "Mutasson többet",
+		"refresh": "Frissítés"
 	},
 	"currencies": {
 		"AED": "Egyesült Arab Emírségek dirham",

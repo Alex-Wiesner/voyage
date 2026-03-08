@@ -1040,6 +1040,7 @@
 	"invites": {
 		"accepted": "Invite accepted",
 		"accept_failed": "Failed to accept invite",
+		"fetch_failed": "Failed to fetch invites",
 		"declined": "Invite declined",
 		"decline_failed": "Failed to decline invite",
 		"title": "Invites",
@@ -1103,7 +1104,8 @@
 	},
 	"common": {
 		"show_less": "Hide details",
-		"show_more": "Show more"
+		"show_more": "Show more",
+		"refresh": "Refresh"
 	},
 	"collections": {
 		"not_found": "Collection Not Found",

@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accept": "Accepteren",
 		"accept_failed": "Kan uitnodigen niet accepteren",
+		"fetch_failed": "Uitnodigingen konden niet worden opgehaald",
 		"accepted": "Nodig geaccepteerd uit",
 		"by": "door",
 		"decline": "Afwijzen",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Details verbergen",
-		"show_more": "Laat meer zien"
+		"show_more": "Laat meer zien",
+		"refresh": "Vernieuwen"
 	},
 	"currencies": {
 		"AED": "VAE Dirham",

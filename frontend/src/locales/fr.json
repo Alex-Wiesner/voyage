@@ -1037,6 +1037,7 @@
 	"settings_download_backup": "Télécharger la sauvegarde",
 	"invites": {
 		"accept_failed": "Échec de l'acceptation de l'invitation",
+		"fetch_failed": "Impossible de récupérer les invitations",
 		"accepted": "Inviter accepté",
 		"by": "par",
 		"decline": "Déclin",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Masquer les détails",
-		"show_more": "Afficher plus"
+		"show_more": "Afficher plus",
+		"refresh": "Actualiser"
 	},
 	"currencies": {
 		"AED": "Dirham des Émirats Arabes Unis",

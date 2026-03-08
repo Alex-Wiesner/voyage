@@ -53,21 +53,21 @@
 	/>
 {/if}
 
-<figure>
+<figure class="m-0 h-full">
 	{#if sortedImages && sortedImages.length > 0}
-		<div class="carousel w-full relative">
+		<div class="carousel w-full h-full relative">
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<div class="carousel-item w-full block">
+			<div class="carousel-item w-full h-full block">
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<!-- svelte-ignore a11y-missing-attribute -->
 				<a
 					on:click|stopPropagation={() => openImageModal(currentSlide)}
-					class="cursor-pointer relative group"
+					class="cursor-pointer relative group block h-full w-full"
 				>
 					<img
 						src={sortedImages[currentSlide].image}
-						class="w-full h-48 object-cover transition-all group-hover:brightness-110"
+						class="w-full h-full object-cover transition-all group-hover:brightness-110"
 						alt={name || 'Image'}
 					/>
 
@@ -165,7 +165,7 @@
 		</div>
 	{:else}
 		<!-- Fallback with emoji icon as main image -->
-		<div class="w-full h-48 relative flex items-center justify-center">
+		<div class="w-full h-full relative flex items-center justify-center">
 			{#if icon}
 				<!-- Clean background with emoji as the focal point -->
 				<div

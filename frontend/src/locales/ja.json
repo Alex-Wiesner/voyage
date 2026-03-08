@@ -626,6 +626,7 @@
 	"invites": {
 		"accept": "受け入れる",
 		"accept_failed": "招待を受け入れなかった",
+		"fetch_failed": "招待を取得できませんでした",
 		"accepted": "招待された招待",
 		"by": "による",
 		"decline": "衰退",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "詳細を隠す",
-		"show_more": "もっと見る"
+		"show_more": "もっと見る",
+		"refresh": "更新"
 	},
 	"currencies": {
 		"AED": "アラブ首長国連邦ディルハム",

@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accept": "接受",
 		"accept_failed": "未能接受邀请",
+		"fetch_failed": "无法获取邀请",
 		"accepted": "邀请接受",
 		"by": "经过",
 		"decline": "衰退",
@@ -1066,7 +1067,8 @@
 	},
 	"common": {
 		"show_less": "隐藏详细信息",
-		"show_more": "显示更多"
+		"show_more": "显示更多",
+		"refresh": "刷新"
 	},
 	"itinerary": {
 		"item_remove_error": "从行程中删除项目时出错",

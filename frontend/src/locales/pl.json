@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accept": "Przyjąć",
 		"accept_failed": "Nie udało się zaakceptować zaproszenia",
+		"fetch_failed": "Nie udało się pobrać zaproszeń",
 		"accepted": "Zaproś zaakceptowane",
 		"by": "przez",
 		"decline": "Spadek",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Ukryj szczegóły",
-		"show_more": "Pokaż więcej"
+		"show_more": "Pokaż więcej",
+		"refresh": "Odśwież"
 	},
 	"currencies": {
 		"AED": "Dirham Zjednoczonych Emiratów Arabskich",

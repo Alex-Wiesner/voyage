@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accept": "Akzeptieren",
 		"accept_failed": "Fehler beim Akzeptieren der Einladung",
+		"fetch_failed": "Einladungen konnten nicht geladen werden",
 		"accepted": "Einladung akzeptiert",
 		"by": "von",
 		"decline": "Ablehnen",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Details ausblenden",
-		"show_more": "Mehr anzeigen"
+		"show_more": "Mehr anzeigen",
+		"refresh": "Aktualisieren"
 	},
 	"currencies": {
 		"AED": "VAE-Dirham",

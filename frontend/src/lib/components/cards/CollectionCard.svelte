@@ -192,6 +192,12 @@
 	}
 
 	let isWarningModalOpen: boolean = false;
+
+	$: isOwner = !!user && String(user.uuid) === String(collection.user);
+	$: isSharedMember =
+		!!user &&
+		Array.isArray(collection.shared_with) &&
+		collection.shared_with.some((sharedUserId) => String(sharedUserId) === String(user.uuid));
 </script>
 
 {#if isWarningModalOpen}
@@ -210,18 +216,20 @@
 {/if}
 
 <div
-	class="bg-base-100 rounded-2xl shadow hover:shadow-xl transition-all overflow-hidden w-full cursor-pointer group"
+	class="bg-base-100 rounded-2xl shadow hover:shadow-xl transition-all w-full cursor-pointer group"
 	role="link"
 	aria-label={collection.name}
 	tabindex="0"
 	on:click={goToCollection}
 	on:keydown={handleCardKeydown}
 >
-	<div class="relative h-56 overflow-hidden card-carousel-tall">
-		<CardCarousel images={location_images} name={collection.name} icon="📚" />
-		<div
-			class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none z-10"
-		></div>
+	<div class="relative h-56 card-carousel-tall rounded-t-2xl">
+		<div class="absolute inset-0 overflow-hidden rounded-t-2xl">
+			<CardCarousel images={location_images} name={collection.name} icon="📚" />
+			<div
+				class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none z-10"
+			></div>
+		</div>
 
 		<div class="absolute top-3 left-3 z-20 flex gap-1.5">
 			{#if collection.status === 'folder'}
@@ -267,7 +275,7 @@
 			{/if}
 		</div>
 
-		<div class="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+		<div class="absolute top-3 right-3 z-30 flex items-center gap-1.5">
 			<div
 				class="tooltip tooltip-left"
 				data-tip={collection.is_public ? $t('adventures.public') : $t('adventures.private')}
@@ -284,8 +292,8 @@
 				</div>
 			</div>
 
-			{#if user && user.uuid == collection.user && type != 'link' && type != 'viewonly'}
-				<div class="dropdown dropdown-end">
+			{#if isOwner && type != 'link' && type != 'viewonly'}
+				<div class="dropdown dropdown-end z-30">
 					<button
 						type="button"
 						class="btn btn-ghost bg-black/40 backdrop-blur-sm text-white rounded-full w-7 h-7 p-0 min-h-0 border-0 hover:bg-black/55"
@@ -294,7 +302,7 @@
 						<DotsHorizontal class="w-4 h-4" />
 					</button>
 					<ul
-						class="dropdown-content menu bg-base-100 rounded-box z-[1] w-64 p-2 shadow-xl border border-base-300 mt-1"
+						class="dropdown-content menu bg-base-100 rounded-box z-[60] w-64 p-2 shadow-xl border border-base-300 mt-1"
 					>
 						{#if type != 'viewonly'}
 							<li>
@@ -380,8 +388,8 @@
 						{/if}
 					</ul>
 				</div>
-			{:else if user && collection.shared_with && collection.shared_with.includes(user.uuid) && type != 'link'}
-				<div class="dropdown dropdown-end">
+			{:else if isSharedMember && type != 'link'}
+				<div class="dropdown dropdown-end z-30">
 					<button
 						type="button"
 						class="btn btn-ghost bg-black/40 backdrop-blur-sm text-white rounded-full w-7 h-7 p-0 min-h-0 border-0 hover:bg-black/55"
@@ -390,7 +398,7 @@
 						<DotsHorizontal class="w-4 h-4" />
 					</button>
 					<ul
-						class="dropdown-content menu bg-base-100 rounded-box z-[1] w-64 p-2 shadow-xl border border-base-300 mt-1"
+						class="dropdown-content menu bg-base-100 rounded-box z-[60] w-64 p-2 shadow-xl border border-base-300 mt-1"
 					>
 						<li>
 							<button

@@ -618,7 +618,8 @@
   },
   "common": {
     "show_less": "Ascunde detaliile",
-    "show_more": "Arată mai multe"
+    "show_more": "Arată mai multe",
+    "refresh": "Reîmprospătează"
   },
   "currencies": {
     "AED": "Dirhamul Emiratelor Arabe Unite",
@@ -702,6 +703,7 @@
   "invites": {
     "accept": "Accepta",
     "accept_failed": "Nu s-a acceptat invitația",
+    "fetch_failed": "Nu s-au putut încărca invitațiile",
     "accepted": "Invitația a fost acceptată",
     "by": "de",
     "decline": "Declin",

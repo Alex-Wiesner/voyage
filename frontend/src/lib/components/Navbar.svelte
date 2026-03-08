@@ -113,6 +113,7 @@
 	const navigationItems = [
 		{ path: '/locations', icon: MapMarker, label: 'locations.locations' },
 		{ path: '/collections', icon: FormatListBulletedSquare, label: 'navbar.collections' },
+		{ path: '/invites', icon: AccountMultiple, label: 'invites.title' },
 		{ path: '/worldtravel', icon: Earth, label: 'navbar.worldtravel' },
 		{ path: '/map', icon: MapIcon, label: 'navbar.map' },
 		{ path: '/calendar', icon: Calendar, label: 'navbar.calendar' },

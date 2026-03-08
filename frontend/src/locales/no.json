@@ -1038,6 +1038,7 @@
 	"invites": {
 		"accept": "Akseptere",
 		"accept_failed": "Kunne ikke godta invitasjon",
+		"fetch_failed": "Kunne ikke hente invitasjoner",
 		"accepted": "Inviter akseptert",
 		"by": "ved",
 		"decline": "Avslå",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Skjul detaljer",
-		"show_more": "Vis mer"
+		"show_more": "Vis mer",
+		"refresh": "Oppdater"
 	},
 	"currencies": {
 		"AED": "UAE Dirham",

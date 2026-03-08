@@ -626,6 +626,7 @@
 	"invites": {
 		"accept": "Aceitar",
 		"accept_failed": "Falha ao aceitar convite",
+		"fetch_failed": "Falha ao buscar convites",
 		"accepted": "Convite Aceito",
 		"by": "por",
 		"decline": "Recusar",
@@ -1081,7 +1082,8 @@
 	},
 	"common": {
 		"show_less": "Ocultar detalhes",
-		"show_more": "Mostrar mais"
+		"show_more": "Mostrar mais",
+		"refresh": "Atualizar"
 	},
 	"currencies": {
 		"AED": "Dirham dos Emirados Árabes Unidos",
