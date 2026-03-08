@@ -73,6 +73,7 @@ class ChatViewSet(viewsets.ModelViewSet):
     @staticmethod
     def _merge_tool_call_delta(accumulator, tool_calls_delta):
         for idx, tool_call in enumerate(tool_calls_delta or []):
+            idx = tool_call.get("index", idx)
             while len(accumulator) <= idx:
                 accumulator.append(
                     {
@@ -119,11 +120,14 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         llm_messages = self._build_llm_messages(conversation, request.user)
 
+        MAX_TOOL_ITERATIONS = 10
+
         async def event_stream():
             current_messages = list(llm_messages)
             encountered_error = False
+            tool_iterations = 0
 
-            while True:
+            while tool_iterations < MAX_TOOL_ITERATIONS:
                 content_chunks = []
                 tool_calls_accumulator = []
 

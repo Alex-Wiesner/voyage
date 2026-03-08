@@ -1,8 +1,11 @@
 import json
+import logging
 
 import litellm
 
 from integrations.models import UserAPIKey
+
+logger = logging.getLogger(__name__)
 
 PROVIDER_MODELS = {
     "openai": "gpt-4o",
@@ -138,5 +141,6 @@ async def stream_chat_completion(user, messages, provider, tools=None):
                 yield f"data: {json.dumps(chunk_data)}\n\n"
 
         yield "data: [DONE]\n\n"
-    except Exception as exc:
-        yield f"data: {json.dumps({'error': str(exc)})}\n\n"
+    except Exception:
+        logger.exception("LLM streaming error")
+        yield f"data: {json.dumps({'error': 'An error occurred while processing your request. Please try again.'})}\n\n"

@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date as date_cls
 
 import requests
@@ -6,6 +7,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from adventures.models import Collection, CollectionItineraryItem, Location
+
+logger = logging.getLogger(__name__)
 
 AGENT_TOOLS = [
     {
@@ -232,8 +235,9 @@ def search_places(user, **kwargs):
         return {"error": f"Places API request failed: {exc}"}
     except (TypeError, ValueError) as exc:
         return {"error": f"Invalid search parameters: {exc}"}
-    except Exception as exc:
-        return {"error": str(exc)}
+    except Exception:
+        logger.exception("search_places failed")
+        return {"error": "An unexpected error occurred during place search"}
 
 
 def list_trips(user, **kwargs):
@@ -256,8 +260,9 @@ def list_trips(user, **kwargs):
                 }
             )
         return {"trips": trips}
-    except Exception as exc:
-        return {"error": str(exc)}
+    except Exception:
+        logger.exception("list_trips failed")
+        return {"error": "An unexpected error occurred while listing trips"}
 
 
 def get_trip_details(user, **kwargs):
@@ -344,8 +349,9 @@ def get_trip_details(user, **kwargs):
         }
     except Collection.DoesNotExist:
         return {"error": "Trip not found"}
-    except Exception as exc:
-        return {"error": str(exc)}
+    except Exception:
+        logger.exception("get_trip_details failed")
+        return {"error": "An unexpected error occurred while fetching trip details"}
 
 
 def add_to_itinerary(user, **kwargs):
@@ -422,8 +428,9 @@ def add_to_itinerary(user, **kwargs):
         }
     except Collection.DoesNotExist:
         return {"error": "Trip not found"}
-    except Exception as exc:
-        return {"error": str(exc)}
+    except Exception:
+        logger.exception("add_to_itinerary failed")
+        return {"error": "An unexpected error occurred while adding to itinerary"}
 
 
 def _fetch_temperature_for_date(latitude, longitude, date_value):
@@ -497,8 +504,26 @@ def get_weather(user, **kwargs):
         }
     except (TypeError, ValueError):
         return {"error": "latitude and longitude must be numeric"}
-    except Exception as exc:
-        return {"error": str(exc)}
+    except Exception:
+        logger.exception("get_weather failed")
+        return {"error": "An unexpected error occurred while fetching weather data"}
+
+
+ALLOWED_KWARGS = {
+    "search_places": {"location", "category", "radius"},
+    "list_trips": set(),
+    "get_trip_details": {"collection_id"},
+    "add_to_itinerary": {
+        "collection_id",
+        "name",
+        "description",
+        "latitude",
+        "longitude",
+        "date",
+        "location_address",
+    },
+    "get_weather": {"latitude", "longitude", "dates"},
+}
 
 
 def execute_tool(tool_name, user, **kwargs):
@@ -514,10 +539,14 @@ def execute_tool(tool_name, user, **kwargs):
     if not tool_fn:
         return {"error": f"Unknown tool: {tool_name}"}
 
+    allowed = ALLOWED_KWARGS.get(tool_name, set())
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed}
+
     try:
-        return tool_fn(user, **kwargs)
-    except Exception as exc:
-        return {"error": str(exc)}
+        return tool_fn(user, **filtered_kwargs)
+    except Exception:
+        logger.exception("Tool execution failed: %s", tool_name)
+        return {"error": "An unexpected error occurred while executing the tool"}
 
 
 def serialize_tool_result(result):
