@@ -2,6 +2,8 @@
 
 Voyage includes a **Travel Agent** interface exposed through an **MCP-compatible HTTP endpoint**. This lets external MCP clients read and manage trip itineraries programmatically for authenticated users.
 
+> **Note**: This is the *external* programmatic interface. For the *in-app* AI chat assistant (conversational trip planning), see the AI Travel Chat section in [How to use Voyage](../usage/usage.md#ai-travel-chat).
+
 ## Endpoint
 
 - Default path: `api/mcp`

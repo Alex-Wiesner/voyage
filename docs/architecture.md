@@ -26,7 +26,7 @@ Session-based via `django-allauth`. CSRF tokens from `/auth/csrf/`, passed as `X
 - `worldtravel` — countries, regions, cities, visited tracking
 - `integrations` — external service integrations
 - `achievements` — gamification
-- `chat` — LLM chat/agent
+- `chat` — LLM chat/agent (AI travel chat in Collections → Recommendations; dynamic provider catalog via LiteLLM; `GET /api/chat/providers/`)
 
 ## Frontend Structure
 - `src/routes/` — SvelteKit file-based routing

@@ -3,7 +3,6 @@
 	import { goto } from '$app/navigation';
 	export let data: any;
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import { mdiRobotOutline } from '@mdi/js';
 
 	import DotsHorizontal from '~icons/mdi/dots-horizontal';
 	import Calendar from '~icons/mdi/calendar';
@@ -122,7 +121,6 @@
 	const navigationItems: NavigationItem[] = [
 		{ path: '/locations', icon: MapMarker, label: 'locations.locations' },
 		{ path: '/collections', icon: FormatListBulletedSquare, label: 'navbar.collections' },
-		{ path: '/chat', iconPath: mdiRobotOutline, label: 'navbar.chat' },
 		{ path: '/invites', icon: AccountMultiple, label: 'invites.title' },
 		{ path: '/worldtravel', icon: Earth, label: 'navbar.worldtravel' },
 		{ path: '/map', icon: MapIcon, label: 'navbar.map' },

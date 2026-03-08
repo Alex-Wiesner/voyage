@@ -19,6 +19,7 @@
 	import CollectionAllItems from '$lib/components/collections/CollectionAllItems.svelte';
 	import CollectionItineraryPlanner from '$lib/components/collections/CollectionItineraryPlanner.svelte';
 	import CollectionRecommendationView from '$lib/components/CollectionRecommendationView.svelte';
+	import AITravelChat from '$lib/components/AITravelChat.svelte';
 	import CollectionMap from '$lib/components/collections/CollectionMap.svelte';
 	import CollectionStats from '$lib/components/collections/CollectionStats.svelte';
 	import LocationLink from '$lib/components/LocationLink.svelte';
@@ -1259,7 +1260,10 @@
 
 				<!-- Recommendations View -->
 				{#if currentView === 'recommendations'}
-					<CollectionRecommendationView bind:collection user={data.user} />
+					<div class="space-y-8">
+						<AITravelChat embedded={true} />
+						<CollectionRecommendationView bind:collection user={data.user} />
+					</div>
 				{/if}
 			</div>
 

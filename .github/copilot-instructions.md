@@ -10,6 +10,8 @@ Voyage is a self-hosted travel companion web application built with SvelteKit fr
 
 **Key architectural pattern — API Proxy**: The frontend never calls the Django backend directly. All API calls go to `src/routes/api/[...path]/+server.ts`, which proxies requests to the Django server (`http://server:8000`), injecting CSRF tokens and managing session cookies. This means frontend fetches use relative URLs like `/api/locations/`.
 
+**AI Chat**: The AI travel chat assistant is embedded in Collections → Recommendations (component: `AITravelChat.svelte`). There is no standalone `/chat` route. Chat providers are loaded dynamically from `GET /api/chat/providers/` (backed by LiteLLM runtime list + custom entries like `opencode_zen`). Chat conversations stream via SSE through `/api/chat/conversations/`. Provider config lives in `backend/server/chat/llm_client.py` (`CHAT_PROVIDER_CONFIG`).
+
 **Services** (docker-compose):
 - `web` → SvelteKit frontend at `:8015`
 - `server` → Django (via Gunicorn + Nginx) at `:8016`
@@ -20,7 +22,7 @@ Voyage is a self-hosted travel companion web application built with SvelteKit fr
 
 ## Codebase Conventions
 
-**Backend layout**: The Django project lives in `backend/server/`. Apps are `adventures` (core: locations, collections, itineraries, notes, transportation), `users`, `worldtravel` (countries/regions), and `integrations`. Views inside `adventures` are split into per-domain files under `adventures/views/` (e.g. `location_view.py`, `collection_view.py`).
+**Backend layout**: The Django project lives in `backend/server/`. Apps are `adventures` (core: locations, collections, itineraries, notes, transportation), `users`, `worldtravel` (countries/regions), `integrations`, `achievements`, and `chat` (LLM chat agent with dynamic provider catalog). Views inside `adventures` are split into per-domain files under `adventures/views/` (e.g. `location_view.py`, `collection_view.py`).
 
 **Backend patterns**:
 - DRF `ModelViewSet` subclasses for all CRUD resources; custom actions with `@action`
@@ -33,7 +35,7 @@ Voyage is a self-hosted travel companion web application built with SvelteKit fr
 - `src/lib/types.ts` — all TypeScript interfaces (`Location`, `Collection`, `User`, `Visit`, etc.)
 - `src/lib/index.ts` — general utility functions
 - `src/lib/index.server.ts` — server-only utilities (used in `+page.server.ts` and `+server.ts` files)
-- `src/lib/components/` — Svelte components organized by domain (`locations/`, `collections/`, `map/`, `cards/`, `shared/`)
+- `src/lib/components/` — Svelte components organized by domain (`locations/`, `collections/`, `map/`, `cards/`, `shared/`); includes `AITravelChat.svelte` for Collections chat
 - `src/locales/` — i18n JSON files (uses `svelte-i18n`); wrap all user-visible strings in `$t('key')`
 
 **Frontend patterns**:
@@ -57,19 +59,20 @@ Run these commands in order:
 - Wait 30+ seconds for services to fully initialize before testing functionality
 
 ### Development Workflow Commands
-**Frontend (SvelteKit with Node.js):**
-- `cd frontend && npm install` - **45+ seconds, NEVER CANCEL. Set timeout to 60+ minutes**
-- `cd frontend && npm run build` - **32 seconds, set timeout to 60 seconds**
-- `cd frontend && npm run dev` - Start development server (requires backend running)
-- `cd frontend && npm run format` - **6 seconds** - Fix code formatting (ALWAYS run before committing)
-- `cd frontend && npm run lint` - **6 seconds** - Check code formatting
-- `cd frontend && npm run check` - **12 seconds** - Run Svelte type checking (3 errors, 19 warnings expected)
+**Frontend (SvelteKit — prefer Bun):**
+- `cd frontend && bun install` - **45+ seconds, NEVER CANCEL. Set timeout to 60+ minutes**
+- `cd frontend && bun run build` - **32 seconds, set timeout to 60 seconds**
+- `cd frontend && bun run dev` - Start development server (requires backend running)
+- `cd frontend && bun run format` - **6 seconds** - Fix code formatting (ALWAYS run before committing)
+- `cd frontend && bun run lint` - **6 seconds** - Check code formatting
+- `cd frontend && bun run check` - **12 seconds** - Run Svelte type checking (3 errors, 19 warnings expected)
 
-**Backend (Django with Python):**
+**Backend (Django with Python — prefer uv for local tooling):**
 - Backend development requires Docker - local Python pip install fails due to network timeouts
 - `docker compose exec server python3 manage.py test` - **7 seconds** - Run tests (2/3 tests fail, this is expected)
 - `docker compose exec server python3 manage.py help` - View Django commands
 - `docker compose exec server python3 manage.py migrate` - Run database migrations
+- Use `uv` for local Python dependency/tooling commands when applicable
 
 **Full Application:**
 - Frontend runs on: http://localhost:8015
@@ -87,10 +90,10 @@ Run these commands in order:
 
 ### Pre-Commit Validation (ALWAYS run before committing)
 **ALWAYS run these commands to ensure CI will pass:**
-- `cd frontend && npm run format` - **6 seconds** - Fix formatting issues
-- `cd frontend && npm run lint` - **6 seconds** - Verify formatting is correct (should pass after format)
-- `cd frontend && npm run check` - **12 seconds** - Type checking (some warnings expected)
-- `cd frontend && npm run build` - **32 seconds** - Verify build succeeds
+- `cd frontend && bun run format` - **6 seconds** - Fix formatting issues
+- `cd frontend && bun run lint` - **6 seconds** - Verify formatting is correct (should pass after format)
+- `cd frontend && bun run check` - **12 seconds** - Type checking (some warnings expected)
+- `cd frontend && bun run build` - **32 seconds** - Verify build succeeds
 
 ## Critical Development Notes
 
@@ -112,7 +115,7 @@ Run these commands in order:
 ### Build Timing (NEVER CANCEL)
 - **Docker first startup**: 25+ minutes (image downloads)
 - **Docker subsequent startups**: <1 second (images cached)
-- **Frontend npm install**: 45 seconds
+- **Frontend bun install**: 45 seconds
 - **Frontend build**: 32 seconds
 - **Tests and checks**: 6-12 seconds each
 
@@ -149,7 +152,7 @@ Voyage/
 - **"500: Internal Error"**: Frontend-backend communication issue (expected in dev setup)
 - **"Cannot connect to backend"**: Backend not started or wrong URL configuration
 - **"pip install timeout"**: Network issue, use Docker instead of local Python
-- **"Frontend build fails"**: Run `npm install` first, check Node.js version compatibility
+- **"Frontend build fails"**: Run `bun install` first, check Node.js version compatibility
 
 ## Troubleshooting Commands
 ```bash

@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { addToast } from '$lib/toasts';
 	import { CURRENCY_LABELS, CURRENCY_OPTIONS } from '$lib/money';
-	import type { ImmichIntegration, User } from '$lib/types.js';
+	import type { ChatProviderCatalogEntry, ImmichIntegration, User } from '$lib/types.js';
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
@@ -46,6 +46,7 @@
 	let userApiKeys: UserAPIKey[] = data.props.apiKeys ?? [];
 	let apiKeysConfigError: string | null = data.props.apiKeysConfigError ?? null;
 	let newApiKeyProvider = 'anthropic';
+	let providerCatalog: ChatProviderCatalogEntry[] = [];
 	let newApiKeyValue = '';
 	let isSavingApiKey = false;
 	let deletingApiKeyId: string | null = null;
@@ -53,21 +54,26 @@
 	let isLoadingMcpToken = false;
 	let activeSection: string = 'profile';
 
-	const API_KEY_PROVIDER_OPTIONS = [
-		{ value: 'anthropic', labelKey: 'settings.api_key_provider_anthropic' },
-		{ value: 'openai', labelKey: 'settings.api_key_provider_openai' },
-		{ value: 'gemini', labelKey: 'settings.api_key_provider_gemini' },
-		{ value: 'ollama', labelKey: 'settings.api_key_provider_ollama' },
-		{ value: 'groq', labelKey: 'settings.api_key_provider_groq' },
-		{ value: 'mistral', labelKey: 'settings.api_key_provider_mistral' },
-		{ value: 'github_models', labelKey: 'settings.api_key_provider_github_models' },
-		{ value: 'openrouter', labelKey: 'settings.api_key_provider_openrouter' }
-	];
+	async function loadProviderCatalog() {
+		const res = await fetch('/api/chat/providers/');
+		if (!res.ok) {
+			return;
+		}
+
+		providerCatalog = await res.json();
+		if (!providerCatalog.length) {
+			return;
+		}
+
+		if (!providerCatalog.some((provider) => provider.id === newApiKeyProvider)) {
+			newApiKeyProvider = providerCatalog[0].id;
+		}
+	}
 
 	function getApiKeyProviderLabel(provider: string): string {
-		const option = API_KEY_PROVIDER_OPTIONS.find((entry) => entry.value === provider);
-		if (option) {
-			return $t(option.labelKey);
+		const catalogProvider = providerCatalog.find((entry) => entry.id === provider);
+		if (catalogProvider) {
+			return catalogProvider.label;
 		}
 
 		if (provider === 'google_maps') {
@@ -127,6 +133,8 @@
 	];
 
 	onMount(async () => {
+		void loadProviderCatalog();
+
 		if (browser) {
 			const queryParams = new URLSearchParams($page.url.search);
 			const pageParam = queryParams.get('page');
@@ -489,7 +497,9 @@
 					updated[existingIndex] = payload;
 					userApiKeys = updated.sort((a, b) => a.provider.localeCompare(b.provider));
 				} else {
-					userApiKeys = [...userApiKeys, payload].sort((a, b) => a.provider.localeCompare(b.provider));
+					userApiKeys = [...userApiKeys, payload].sort((a, b) =>
+						a.provider.localeCompare(b.provider)
+					);
 				}
 				newApiKeyValue = '';
 				apiKeysConfigError = null;
@@ -1268,14 +1278,14 @@
 								<div class="mt-4 p-4 bg-info/10 rounded-lg">
 									<p class="text-sm">
 										📖 {$t('immich.need_help')}
-									<a
-										class="link link-primary"
-										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/immich_integration.md"
-										target="_blank"
-										rel="noopener noreferrer">{$t('navbar.documentation')}</a
-									>
-								</p>
-							</div>
+										<a
+											class="link link-primary"
+											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/immich_integration.md"
+											target="_blank"
+											rel="noopener noreferrer">{$t('navbar.documentation')}</a
+										>
+									</p>
+								</div>
 							</div>
 
 							<!-- Google maps integration - displayt only if its connected -->
@@ -1299,14 +1309,14 @@
 										{#if user.is_staff}
 											<p class="text-sm">
 												📖 {$t('immich.need_help')}
-										<a
-											class="link link-primary"
-											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/google_maps_integration.md"
-											target="_blank"
-											rel="noopener noreferrer">{$t('navbar.documentation')}</a
-										>
-									</p>
-								{:else if !googleMapsEnabled}
+												<a
+													class="link link-primary"
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/google_maps_integration.md"
+													target="_blank"
+													rel="noopener noreferrer">{$t('navbar.documentation')}</a
+												>
+											</p>
+										{:else if !googleMapsEnabled}
 											<p class="text-sm">
 												ℹ️ {$t('google_maps.google_maps_integration_desc_no_staff')}
 											</p>
@@ -1363,14 +1373,14 @@
 										{#if user.is_staff}
 											<p class="text-sm">
 												📖 {$t('immich.need_help')}
-										<a
-											class="link link-primary"
-											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/strava_integration.md"
-											target="_blank"
-											rel="noopener noreferrer">{$t('navbar.documentation')}</a
-										>
-									</p>
-								{:else if !stravaGlobalEnabled}
+												<a
+													class="link link-primary"
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/strava_integration.md"
+													target="_blank"
+													rel="noopener noreferrer">{$t('navbar.documentation')}</a
+												>
+											</p>
+										{:else if !stravaGlobalEnabled}
 											<p class="text-sm">
 												ℹ️ {$t('google_maps.google_maps_integration_desc_no_staff')}
 											</p>
@@ -1478,14 +1488,14 @@
 									<div class="mt-4 p-4 bg-info/10 rounded-lg">
 										<p class="text-sm">
 											📖 {$t('immich.need_help')}
-									<a
-										class="link link-primary"
-										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/wanderer_integration.md"
-										target="_blank"
-										rel="noopener noreferrer">{$t('navbar.documentation')}</a
-									>
-								</p>
-							</div>
+											<a
+												class="link link-primary"
+												href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/wanderer_integration.md"
+												target="_blank"
+												rel="noopener noreferrer">{$t('navbar.documentation')}</a
+											>
+										</p>
+									</div>
 								{/if}
 							</div>
 						</div>
@@ -1552,10 +1562,9 @@
 										>
 										<a
 											class="link link-primary"
-										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/guides/travel_agent.md"
+											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/guides/travel_agent.md"
 											target="_blank"
-											rel="noopener noreferrer"
-											>{$t('settings.travel_agent_help_setup_guide')}</a
+											rel="noopener noreferrer">{$t('settings.travel_agent_help_setup_guide')}</a
 										>
 									</p>
 								</div>
@@ -1564,8 +1573,8 @@
 							<div class="p-6 bg-base-200 rounded-xl mb-6">
 								<h3 class="text-lg font-semibold mb-2">MCP Access Token</h3>
 								<p class="text-sm text-base-content/70 mb-4">
-									Create or fetch your personal token for MCP clients. The same token is reused if one
-									already exists.
+									Create or fetch your personal token for MCP clients. The same token is reused if
+									one already exists.
 								</p>
 
 								<div class="flex flex-wrap gap-3 mb-4">
@@ -1579,11 +1588,7 @@
 										{/if}
 										{mcpToken ? 'Refresh token' : 'Get MCP token'}
 									</button>
-									<button
-										class="btn btn-outline"
-										on:click={copyMcpAuthHeader}
-										disabled={!mcpToken}
-									>
+									<button class="btn btn-outline" on:click={copyMcpAuthHeader} disabled={!mcpToken}>
 										{$t('settings.copy')}
 									</button>
 								</div>
@@ -1608,7 +1613,9 @@
 								{:else}
 									<div class="space-y-3">
 										{#each userApiKeys as apiKey}
-											<div class="flex items-center justify-between gap-4 p-4 bg-base-100 rounded-lg">
+											<div
+												class="flex items-center justify-between gap-4 p-4 bg-base-100 rounded-lg"
+											>
 												<div>
 													<div class="font-medium">{getApiKeyProviderLabel(apiKey.provider)}</div>
 													<div class="text-sm text-base-content/70 font-mono">
@@ -1643,8 +1650,8 @@
 											class="select select-bordered select-primary w-full"
 											bind:value={newApiKeyProvider}
 										>
-											{#each API_KEY_PROVIDER_OPTIONS as option}
-												<option value={option.value}>{$t(option.labelKey)}</option>
+											{#each providerCatalog as provider}
+												<option value={provider.id}>{provider.label}</option>
 											{/each}
 										</select>
 									</div>
@@ -1974,14 +1981,14 @@
 											</svg>
 											<div>
 												<span>{$t('settings.social_auth_desc_2')}</span>
-										<a
-											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/social_auth.md"
-											class="link link-neutral font-medium"
-											target="_blank"
-											rel="noopener noreferrer">{$t('settings.documentation_link')}</a
-										>
-									</div>
-								</div>
+												<a
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/social_auth.md"
+													class="link link-neutral font-medium"
+													target="_blank"
+													rel="noopener noreferrer">{$t('settings.documentation_link')}</a
+												>
+											</div>
+										</div>
 									</div>
 
 									<!-- Debug Information -->
@@ -2046,21 +2053,21 @@
 												Sean Morley. {$t('settings.all_rights_reserved')}
 											</p>
 											<div class="flex justify-center gap-3 mt-2">
-											<a
-												href="https://github.com/Alex-Wiesner/voyage"
-												target="_blank"
-												rel="noopener noreferrer"
-												class="link link-primary text-sm"
-											>
-												GitHub
+												<a
+													href="https://github.com/Alex-Wiesner/voyage"
+													target="_blank"
+													rel="noopener noreferrer"
+													class="link link-primary text-sm"
+												>
+													GitHub
 												</a>
-											<a
-												href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
-												target="_blank"
-												rel="noopener noreferrer"
-												class="link link-secondary text-sm"
-											>
-												{$t('settings.license')}
+												<a
+													href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
+													target="_blank"
+													rel="noopener noreferrer"
+													class="link link-secondary text-sm"
+												>
+													{$t('settings.license')}
 												</a>
 											</div>
 										</div>
