@@ -1,13 +1,56 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Country } from '$lib/types';
-	import { createEventDispatcher } from 'svelte';
 	import { t } from 'svelte-i18n';
 
 	import MapMarkerStar from '~icons/mdi/map-marker-star';
 	import Launch from '~icons/mdi/launch';
 
 	export let country: Country;
+
+	type FlagDisplayState = 'primary' | 'cdn' | 'placeholder';
+
+	let flagState: FlagDisplayState = 'placeholder';
+	let lastFlagKey = '';
+
+	$: normalizedCountryCode = country.country_code.trim().toLowerCase();
+	$: primaryFlagUrl = country.flag_url.trim() || null;
+	$: cdnFlagUrl =
+		normalizedCountryCode.length === 2
+			? `https://flagcdn.com/w320/${normalizedCountryCode}.png`
+			: null;
+	$: currentFlagSrc =
+		flagState === 'primary' ? primaryFlagUrl : flagState === 'cdn' ? cdnFlagUrl : null;
+	$: showFlagImage = Boolean(currentFlagSrc);
+
+	function getInitialFlagState(): FlagDisplayState {
+		if (primaryFlagUrl) {
+			return 'primary';
+		}
+
+		if (cdnFlagUrl) {
+			return 'cdn';
+		}
+
+		return 'placeholder';
+	}
+
+	$: {
+		const flagKey = `${primaryFlagUrl ?? ''}|${cdnFlagUrl ?? ''}`;
+		if (flagKey !== lastFlagKey) {
+			lastFlagKey = flagKey;
+			flagState = getInitialFlagState();
+		}
+	}
+
+	function handleFlagError() {
+		if (flagState === 'primary' && cdnFlagUrl && cdnFlagUrl !== primaryFlagUrl) {
+			flagState = 'cdn';
+			return;
+		}
+
+		flagState = 'placeholder';
+	}
 
 	async function nav() {
 		goto(`/worldtravel/${country.country_code}`);
@@ -18,8 +61,23 @@
 	class="card w-full max-w-md bg-base-300 text-base-content shadow-2xl hover:shadow-3xl transition-all duration-300 border border-base-300 hover:border-primary/20 group overflow-hidden"
 >
 	<!-- Flag Image -->
-	<figure>
-		<img src={country.flag_url} alt={`Flag of ${country.name}`} class="w-full h-48 object-cover" />
+	<figure class="w-full h-48 bg-base-200 overflow-hidden">
+		{#if showFlagImage}
+			<img
+				src={currentFlagSrc}
+				alt={`Flag of ${country.name}`}
+				class="w-full h-full object-cover"
+				on:error={handleFlagError}
+			/>
+		{:else}
+			<div
+				class="w-full h-full flex flex-col items-center justify-center gap-1 text-base-content/70"
+				aria-label={`Flag unavailable for ${country.name}`}
+			>
+				<span class="text-3xl" aria-hidden="true">🏳️</span>
+				<span class="text-sm font-medium">{$t('country.flag_unavailable')}</span>
+			</div>
+		{/if}
 	</figure>
 
 	<!-- Content -->
@@ -64,11 +122,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.truncate {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-</style>

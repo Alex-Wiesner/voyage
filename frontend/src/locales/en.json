@@ -561,6 +561,9 @@
 		"about_region": "About Region",
 		"all_locations_visited": "All locations visited!"
 	},
+	"country": {
+		"flag_unavailable": "Flag unavailable"
+	},
 	"auth": {
 		"username": "Username",
 		"password": "Password",
@@ -742,6 +745,7 @@
 		"no_api_keys_saved": "No API keys saved yet.",
 		"add_api_key": "Add API Key",
 		"provider": "Provider",
+		"api_key_provider_google_places": "Google Places API",
 		"api_key_value": "API Key",
 		"api_key_value_placeholder": "Enter your API key",
 		"api_key_write_only_hint": "For security, your plaintext key is write-only and is never shown after saving.",

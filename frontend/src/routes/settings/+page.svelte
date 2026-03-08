@@ -1244,13 +1244,14 @@
 								<div class="mt-4 p-4 bg-info/10 rounded-lg">
 									<p class="text-sm">
 										📖 {$t('immich.need_help')}
-										<a
-											class="link link-primary"
-											href="https://voyage.app/docs/configuration/immich_integration.html"
-											target="_blank">{$t('navbar.documentation')}</a
-										>
-									</p>
-								</div>
+									<a
+										class="link link-primary"
+										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/immich_integration.md"
+										target="_blank"
+										rel="noopener noreferrer">{$t('navbar.documentation')}</a
+									>
+								</p>
+							</div>
 							</div>
 
 							<!-- Google maps integration - displayt only if its connected -->
@@ -1274,13 +1275,14 @@
 										{#if user.is_staff}
 											<p class="text-sm">
 												📖 {$t('immich.need_help')}
-												<a
-													class="link link-primary"
-													href="https://voyage.app/docs/configuration/google_maps_integration.html"
-													target="_blank">{$t('navbar.documentation')}</a
-												>
-											</p>
-										{:else if !googleMapsEnabled}
+										<a
+											class="link link-primary"
+											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/google_maps_integration.md"
+											target="_blank"
+											rel="noopener noreferrer">{$t('navbar.documentation')}</a
+										>
+									</p>
+								{:else if !googleMapsEnabled}
 											<p class="text-sm">
 												ℹ️ {$t('google_maps.google_maps_integration_desc_no_staff')}
 											</p>
@@ -1337,13 +1339,14 @@
 										{#if user.is_staff}
 											<p class="text-sm">
 												📖 {$t('immich.need_help')}
-												<a
-													class="link link-primary"
-													href="https://voyage.app/docs/configuration/strava_integration.html"
-													target="_blank">{$t('navbar.documentation')}</a
-												>
-											</p>
-										{:else if !stravaGlobalEnabled}
+										<a
+											class="link link-primary"
+											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/strava_integration.md"
+											target="_blank"
+											rel="noopener noreferrer">{$t('navbar.documentation')}</a
+										>
+									</p>
+								{:else if !stravaGlobalEnabled}
 											<p class="text-sm">
 												ℹ️ {$t('google_maps.google_maps_integration_desc_no_staff')}
 											</p>
@@ -1451,13 +1454,14 @@
 									<div class="mt-4 p-4 bg-info/10 rounded-lg">
 										<p class="text-sm">
 											📖 {$t('immich.need_help')}
-											<a
-												class="link link-primary"
-												href="https://voyage.app/docs/configuration/wanderer_integration.html"
-												target="_blank">{$t('navbar.documentation')}</a
-											>
-										</p>
-									</div>
+									<a
+										class="link link-primary"
+										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/wanderer_integration.md"
+										target="_blank"
+										rel="noopener noreferrer">{$t('navbar.documentation')}</a
+									>
+								</p>
+							</div>
 								{/if}
 							</div>
 						</div>
@@ -1524,7 +1528,7 @@
 										>
 										<a
 											class="link link-primary"
-											href="https://voyage.app/docs/usage/usage.html"
+										href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/guides/travel_agent.md"
 											target="_blank"
 											rel="noopener noreferrer"
 											>{$t('settings.travel_agent_help_setup_guide')}</a
@@ -1615,9 +1619,9 @@
 											class="select select-bordered select-primary w-full"
 											bind:value={newApiKeyProvider}
 										>
-											<option value="google_maps">Google Maps</option>
-										</select>
-									</div>
+										<option value="google_maps">{$t('settings.api_key_provider_google_places')}</option>
+									</select>
+								</div>
 									<div class="form-control">
 										<label class="label" for="api-key-value">
 											<span class="label-text font-medium">{$t('settings.api_key_value')}</span>
@@ -1944,13 +1948,14 @@
 											</svg>
 											<div>
 												<span>{$t('settings.social_auth_desc_2')}</span>
-												<a
-													href="https://voyage.app/docs/configuration/social_auth.html"
-													class="link link-neutral font-medium"
-													target="_blank">{$t('settings.documentation_link')}</a
-												>
-											</div>
-										</div>
+										<a
+											href="https://github.com/Alex-Wiesner/voyage/blob/main/documentation/docs/configuration/social_auth.md"
+											class="link link-neutral font-medium"
+											target="_blank"
+											rel="noopener noreferrer">{$t('settings.documentation_link')}</a
+										>
+									</div>
+								</div>
 									</div>
 
 									<!-- Debug Information -->
@@ -2015,19 +2020,21 @@
 												Sean Morley. {$t('settings.all_rights_reserved')}
 											</p>
 											<div class="flex justify-center gap-3 mt-2">
-												<a
-													href="https://github.com/Alex-Wiesner/voyage"
-													target="_blank"
-													class="link link-primary text-sm"
-												>
-													GitHub
+											<a
+												href="https://github.com/Alex-Wiesner/voyage"
+												target="_blank"
+												rel="noopener noreferrer"
+												class="link link-primary text-sm"
+											>
+												GitHub
 												</a>
-												<a
-													href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
-													target="_blank"
-													class="link link-secondary text-sm"
-												>
-													{$t('settings.license')}
+											<a
+												href="https://github.com/Alex-Wiesner/voyage/blob/main/LICENSE"
+												target="_blank"
+												rel="noopener noreferrer"
+												class="link link-secondary text-sm"
+											>
+												{$t('settings.license')}
 												</a>
 											</div>
 										</div>

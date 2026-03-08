@@ -589,6 +589,9 @@
 		"show_more": "Mehr anzeigen",
 		"all_locations_visited": "Alle Orte besucht!"
 	},
+	"country": {
+		"flag_unavailable": "Flagge nicht verfügbar"
+	},
 	"settings": {
 		"account_settings": "Benutzerkontoeinstellungen",
 		"email_change": "E-Mail ändern",
@@ -745,6 +748,7 @@
 		"no_api_keys_saved": "Noch keine API-Schlüssel gespeichert.",
 		"add_api_key": "API-Schlüssel hinzufügen",
 		"provider": "Anbieter",
+		"api_key_provider_google_places": "Google Places API",
 		"api_key_value": "API-Schlüssel",
 		"api_key_value_placeholder": "Geben Sie Ihren API-Schlüssel ein",
 		"api_key_write_only_hint": "Aus Sicherheitsgründen ist Ihr Klartextschlüssel nur zum Schreiben verfügbar und wird nach dem Speichern nicht mehr angezeigt.",

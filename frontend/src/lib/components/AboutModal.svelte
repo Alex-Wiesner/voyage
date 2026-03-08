@@ -200,7 +200,7 @@
 						</a>
 						<!-- documentation -->
 						<a
-							href="https://voyage.app"
+							href="https://github.com/Alex-Wiesner/voyage"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="btn btn-outline btn-sm"

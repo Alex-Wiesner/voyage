@@ -6,7 +6,6 @@
 
 	import DotsHorizontal from '~icons/mdi/dots-horizontal';
 	import Calendar from '~icons/mdi/calendar';
-	import HelpCircle from '~icons/mdi/help-circle';
 	import AboutModal from './AboutModal.svelte';
 	import AccountMultiple from '~icons/mdi/account-multiple';
 	import MapMarker from '~icons/mdi/map-marker';
@@ -122,12 +121,6 @@
 		{ path: '/locations', icon: MapMarker, label: 'locations.locations' },
 		{ path: '/collections', icon: FormatListBulletedSquare, label: 'navbar.collections' },
 		{ path: '/invites', icon: AccountMultiple, label: 'invites.title' },
-		{
-			path: 'https://voyage.app/docs/usage/usage.html',
-			icon: HelpCircle,
-			label: 'navbar.documentation',
-			external: true
-		},
 		{ path: '/worldtravel', icon: Earth, label: 'navbar.worldtravel' },
 		{ path: '/map', icon: MapIcon, label: 'navbar.map' },
 		{ path: '/calendar', icon: Calendar, label: 'navbar.calendar' },
@@ -306,12 +299,14 @@
 					>
 						{$t('navbar.about')}
 					</button>
-					<button
+					<a
+						href="https://github.com/Alex-Wiesner/voyage"
+						target="_blank"
+						rel="noopener noreferrer"
 						class="btn btn-ghost w-full justify-start gap-3"
-						on:click={() => (window.location.href = 'https://voyage.app')}
 					>
 						{$t('navbar.documentation')}
-					</button>
+					</a>
 					<button
 						class="btn btn-ghost w-full justify-start gap-3"
 						on:click={() => (window.location.href = 'https://discord.gg/wRbQ9Egr8C')}

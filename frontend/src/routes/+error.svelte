@@ -48,7 +48,11 @@
 			<div class="alert alert-warning mt-4">
 				<p class="text-muted-foreground">
 					<strong>Administrators:</strong> Please check your setup using the
-					<a class="link link-primary" target="_blank" href="https://voyage.app"
+					<a
+						class="link link-primary"
+						target="_blank"
+						rel="noopener noreferrer"
+						href="https://github.com/Alex-Wiesner/voyage"
 						>documentation</a
 					>.
 				</p>
