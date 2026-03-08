@@ -21,14 +21,14 @@ WORKDIR /app
 # Upgrade zlib to include Alpine security fixes
 RUN apk upgrade --no-cache zlib
 
-# Upgrade global npm and pnpm tooling
-RUN npm install -g npm@latest pnpm@latest
+# Install bun toolchain
+RUN npm install -g bun@1.2.22
 
 # Copy package files first for better Docker layer caching
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json bun.lock* ./
 
-# Clean install all node modules using pnpm with frozen lockfile
-RUN pnpm install --frozen-lockfile
+# Clean install all node modules using bun with frozen lockfile
+RUN bun install --frozen-lockfile
 
 # Copy the rest of the application files
 COPY . .
@@ -37,13 +37,13 @@ COPY . .
 RUN rm -f .env
 
 # Build SvelteKit app
-RUN pnpm run build
+RUN bun run build
 
 # Make startup script executable
 RUN chmod +x ./startup.sh
 
 # Keep only production dependencies for runtime image
-RUN CI=true pnpm prune --prod
+RUN bun install --frozen-lockfile --production
 
 # Runtime image contains only built app + runtime deps
 FROM node:22-alpine AS runtime

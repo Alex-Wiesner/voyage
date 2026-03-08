@@ -5,15 +5,15 @@ This file captures project-local commands and conventions for working in the Voy
 ## Frontend (SvelteKit)
 
 - Working directory: `frontend/`
-- Package manager: `pnpm`
-- Install dependencies: `pnpm install`
-- Dev server: `pnpm dev` (Vite dev server; frontend is configured to work with the Django backend in development)
-- Build: `pnpm build`
-- Preview production build: `pnpm preview`
-- Type check: `pnpm check` (`svelte-check`)
-- Lint: `pnpm lint` (currently runs `prettier --check .`; no ESLint config file is present right now)
-- Format: `pnpm format` (runs `prettier --write .`)
-- Type check (watch mode): `pnpm check:watch`
+- Package manager: `bun`
+- Install dependencies: `bun install`
+- Dev server: `bun run dev` (Vite dev server; frontend is configured to work with the Django backend in development)
+- Build: `bun run build`
+- Preview production build: `bun run preview`
+- Type check: `bun run check` (`svelte-check`)
+- Lint: `bun run lint` (currently runs `prettier --check .`; no ESLint config file is present right now)
+- Format: `bun run format` (runs `prettier --write .`)
+- Type check (watch mode): `bun run check:watch`
 
 ## Backend (Django + DRF)
 
