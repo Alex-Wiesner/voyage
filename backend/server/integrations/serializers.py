@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from .models import (
     EncryptionConfigurationError,
     ImmichIntegration,
+    UserAISettings,
     UserAPIKey,
     UserRecommendationPreferenceProfile,
 )
@@ -94,6 +95,19 @@ class UserRecommendationPreferenceProfileSerializer(serializers.ModelSerializer)
             "interests",
             "trip_style",
             "notes",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class UserAISettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAISettings
+        fields = [
+            "id",
+            "preferred_provider",
+            "preferred_model",
             "created_at",
             "updated_at",
         ]

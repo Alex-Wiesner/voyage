@@ -256,6 +256,29 @@
 	// Enforce recommendations visibility only for owner/shared users
 	$: availableViews.recommendations = !!canModifyCollection;
 
+	function deriveCollectionDestination(current: Collection | null): string | undefined {
+		if (!current?.locations?.length) {
+			return undefined;
+		}
+
+		const firstLocation = current.locations.find((loc) =>
+			Boolean(loc.city?.name || loc.country?.name || loc.location || loc.name)
+		);
+		if (!firstLocation) {
+			return undefined;
+		}
+
+		const cityName = firstLocation.city?.name;
+		const countryName = firstLocation.country?.name;
+		if (cityName && countryName) {
+			return `${cityName}, ${countryName}`;
+		}
+
+		return cityName || countryName || firstLocation.location || firstLocation.name || undefined;
+	}
+
+	$: collectionDestination = deriveCollectionDestination(collection);
+
 	// Build calendar events from collection visits
 	type TimezoneMode = 'event' | 'local';
 
@@ -1261,7 +1284,14 @@
 				<!-- Recommendations View -->
 				{#if currentView === 'recommendations'}
 					<div class="space-y-8">
-						<AITravelChat embedded={true} />
+						<AITravelChat
+							embedded={true}
+							collectionId={collection.id}
+							collectionName={collection.name}
+							startDate={collection.start_date || undefined}
+							endDate={collection.end_date || undefined}
+							destination={collectionDestination}
+						/>
 						<CollectionRecommendationView bind:collection user={data.user} />
 					</div>
 				{/if}

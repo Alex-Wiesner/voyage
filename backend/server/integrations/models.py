@@ -124,3 +124,23 @@ class UserRecommendationPreferenceProfile(models.Model):
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class UserAISettings(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ai_settings",
+    )
+    preferred_provider = models.CharField(max_length=100, blank=True, null=True)
+    preferred_model = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "User AI Settings"
+        verbose_name_plural = "User AI Settings"
+
+    def __str__(self):
+        return f"AI Settings for {self.user.username}"

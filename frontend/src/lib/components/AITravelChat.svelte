@@ -1,8 +1,22 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { t } from 'svelte-i18n';
-	import { mdiRobot, mdiSend, mdiPlus, mdiDelete, mdiMenu, mdiClose } from '@mdi/js';
+	import { mdiSend, mdiPlus, mdiDelete, mdiMenu, mdiClose } from '@mdi/js';
 	import type { ChatProviderCatalogEntry } from '$lib/types.js';
+	import { addToast } from '$lib/toasts';
+
+	type ToolResultEntry = {
+		name: string;
+		result: unknown;
+	};
+
+	type PlaceResult = {
+		name: string;
+		address?: string;
+		rating?: number;
+		latitude?: number | string;
+		longitude?: number | string;
+	};
 
 	type Conversation = {
 		id: string;
@@ -14,9 +28,15 @@
 		role: 'user' | 'assistant' | 'tool';
 		content: string;
 		name?: string;
+		tool_results?: ToolResultEntry[];
 	};
 
 	export let embedded = false;
+	export let collectionId: string | undefined = undefined;
+	export let collectionName: string | undefined = undefined;
+	export let startDate: string | undefined = undefined;
+	export let endDate: string | undefined = undefined;
+	export let destination: string | undefined = undefined;
 
 	let conversations: Conversation[] = [];
 	let activeConversation: Conversation | null = null;
@@ -27,8 +47,22 @@
 	let streamingContent = '';
 
 	let selectedProvider = 'openai';
+	let selectedModel = '';
 	let providerCatalog: ChatProviderCatalogEntry[] = [];
+	let showDateSelector = false;
+	let selectedPlaceToAdd: PlaceResult | null = null;
+	let selectedDate = '';
 	$: chatProviders = providerCatalog.filter((provider) => provider.available_for_chat);
+	$: selectedProviderEntry =
+		chatProviders.find((provider) => provider.id === selectedProvider) ?? null;
+
+	const dispatch = createEventDispatcher<{
+		close: void;
+		itemAdded: { locationId: string; date: string };
+	}>();
+
+	const MODEL_PREFS_STORAGE_KEY = 'voyage_chat_model_prefs';
+	let initializedModelProvider = '';
 
 	onMount(async () => {
 		await Promise.all([loadConversations(), loadProviderCatalog()]);
@@ -50,6 +84,50 @@
 		if (!availableProviders.some((provider) => provider.id === selectedProvider)) {
 			selectedProvider = availableProviders[0].id;
 		}
+	}
+
+	function loadModelPref(provider: string): string {
+		if (typeof window === 'undefined') {
+			return '';
+		}
+
+		try {
+			const raw = window.localStorage.getItem(MODEL_PREFS_STORAGE_KEY);
+			if (!raw) {
+				return '';
+			}
+
+			const prefs = JSON.parse(raw) as Record<string, string>;
+			const value = prefs[provider];
+			return typeof value === 'string' ? value : '';
+		} catch {
+			return '';
+		}
+	}
+
+	function saveModelPref(provider: string, model: string) {
+		if (typeof window === 'undefined') {
+			return;
+		}
+
+		try {
+			const raw = window.localStorage.getItem(MODEL_PREFS_STORAGE_KEY);
+			const prefs: Record<string, string> = raw ? JSON.parse(raw) : {};
+			prefs[provider] = model;
+			window.localStorage.setItem(MODEL_PREFS_STORAGE_KEY, JSON.stringify(prefs));
+		} catch {
+			// ignore localStorage persistence failures
+		}
+	}
+
+	$: if (selectedProviderEntry && initializedModelProvider !== selectedProvider) {
+		selectedModel =
+			loadModelPref(selectedProvider) || (selectedProviderEntry.default_model ?? '') || '';
+		initializedModelProvider = selectedProvider;
+	}
+
+	$: if (selectedProviderEntry && initializedModelProvider === selectedProvider) {
+		saveModelPref(selectedProvider, selectedModel);
 	}
 
 	async function loadConversations() {
@@ -118,7 +196,16 @@
 			const res = await fetch(`/api/chat/conversations/${conversation.id}/send_message/`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ message: msgText, provider: selectedProvider })
+				body: JSON.stringify({
+					message: msgText,
+					provider: selectedProvider,
+					model: selectedModel.trim() || undefined,
+					collection_id: collectionId,
+					collection_name: collectionName,
+					start_date: startDate,
+					end_date: endDate,
+					destination
+				})
 			});
 
 			if (!res.ok) {
@@ -167,18 +254,12 @@
 						}
 
 						if (parsed.tool_result) {
-							const toolMsg: ChatMessage = {
-								role: 'tool',
-								content: JSON.stringify(parsed.tool_result, null, 2),
-								name: parsed.tool_result.tool || 'tool',
-								id: crypto.randomUUID()
+							const toolResult: ToolResultEntry = {
+								name: parsed.tool_result.name || parsed.tool_result.tool || 'tool',
+								result: parsed.tool_result.result
 							};
-
-							const idx = messages.findIndex((m) => m.id === assistantMsg.id);
-							messages = [...messages.slice(0, idx), toolMsg, ...messages.slice(idx)];
-
-							streamingContent = '';
-							assistantMsg.content = '';
+							assistantMsg.tool_results = [...(assistantMsg.tool_results || []), toolResult];
+							messages = [...messages];
 						}
 					} catch {
 						// ignore malformed chunks
@@ -195,10 +276,161 @@
 		}
 	}
 
+	async function sendPresetMessage(message: string) {
+		if (isStreaming || chatProviders.length === 0) {
+			return;
+		}
+
+		inputMessage = message;
+		await sendMessage();
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
 			sendMessage();
+		}
+	}
+
+	function parseToolResults(msg: ChatMessage): ToolResultEntry[] {
+		if (msg.tool_results?.length) {
+			return msg.tool_results;
+		}
+
+		if (msg.role !== 'tool') {
+			return [];
+		}
+
+		try {
+			return [{ name: msg.name || 'tool', result: JSON.parse(msg.content) }];
+		} catch {
+			return [{ name: msg.name || 'tool', result: msg.content }];
+		}
+	}
+
+	function hasPlaceResults(result: ToolResultEntry): boolean {
+		return (
+			result.name === 'search_places' &&
+			typeof result.result === 'object' &&
+			result.result !== null &&
+			Array.isArray((result.result as { places?: unknown[] }).places)
+		);
+	}
+
+	function getPlaceResults(result: ToolResultEntry): any[] {
+		if (!hasPlaceResults(result)) {
+			return [];
+		}
+
+		return (result.result as { places: any[] }).places;
+	}
+
+	function hasWebSearchResults(result: ToolResultEntry): boolean {
+		return (
+			result.name === 'web_search' &&
+			typeof result.result === 'object' &&
+			result.result !== null &&
+			Array.isArray((result.result as { results?: unknown[] }).results)
+		);
+	}
+
+	function getWebSearchResults(result: ToolResultEntry): any[] {
+		if (!hasWebSearchResults(result)) {
+			return [];
+		}
+
+		return (result.result as { results: any[] }).results;
+	}
+
+	function parseCoordinate(value: unknown): number | null {
+		if (typeof value === 'number' && Number.isFinite(value)) {
+			return value;
+		}
+
+		if (typeof value === 'string') {
+			const parsed = Number(value);
+			return Number.isFinite(parsed) ? parsed : null;
+		}
+
+		return null;
+	}
+
+	function hasPlaceCoordinates(place: PlaceResult): boolean {
+		return parseCoordinate(place.latitude) !== null && parseCoordinate(place.longitude) !== null;
+	}
+
+	function openDateSelector(place: PlaceResult) {
+		selectedPlaceToAdd = place;
+		selectedDate = startDate || '';
+		showDateSelector = true;
+	}
+
+	function closeDateSelector() {
+		showDateSelector = false;
+		selectedPlaceToAdd = null;
+		selectedDate = '';
+	}
+
+	async function addPlaceToItinerary(place: PlaceResult, date: string) {
+		if (!collectionId || !date) {
+			return;
+		}
+
+		const latitude = parseCoordinate(place.latitude);
+		const longitude = parseCoordinate(place.longitude);
+		if (latitude === null || longitude === null) {
+			addToast('error', $t('chat.connection_error'));
+			return;
+		}
+
+		try {
+			const locationResponse = await fetch('/api/locations/', {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					name: place.name,
+					location: place.address || place.name,
+					latitude,
+					longitude,
+					collections: [collectionId],
+					is_public: false
+				})
+			});
+
+			if (!locationResponse.ok) {
+				throw new Error('Failed to create location');
+			}
+
+			const location = await locationResponse.json();
+
+			const itineraryResponse = await fetch('/api/itineraries/', {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					collection: collectionId,
+					content_type: 'location',
+					object_id: location.id,
+					date,
+					order: 0
+				})
+			});
+
+			if (!itineraryResponse.ok) {
+				throw new Error('Failed to add to itinerary');
+			}
+
+			dispatch('itemAdded', { locationId: location.id, date });
+			addToast('success', $t('added_successfully'));
+			closeDateSelector();
+		} catch (error) {
+			console.error('Failed to add to itinerary:', error);
+			addToast('error', $t('chat.connection_error'));
 		}
 	}
 
@@ -277,16 +509,33 @@
 							</svg>
 						{/if}
 					</button>
-					<svg
-						class="w-6 h-6 text-primary"
-						viewBox="0 0 24 24"
-						fill="currentColor"
-						aria-hidden="true"
-					>
-						<path d={mdiRobot}></path>
-					</svg>
-					<h2 class="text-lg font-semibold">{$t('chat.title')}</h2>
-					<div class="ml-auto">
+					<div class="flex items-center gap-2">
+						<span class="text-2xl">✈️</span>
+						<div>
+							<h3 class="text-lg font-bold">
+								{#if collectionName}
+									{$t('travel_assistant')} · {collectionName}
+								{:else}
+									{$t('travel_assistant')}
+								{/if}
+							</h3>
+							{#if destination}
+								<p class="text-sm text-base-content/70">{destination}</p>
+							{/if}
+						</div>
+					</div>
+					<div class="ml-auto flex items-center gap-2">
+						<label for="chat-model-input" class="text-xs opacity-70 whitespace-nowrap"
+							>{$t('chat.model_label')}</label
+						>
+						<input
+							id="chat-model-input"
+							type="text"
+							class="input input-bordered input-sm w-44"
+							bind:value={selectedModel}
+							placeholder={selectedProviderEntry?.default_model || $t('chat.model_placeholder')}
+							disabled={chatProviders.length === 0}
+						/>
 						<select
 							class="select select-bordered select-sm"
 							bind:value={selectedProvider}
@@ -302,14 +551,7 @@
 				<div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={messagesContainer}>
 					{#if messages.length === 0 && !activeConversation}
 						<div class="flex flex-col items-center justify-center h-full text-center">
-							<svg
-								class="w-16 h-16 text-primary opacity-40 mb-4"
-								viewBox="0 0 24 24"
-								fill="currentColor"
-								aria-hidden="true"
-							>
-								<path d={mdiRobot}></path>
-							</svg>
+							<div class="text-6xl opacity-40 mb-4">🌍</div>
 							<h3 class="text-2xl font-bold mb-2">{$t('chat.welcome_title')}</h3>
 							<p class="text-base-content/60 max-w-md">{$t('chat.welcome_message')}</p>
 						</div>
@@ -318,9 +560,57 @@
 							<div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
 								{#if msg.role === 'tool'}
 									<div class="max-w-2xl w-full">
-										<div class="bg-base-200 rounded-lg p-3 text-xs">
-											<div class="font-semibold mb-1 text-primary">🔧 {msg.name}</div>
-											<pre class="whitespace-pre-wrap overflow-x-auto">{msg.content}</pre>
+										<div class="bg-base-200 rounded-lg p-3 text-xs space-y-2">
+											<div class="font-semibold mb-1 text-primary">🗺️ {msg.name}</div>
+											{#each parseToolResults(msg) as result}
+												{#if hasPlaceResults(result)}
+													<div class="grid gap-2">
+														{#each getPlaceResults(result) as place}
+															<div class="card card-compact bg-base-100 p-3">
+																<h4 class="font-semibold">{place.name}</h4>
+																{#if place.address}
+																	<p class="text-sm text-base-content/70">{place.address}</p>
+																{/if}
+																{#if place.rating}
+																	<div class="flex items-center gap-1 text-sm">
+																		<span>⭐</span>
+																		<span>{place.rating}</span>
+																	</div>
+																{/if}
+																{#if collectionId}
+																	<button
+																		class="btn btn-xs btn-primary btn-outline mt-2"
+																		on:click={() => openDateSelector(place)}
+																		disabled={!hasPlaceCoordinates(place)}
+																	>
+																		{$t('add_to_itinerary')}
+																	</button>
+																{/if}
+															</div>
+														{/each}
+													</div>
+												{:else if hasWebSearchResults(result)}
+													<div class="grid gap-2">
+														{#each getWebSearchResults(result) as item}
+															<a
+																href={item.url}
+																target="_blank"
+																rel="noopener noreferrer"
+																class="card card-compact bg-base-100 p-3 hover:bg-base-300 transition-colors block"
+															>
+																<h4 class="font-semibold link">{item.title}</h4>
+																<p class="text-sm text-base-content/70 line-clamp-2">
+																	{item.snippet}
+																</p>
+															</a>
+														{/each}
+													</div>
+												{:else}
+													<div class="bg-base-100 rounded p-2 text-sm">
+														<pre>{JSON.stringify(result.result, null, 2)}</pre>
+													</div>
+												{/if}
+											{/each}
 										</div>
 									</div>
 								{:else}
@@ -331,6 +621,59 @@
 												: 'chat-bubble-neutral'}"
 										>
 											<div class="whitespace-pre-wrap">{msg.content}</div>
+											{#if msg.role === 'assistant' && msg.tool_results}
+												<div class="mt-2 space-y-2">
+													{#each msg.tool_results as result}
+														{#if hasPlaceResults(result)}
+															<div class="grid gap-2">
+																{#each getPlaceResults(result) as place}
+																	<div class="card card-compact bg-base-200 p-3">
+																		<h4 class="font-semibold">{place.name}</h4>
+																		{#if place.address}
+																			<p class="text-sm text-base-content/70">{place.address}</p>
+																		{/if}
+																		{#if place.rating}
+																			<div class="flex items-center gap-1 text-sm">
+																				<span>⭐</span>
+																				<span>{place.rating}</span>
+																			</div>
+																		{/if}
+																		{#if collectionId}
+																			<button
+																				class="btn btn-xs btn-primary btn-outline mt-2"
+																				on:click={() => openDateSelector(place)}
+																				disabled={!hasPlaceCoordinates(place)}
+																			>
+																				{$t('add_to_itinerary')}
+																			</button>
+																		{/if}
+																	</div>
+																{/each}
+															</div>
+														{:else if hasWebSearchResults(result)}
+															<div class="grid gap-2">
+																{#each getWebSearchResults(result) as item}
+																	<a
+																		href={item.url}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		class="card card-compact bg-base-200 p-3 hover:bg-base-300 transition-colors block"
+																	>
+																		<h4 class="font-semibold link">{item.title}</h4>
+																		<p class="text-sm text-base-content/70 line-clamp-2">
+																			{item.snippet}
+																		</p>
+																	</a>
+																{/each}
+															</div>
+														{:else}
+															<div class="bg-base-200 rounded p-2 text-sm">
+																<pre>{JSON.stringify(result.result, null, 2)}</pre>
+															</div>
+														{/if}
+													{/each}
+												</div>
+											{/if}
 											{#if msg.role === 'assistant' && isStreaming && msg.id === messages[messages.length - 1]?.id && !msg.content}
 												<span class="loading loading-dots loading-sm"></span>
 											{/if}
@@ -343,6 +686,47 @@
 				</div>
 
 				<div class="p-4 border-t border-base-300">
+					<div class="max-w-4xl mx-auto">
+						<div class="flex flex-wrap gap-2 mb-3">
+							{#if destination}
+								<button
+									class="btn btn-sm btn-ghost"
+									on:click={() =>
+										sendPresetMessage(`What are the best restaurants in ${destination}?`)}
+									disabled={isStreaming || chatProviders.length === 0}
+								>
+									🍽️ Restaurants
+								</button>
+								<button
+									class="btn btn-sm btn-ghost"
+									on:click={() => sendPresetMessage(`What activities can I do in ${destination}?`)}
+									disabled={isStreaming || chatProviders.length === 0}
+								>
+									🎯 Activities
+								</button>
+							{/if}
+							{#if startDate && endDate}
+								<button
+									class="btn btn-sm btn-ghost"
+									on:click={() =>
+										sendPresetMessage(
+											`What should I pack for my trip from ${startDate} to ${endDate}?`
+										)}
+									disabled={isStreaming || chatProviders.length === 0}
+								>
+									🎒 Packing tips
+								</button>
+							{/if}
+							<button
+								class="btn btn-sm btn-ghost"
+								on:click={() =>
+									sendPresetMessage('Can you help me plan a day-by-day itinerary for this trip?')}
+								disabled={isStreaming || chatProviders.length === 0}
+							>
+								📅 Itinerary help
+							</button>
+						</div>
+					</div>
 					<div class="flex gap-2 max-w-4xl mx-auto">
 						<textarea
 							class="textarea textarea-bordered flex-1 resize-none"
@@ -372,3 +756,35 @@
 		</div>
 	</div>
 </div>
+
+{#if showDateSelector && selectedPlaceToAdd}
+	<div class="modal modal-open">
+		<div class="modal-box">
+			<h3 class="font-bold text-lg">{$t('add_to_itinerary')}</h3>
+			<p class="py-4">
+				{$t('add_to_which_day', { values: { placeName: selectedPlaceToAdd.name } })}
+			</p>
+
+			<input
+				type="date"
+				class="input input-bordered w-full"
+				bind:value={selectedDate}
+				min={startDate}
+				max={endDate}
+			/>
+
+			<div class="modal-action">
+				<button class="btn btn-ghost" on:click={closeDateSelector}>{$t('adventures.cancel')}</button
+				>
+				<button
+					class="btn btn-primary"
+					on:click={() =>
+						selectedPlaceToAdd && addPlaceToItinerary(selectedPlaceToAdd, selectedDate)}
+					disabled={!selectedDate}
+				>
+					{$t('adventures.add')}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

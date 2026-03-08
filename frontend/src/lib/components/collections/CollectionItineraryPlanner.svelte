@@ -29,6 +29,7 @@
 	import NoteModal from '$lib/components/NoteModal.svelte';
 	import ChecklistModal from '$lib/components/ChecklistModal.svelte';
 	import ItineraryLinkModal from '$lib/components/collections/ItineraryLinkModal.svelte';
+	import ItinerarySuggestionModal from '$lib/components/collections/ItinerarySuggestionModal.svelte';
 	import ItineraryDayPickModal from '$lib/components/collections/ItineraryDayPickModal.svelte';
 	import Car from '~icons/mdi/car';
 	import Walk from '~icons/mdi/walk';
@@ -382,6 +383,7 @@
 	let isNoteModalOpen = false;
 	let isChecklistModalOpen = false;
 	let isItineraryLinkModalOpen = false;
+	let isSuggestionModalOpen = false;
 
 	let noteToEdit: Note | null = null;
 	let checklistToEdit: Checklist | null = null;
@@ -389,6 +391,8 @@
 	// Store the target date and display date for the link modal
 	let linkModalTargetDate: string = '';
 	let linkModalDisplayDate: string = '';
+	let suggestionModalTargetDate: string = '';
+	let suggestionModalDisplayDate: string = '';
 
 	// Day picker modal state for unscheduled items
 	let isDayPickModalOpen = false;
@@ -649,8 +653,7 @@
 				if (!result?.date) continue;
 				nextMap[result.date] = {
 					available: !!result.available,
-					temperature_c:
-						typeof result.temperature_c === 'number' ? result.temperature_c : null
+					temperature_c: typeof result.temperature_c === 'number' ? result.temperature_c : null
 				};
 			}
 
@@ -730,9 +733,7 @@
 
 	function getDayTimelineItems(day: DayGroup): ResolvedItineraryItem[] {
 		const boundaryIds = new Set(
-			[day.preTimelineLodging?.id, day.postTimelineLodging?.id].filter(
-				(id): id is string => !!id
-			)
+			[day.preTimelineLodging?.id, day.postTimelineLodging?.id].filter((id): id is string => !!id)
 		);
 
 		if (boundaryIds.size === 0) return day.items;
@@ -804,10 +805,7 @@
 			currentItem,
 			currentType === 'transportation' ? 'destination' : 'origin'
 		);
-		const toCoordinates = getCoordinatesFromItineraryItem(
-			nextItem,
-			'origin'
-		);
+		const toCoordinates = getCoordinatesFromItineraryItem(nextItem, 'origin');
 		if (!fromCoordinates || !toCoordinates) return null;
 
 		const key = getLocationConnectorKey(currentItem, nextItem);
@@ -1141,7 +1139,9 @@
 				};
 			})
 			.filter(
-				(entry): entry is {
+				(
+					entry
+				): entry is {
 					item: ResolvedItineraryItem;
 					originalIndex: number;
 					primaryTimestamp: number;
@@ -1175,9 +1175,7 @@
 			return;
 		}
 
-		const anchorsByPosition = [...anchorEntries].sort(
-			(a, b) => a.originalIndex - b.originalIndex
-		);
+		const anchorsByPosition = [...anchorEntries].sort((a, b) => a.originalIndex - b.originalIndex);
 		const chronologicalAnchors = [...anchorEntries]
 			.sort((a, b) => {
 				if (a.primaryTimestamp !== b.primaryTimestamp) {
@@ -1301,10 +1299,7 @@
 			currentItem,
 			currentType === 'transportation' ? 'destination' : 'origin'
 		);
-		const toCoordinates = getCoordinatesFromItineraryItem(
-			nextItem,
-			'origin'
-		);
+		const toCoordinates = getCoordinatesFromItineraryItem(nextItem, 'origin');
 		if (!fromCoordinates || !toCoordinates) return unavailableConnector;
 
 		const distanceKm = haversineDistanceKm(
@@ -1352,10 +1347,7 @@
 			currentItem,
 			currentType === 'transportation' ? 'destination' : 'origin'
 		);
-		const toCoordinates = getCoordinatesFromItineraryItem(
-			nextItem,
-			'origin'
-		);
+		const toCoordinates = getCoordinatesFromItineraryItem(nextItem, 'origin');
 		if (!fromCoordinates || !toCoordinates) return null;
 
 		const fromLatitude = fromCoordinates.latitude;
@@ -2624,6 +2616,25 @@
 	/>
 {/if}
 
+{#if isSuggestionModalOpen}
+	<ItinerarySuggestionModal
+		{collection}
+		{user}
+		targetDate={suggestionModalTargetDate}
+		displayDate={suggestionModalDisplayDate}
+		on:close={() => (isSuggestionModalOpen = false)}
+		on:addItem={(e) => {
+			addItineraryItemForObject(
+				e.detail.type,
+				e.detail.itemId,
+				suggestionModalTargetDate,
+				e.detail.updateDate
+			);
+			isSuggestionModalOpen = false;
+		}}
+	/>
+{/if}
+
 {#if isDayPickModalOpen}
 	<ItineraryDayPickModal
 		isOpen={isDayPickModalOpen}
@@ -2896,7 +2907,9 @@
 								<div class="text-xs opacity-70">{weekday}</div>
 								<div class="text-2xl font-bold -mt-1">{dayOfMonth}</div>
 								<div class="text-xs opacity-70">{monthAbbrev}</div>
-								<div class="text-[10px] opacity-80 mt-1">{formatDayTemperature(day, dayTemperatures)}</div>
+								<div class="text-[10px] opacity-80 mt-1">
+									{formatDayTemperature(day, dayTemperatures)}
+								</div>
 							</div>
 						</div>
 
@@ -3129,7 +3142,11 @@
 									{@const resolvedObj = item.resolvedObject}
 									{@const multiDay = isMultiDay(item)}
 									{@const nextConnectableItem = findNextConnectableItem(dayTimelineItems, index)}
-									{@const locationConnector = getLocationConnector(item, nextConnectableItem, connectorMetricsMap)}
+									{@const locationConnector = getLocationConnector(
+										item,
+										nextConnectableItem,
+										connectorMetricsMap
+									)}
 									{@const directionsUrl = buildDirectionsUrl(
 										item,
 										nextConnectableItem,
@@ -3482,6 +3499,19 @@
 													}}
 												>
 													{$t('itinerary.link_existing_item')}
+												</button>
+											</li>
+											<li>
+												<button
+													type="button"
+													role="menuitem"
+													on:click={() => {
+														suggestionModalTargetDate = day.date;
+														suggestionModalDisplayDate = day.displayDate;
+														isSuggestionModalOpen = true;
+													}}
+												>
+													✨ {$t('suggestions.get_suggestions')}
 												</button>
 											</li>
 											<li class="menu-title">{$t('adventures.create_new')}</li>

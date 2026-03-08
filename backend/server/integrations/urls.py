@@ -6,6 +6,7 @@ from integrations.views import (
     StravaIntegrationView,
     WandererIntegrationViewSet,
     UserAPIKeyViewSet,
+    UserAISettingsViewSet,
     UserRecommendationPreferenceProfileViewSet,
 )
 
@@ -22,6 +23,7 @@ router.register(
     UserRecommendationPreferenceProfileViewSet,
     basename="user-recommendation-preferences",
 )
+router.register(r"ai-settings", UserAISettingsViewSet, basename="user-ai-settings")
 
 # Include the router URLs
 urlpatterns = [

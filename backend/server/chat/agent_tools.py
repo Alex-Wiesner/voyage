@@ -1,4 +1,5 @@
 import json
+import inspect
 import logging
 from datetime import date as date_cls
 
@@ -10,117 +11,50 @@ from adventures.models import Collection, CollectionItineraryItem, Location
 
 logger = logging.getLogger(__name__)
 
-AGENT_TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search_places",
-            "description": "Search for places of interest near a location. Returns tourist attractions, restaurants, hotels, etc.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "Location name or address to search near",
-                    },
-                    "category": {
-                        "type": "string",
-                        "enum": ["tourism", "food", "lodging"],
-                        "description": "Category of places",
-                    },
-                    "radius": {
-                        "type": "number",
-                        "description": "Search radius in km (default 10)",
-                    },
+_REGISTERED_TOOLS = {}
+_TOOL_SCHEMAS = []
+
+
+def agent_tool(name: str, description: str, parameters: dict):
+    """Decorator to register a function as an agent tool."""
+
+    def decorator(func):
+        _REGISTERED_TOOLS[name] = func
+
+        required = [k for k, v in parameters.items() if v.get("required", False)]
+        props = {
+            k: {kk: vv for kk, vv in v.items() if kk != "required"}
+            for k, v in parameters.items()
+        }
+
+        schema = {
+            "type": "function",
+            "function": {
+                "name": name,
+                "description": description,
+                "parameters": {
+                    "type": "object",
+                    "properties": props,
+                    "required": required,
                 },
-                "required": ["location"],
             },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "list_trips",
-            "description": "List the user's trip collections with dates and descriptions",
-            "parameters": {"type": "object", "properties": {}},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_trip_details",
-            "description": "Get full details of a trip including all itinerary items, locations, transportation, and lodging",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "collection_id": {
-                        "type": "string",
-                        "description": "UUID of the collection/trip",
-                    }
-                },
-                "required": ["collection_id"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "add_to_itinerary",
-            "description": "Add a new location to a trip's itinerary on a specific date",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "collection_id": {
-                        "type": "string",
-                        "description": "UUID of the collection/trip",
-                    },
-                    "name": {"type": "string", "description": "Name of the location"},
-                    "description": {
-                        "type": "string",
-                        "description": "Description of why to visit",
-                    },
-                    "latitude": {
-                        "type": "number",
-                        "description": "Latitude coordinate",
-                    },
-                    "longitude": {
-                        "type": "number",
-                        "description": "Longitude coordinate",
-                    },
-                    "date": {
-                        "type": "string",
-                        "description": "Date in YYYY-MM-DD format",
-                    },
-                    "location_address": {
-                        "type": "string",
-                        "description": "Full address of the location",
-                    },
-                },
-                "required": ["collection_id", "name", "latitude", "longitude"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_weather",
-            "description": "Get temperature/weather data for a location on specific dates",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "latitude": {"type": "number", "description": "Latitude"},
-                    "longitude": {"type": "number", "description": "Longitude"},
-                    "dates": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "List of dates in YYYY-MM-DD format",
-                    },
-                },
-                "required": ["latitude", "longitude", "dates"],
-            },
-        },
-    },
-]
+        }
+        _TOOL_SCHEMAS.append(schema)
+
+        return func
+
+    return decorator
+
+
+def get_tool_schemas() -> list:
+    """Return all registered tool schemas for LLM."""
+    return _TOOL_SCHEMAS.copy()
+
+
+def get_registered_tools() -> dict:
+    """Return all registered tool functions."""
+    return _REGISTERED_TOOLS.copy()
+
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
@@ -162,14 +96,39 @@ def _parse_address(tags):
     return ", ".join([p for p in parts if p])
 
 
-def search_places(user, **kwargs):
+@agent_tool(
+    name="search_places",
+    description="Search for places of interest near a location. Returns tourist attractions, restaurants, hotels, etc.",
+    parameters={
+        "location": {
+            "type": "string",
+            "description": "Location name or address to search near",
+            "required": True,
+        },
+        "category": {
+            "type": "string",
+            "enum": ["tourism", "food", "lodging"],
+            "description": "Category of places",
+        },
+        "radius": {
+            "type": "number",
+            "description": "Search radius in km (default 10)",
+        },
+    },
+)
+def search_places(
+    user,
+    location: str | None = None,
+    category: str = "tourism",
+    radius: float = 10,
+):
     try:
-        location_name = kwargs.get("location")
+        location_name = location
         if not location_name:
             return {"error": "location is required"}
 
-        category = kwargs.get("category") or "tourism"
-        radius_km = float(kwargs.get("radius") or 10)
+        category = category or "tourism"
+        radius_km = float(radius or 10)
         radius_meters = max(500, min(int(radius_km * 1000), 50000))
 
         geocode_resp = requests.get(
@@ -240,7 +199,12 @@ def search_places(user, **kwargs):
         return {"error": "An unexpected error occurred during place search"}
 
 
-def list_trips(user, **kwargs):
+@agent_tool(
+    name="list_trips",
+    description="List the user's trip collections with dates and descriptions",
+    parameters={},
+)
+def list_trips(user):
     try:
         collections = Collection.objects.filter(user=user).prefetch_related("locations")
         trips = []
@@ -265,9 +229,87 @@ def list_trips(user, **kwargs):
         return {"error": "An unexpected error occurred while listing trips"}
 
 
-def get_trip_details(user, **kwargs):
+@agent_tool(
+    name="web_search",
+    description="Search the web for current information about destinations, events, prices, weather, or any real-time travel information. Use this when you need up-to-date information that may not be in your training data.",
+    parameters={
+        "query": {
+            "type": "string",
+            "description": "The search query (e.g., 'best restaurants Paris 2024', 'weather Tokyo March')",
+            "required": True,
+        },
+        "location_context": {
+            "type": "string",
+            "description": "Optional location to bias search results (e.g., 'Paris, France')",
+        },
+    },
+)
+def web_search(user, query: str, location_context: str | None = None) -> dict:
+    """
+    Search the web for current information about destinations, events, prices, etc.
+
+    Args:
+        user: The user making the request (for auth/logging)
+        query: The search query
+        location_context: Optional location to bias results
+
+    Returns:
+        dict with 'results' list or 'error' string
+    """
+    if not query:
+        return {"error": "query is required", "results": []}
+
     try:
-        collection_id = kwargs.get("collection_id")
+        from duckduckgo_search import DDGS  # type: ignore[import-not-found]
+
+        full_query = query
+        if location_context:
+            full_query = f"{query} {location_context}"
+
+        with DDGS() as ddgs:
+            results = list(ddgs.text(full_query, max_results=5))
+
+        formatted = []
+        for result in results:
+            formatted.append(
+                {
+                    "title": result.get("title", ""),
+                    "snippet": result.get("body", ""),
+                    "url": result.get("href", ""),
+                }
+            )
+
+        return {"results": formatted}
+
+    except ImportError:
+        return {
+            "error": "Web search is not available (duckduckgo-search not installed)",
+            "results": [],
+        }
+    except Exception as exc:
+        error_str = str(exc).lower()
+        if "rate" in error_str or "limit" in error_str:
+            return {
+                "error": "Search rate limit reached. Please wait a moment and try again.",
+                "results": [],
+            }
+        logger.error("Web search error: %s", exc)
+        return {"error": "Web search failed. Please try again.", "results": []}
+
+
+@agent_tool(
+    name="get_trip_details",
+    description="Get full details of a trip including all itinerary items, locations, transportation, and lodging",
+    parameters={
+        "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection/trip",
+            "required": True,
+        }
+    },
+)
+def get_trip_details(user, collection_id: str | None = None):
+    try:
         if not collection_id:
             return {"error": "collection_id is required"}
 
@@ -354,16 +396,55 @@ def get_trip_details(user, **kwargs):
         return {"error": "An unexpected error occurred while fetching trip details"}
 
 
-def add_to_itinerary(user, **kwargs):
+@agent_tool(
+    name="add_to_itinerary",
+    description="Add a new location to a trip's itinerary on a specific date",
+    parameters={
+        "collection_id": {
+            "type": "string",
+            "description": "UUID of the collection/trip",
+            "required": True,
+        },
+        "name": {
+            "type": "string",
+            "description": "Name of the location",
+            "required": True,
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of why to visit",
+        },
+        "latitude": {
+            "type": "number",
+            "description": "Latitude coordinate",
+            "required": True,
+        },
+        "longitude": {
+            "type": "number",
+            "description": "Longitude coordinate",
+            "required": True,
+        },
+        "date": {
+            "type": "string",
+            "description": "Date in YYYY-MM-DD format",
+        },
+        "location_address": {
+            "type": "string",
+            "description": "Full address of the location",
+        },
+    },
+)
+def add_to_itinerary(
+    user,
+    collection_id: str | None = None,
+    name: str | None = None,
+    latitude: float | None = None,
+    longitude: float | None = None,
+    description: str | None = None,
+    date: str | None = None,
+    location_address: str | None = None,
+):
     try:
-        collection_id = kwargs.get("collection_id")
-        name = kwargs.get("name")
-        latitude = kwargs.get("latitude")
-        longitude = kwargs.get("longitude")
-        description = kwargs.get("description")
-        location_address = kwargs.get("location_address")
-        date = kwargs.get("date")
-
         if not collection_id or not name or latitude is None or longitude is None:
             return {
                 "error": "collection_id, name, latitude, and longitude are required"
@@ -479,16 +560,34 @@ def _fetch_temperature_for_date(latitude, longitude, date_value):
     }
 
 
-def get_weather(user, **kwargs):
+@agent_tool(
+    name="get_weather",
+    description="Get temperature/weather data for a location on specific dates",
+    parameters={
+        "latitude": {"type": "number", "description": "Latitude", "required": True},
+        "longitude": {
+            "type": "number",
+            "description": "Longitude",
+            "required": True,
+        },
+        "dates": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "List of dates in YYYY-MM-DD format",
+            "required": True,
+        },
+    },
+)
+def get_weather(user, latitude=None, longitude=None, dates=None):
     try:
-        raw_latitude = kwargs.get("latitude")
-        raw_longitude = kwargs.get("longitude")
+        raw_latitude = latitude
+        raw_longitude = longitude
         if raw_latitude is None or raw_longitude is None:
             return {"error": "latitude and longitude are required"}
 
         latitude = float(raw_latitude)
         longitude = float(raw_longitude)
-        dates = kwargs.get("dates") or []
+        dates = dates or []
 
         if not isinstance(dates, list) or not dates:
             return {"error": "dates must be a non-empty list"}
@@ -509,44 +608,24 @@ def get_weather(user, **kwargs):
         return {"error": "An unexpected error occurred while fetching weather data"}
 
 
-ALLOWED_KWARGS = {
-    "search_places": {"location", "category", "radius"},
-    "list_trips": set(),
-    "get_trip_details": {"collection_id"},
-    "add_to_itinerary": {
-        "collection_id",
-        "name",
-        "description",
-        "latitude",
-        "longitude",
-        "date",
-        "location_address",
-    },
-    "get_weather": {"latitude", "longitude", "dates"},
-}
-
-
 def execute_tool(tool_name, user, **kwargs):
-    tool_map = {
-        "search_places": search_places,
-        "list_trips": list_trips,
-        "get_trip_details": get_trip_details,
-        "add_to_itinerary": add_to_itinerary,
-        "get_weather": get_weather,
-    }
-
-    tool_fn = tool_map.get(tool_name)
-    if not tool_fn:
+    if tool_name not in _REGISTERED_TOOLS:
         return {"error": f"Unknown tool: {tool_name}"}
 
-    allowed = ALLOWED_KWARGS.get(tool_name, set())
+    tool_fn = _REGISTERED_TOOLS[tool_name]
+
+    sig = inspect.signature(tool_fn)
+    allowed = set(sig.parameters.keys()) - {"user"}
     filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed}
 
     try:
-        return tool_fn(user, **filtered_kwargs)
-    except Exception:
-        logger.exception("Tool execution failed: %s", tool_name)
-        return {"error": "An unexpected error occurred while executing the tool"}
+        return tool_fn(user=user, **filtered_kwargs)
+    except Exception as exc:
+        logger.exception("Tool %s failed", tool_name)
+        return {"error": str(exc)}
+
+
+AGENT_TOOLS = get_tool_schemas()
 
 
 def serialize_tool_result(result):

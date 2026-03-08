@@ -575,6 +575,16 @@ export type ChatProviderCatalogEntry = {
 	api_base: string | null;
 };
 
+export type UserRecommendationPreferenceProfile = {
+	id: string;
+	cuisines: string | null;
+	interests: string[];
+	trip_style: string | null;
+	notes: string | null;
+	created_at: string;
+	updated_at: string;
+};
+
 export type CollectionItineraryDay = {
 	id: string;
 	collection: string; // UUID of the collection

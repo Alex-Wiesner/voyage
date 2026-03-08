@@ -403,6 +403,11 @@ OSRM_BASE_URL = getenv("OSRM_BASE_URL", "https://router.project-osrm.org")
 
 FIELD_ENCRYPTION_KEY = getenv("FIELD_ENCRYPTION_KEY", "")
 
+# Voyage AI Configuration
+VOYAGE_AI_PROVIDER = getenv("VOYAGE_AI_PROVIDER", "openai")
+VOYAGE_AI_MODEL = getenv("VOYAGE_AI_MODEL", "gpt-4o-mini")
+VOYAGE_AI_API_KEY = getenv("VOYAGE_AI_API_KEY", "")
+
 DJANGO_MCP_ENDPOINT = getenv("DJANGO_MCP_ENDPOINT", "api/mcp")
 DJANGO_MCP_AUTHENTICATION_CLASSES = [
     "rest_framework.authentication.TokenAuthentication",

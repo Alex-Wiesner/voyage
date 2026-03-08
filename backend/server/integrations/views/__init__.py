@@ -4,3 +4,4 @@ from .strava_view import StravaIntegrationView
 from .wanderer_view import WandererIntegrationViewSet
 from .user_api_key_view import UserAPIKeyViewSet
 from .recommendation_profile_view import UserRecommendationPreferenceProfileViewSet
+from .ai_settings_view import UserAISettingsViewSet
