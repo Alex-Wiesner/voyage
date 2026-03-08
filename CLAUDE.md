@@ -1,29 +1,35 @@
-# Voyage Development Instructions (OpenCode)
+# Voyage Development Instructions (Claude Code)
 
 ## Project
 - **Name**: Voyage
-- **Purpose**: Self-hosted travel companion web app (fork of AdventureLog)
+- **Purpose**: Build and maintain a self-hosted travel companion web app (fork of AdventureLog).
 - **Stack**: SvelteKit 2 (TypeScript) frontend · Django REST Framework (Python) backend · PostgreSQL + PostGIS · Memcached · Docker · Bun (frontend package manager)
 
 ## Architecture Overview
-- **API proxy pattern**: Frontend never calls Django directly. All API calls go through `frontend/src/routes/api/[...path]/+server.ts`, which proxies to `http://server:8000`, handles cookies, and injects CSRF behavior.
-- **Service ports**:
+- Use the API proxy pattern: never call Django directly from frontend components.
+- Route all frontend API calls through `frontend/src/routes/api/[...path]/+server.ts`.
+- Proxy target is `http://server:8000`; preserve session cookies and CSRF behavior.
+- Service ports:
   - `web` → `:8015`
   - `server` → `:8016`
   - `db` → `:5432`
   - `cache` → internal only
-- **Authentication**: Session-based via `django-allauth`; CSRF token from `/auth/csrf/`; mutating requests send `X-CSRFToken`; mobile middleware path supports `X-Session-Token`.
+- Keep authentication session-based with `django-allauth`.
+- Fetch CSRF token from `/auth/csrf/` and send `X-CSRFToken` on mutating requests.
+- Preserve mobile middleware support for `X-Session-Token`.
 
 ## Codebase Layout
-- **Backend**: `backend/server/`
+- Backend root: `backend/server/`
   - Apps: `adventures/`, `users/`, `worldtravel/`, `integrations/`, `achievements/`, `chat/`
-- **Frontend**: `frontend/src/`
+- Frontend root: `frontend/src/`
   - Routes: `src/routes/`
   - Shared types: `src/lib/types.ts`
   - Components: `src/lib/components/`
-  - i18n: `src/locales/`
+  - Locales: `src/locales/`
 
-## Development Commands
+## Development Workflow
+- Develop Docker-first. Start services with Docker before backend-dependent work.
+- Use these commands:
 
 ### Frontend
 - `cd frontend && npm run format`
@@ -40,11 +46,13 @@
 - `docker compose down`
 
 ## Pre-Commit Checklist
-Run in this order:
+Run in this exact order:
 1. `cd frontend && npm run format`
 2. `cd frontend && npm run lint`
 3. `cd frontend && npm run check`
 4. `cd frontend && npm run build`
+
+**ALWAYS run format before committing.**
 
 ## Known Issues (Expected)
 - Frontend `npm run check`: **3 type errors + 19 warnings** expected
@@ -52,10 +60,10 @@ Run in this order:
 - Docker dev setup has frontend-backend communication issues (500 errors beyond homepage)
 
 ## Key Patterns
-- i18n: use `$t('key')` for user-facing strings
-- API calls: route through proxy at `/api/[...path]/+server.ts`
-- Styling: use DaisyUI semantic colors/classes (`bg-primary`, `text-base-content`, etc.)
-- Security: handle CSRF tokens via `/auth/csrf/` and `X-CSRFToken`
+- i18n: wrap user-facing strings with `$t('key')`
+- API access: always use proxy route `/api/[...path]/+server.ts`
+- Styling: prefer DaisyUI semantic classes (`bg-primary`, `text-base-content`)
+- CSRF handling: use `/auth/csrf/` + `X-CSRFToken`
 
 ## Conventions
 - Do **not** attempt to fix known test/configuration issues as part of feature work.

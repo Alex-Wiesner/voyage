@@ -4,6 +4,50 @@ Voyage is a self-hosted travel companion web application built with SvelteKit fr
 
 **ALWAYS follow these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
+## Architecture
+
+**Stack**: SvelteKit 2 (TypeScript) frontend · Django REST Framework (Python) backend · PostgreSQL + PostGIS database · Memcached · Docker · Bun (frontend package manager)
+
+**Key architectural pattern — API Proxy**: The frontend never calls the Django backend directly. All API calls go to `src/routes/api/[...path]/+server.ts`, which proxies requests to the Django server (`http://server:8000`), injecting CSRF tokens and managing session cookies. This means frontend fetches use relative URLs like `/api/locations/`.
+
+**Services** (docker-compose):
+- `web` → SvelteKit frontend at `:8015`
+- `server` → Django (via Gunicorn + Nginx) at `:8016`
+- `db` → PostgreSQL + PostGIS at `:5432`
+- `cache` → Memcached (internal)
+
+**Authentication**: Session-based via `django-allauth`. CSRF tokens fetched from `/auth/csrf/` and passed as `X-CSRFToken` header on all mutating requests. There's also a `X-Session-Token` header path for mobile clients (handled in middleware).
+
+## Codebase Conventions
+
+**Backend layout**: The Django project lives in `backend/server/`. Apps are `adventures` (core: locations, collections, itineraries, notes, transportation), `users`, `worldtravel` (countries/regions), and `integrations`. Views inside `adventures` are split into per-domain files under `adventures/views/` (e.g. `location_view.py`, `collection_view.py`).
+
+**Backend patterns**:
+- DRF `ModelViewSet` subclasses for all CRUD resources; custom actions with `@action`
+- `get_queryset()` always filters by `user=self.request.user` to enforce ownership
+- `GenericForeignKey` (`content_type` + `object_id`) used in `CollectionItem` to allow collections to contain heterogeneous items
+- Background geocoding runs in a daemon thread via `threading.Thread`
+- Money fields use `djmoney` (`MoneyField`); geospatial queries use PostGIS via `django-geojson`
+
+**Frontend layout**: Source lives in `frontend/src/`. Pages are in `src/routes/` (file-based SvelteKit routing). Shared code lives in `src/lib/`:
+- `src/lib/types.ts` — all TypeScript interfaces (`Location`, `Collection`, `User`, `Visit`, etc.)
+- `src/lib/index.ts` — general utility functions
+- `src/lib/index.server.ts` — server-only utilities (used in `+page.server.ts` and `+server.ts` files)
+- `src/lib/components/` — Svelte components organized by domain (`locations/`, `collections/`, `map/`, `cards/`, `shared/`)
+- `src/locales/` — i18n JSON files (uses `svelte-i18n`); wrap all user-visible strings in `$t('key')`
+
+**Frontend patterns**:
+- Use `$t('key')` from `svelte-i18n` for all user-facing strings; add new keys to locale files
+- API calls always use `credentials: 'include'` and the `X-CSRFToken` header (get token from the `csrfToken` store/prop)
+- Reactive state updates require reassignment to trigger Svelte reactivity: `items[i] = updated; items = items`
+- DaisyUI component classes (e.g. `btn`, `card`, `modal`) plus Tailwind utilities for layout; use daisyUI semantic color names (`bg-primary`, `text-base-content`) not raw Tailwind colors so themes work
+- Map features use `svelte-maplibre` with MapLibre GL; geospatial data is GeoJSON
+
+**Running a single Django test**:
+```bash
+docker compose exec server python3 manage.py test adventures.tests.TestLocationAPI
+```
+
 ## Working Effectively
 
 ### Essential Setup (NEVER CANCEL - Set 60+ minute timeouts)
