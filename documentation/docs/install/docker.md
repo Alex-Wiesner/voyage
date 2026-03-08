@@ -79,4 +79,14 @@ Once you've configured `.env`, you can start Voyage with:
 docker compose up -d
 ```
 
+## Frontend type check in Docker (dev/CI)
+
+Use the development compose file so the frontend container has Node + bun tooling available:
+
+```bash
+docker compose -f docker-compose.dev.yml run --rm --no-deps --build web sh -lc "bun install --frozen-lockfile && bun run check"
+```
+
+This runs the Svelte type check fully inside Docker (no host Node/bun required).
+
 Enjoy using Voyage! 🎉

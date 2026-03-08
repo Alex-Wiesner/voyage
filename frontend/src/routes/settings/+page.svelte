@@ -4,6 +4,7 @@
 	import { addToast } from '$lib/toasts';
 	import { CURRENCY_LABELS, CURRENCY_OPTIONS } from '$lib/money';
 	import type { ImmichIntegration, User } from '$lib/types.js';
+	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { t } from 'svelte-i18n';
@@ -14,7 +15,7 @@
 	import StravaLogo from '$lib/assets/strava.svg';
 	import WandererLogoSrc from '$lib/assets/wanderer.svg';
 
-	export let data: any;
+	export let data: PageData;
 	console.log(data);
 	let user: User;
 	let emails: typeof data.props.emails;
