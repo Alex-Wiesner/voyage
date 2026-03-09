@@ -1,0 +1,71 @@
+# Voyage Cursor Rules (local-only, gitignored)
+
+## Project Summary
+- Voyage is a self-hosted travel companion app (AdventureLog fork).
+- Stack: SvelteKit 2 + TypeScript frontend, Django REST Framework backend, PostgreSQL/PostGIS, Memcached, Docker, Bun.
+
+## Pre-Release Policy
+Voyage is **pre-release** — not yet in production use. During pre-release:
+- Architecture-level changes are allowed, including replacing core libraries (e.g. LiteLLM).
+- Prioritize correctness, simplicity, and maintainability over backward compatibility.
+- Before launch, this policy must be revisited and tightened for production stability.
+
+## Architecture Essentials
+- Frontend never calls Django directly.
+- Route all API requests through `frontend/src/routes/api/[...path]/+server.ts` (proxy to `http://server:8000`).
+- Services: `web:8015`, `server:8016`, `db:5432`, `cache` internal.
+- Auth: session-based (`django-allauth`), CSRF from `/auth/csrf/`, send `X-CSRFToken` for mutating requests.
+
+## Key Locations
+- Frontend: `frontend/src/`
+- Backend: `backend/server/`
+- Django apps: `adventures/`, `users/`, `worldtravel/`, `integrations/`, `achievements/`, `chat/`
+- Types: `frontend/src/lib/types.ts`
+- i18n: `frontend/src/locales/`
+
+## Commands
+- Frontend:
+  - `cd frontend && bun run format`
+  - `cd frontend && bun run lint`
+  - `cd frontend && bun run check`
+  - `cd frontend && bun run build`
+  - `cd frontend && bun install`
+- Backend:
+  - `docker compose exec server python3 manage.py test`
+  - `docker compose exec server python3 manage.py migrate`
+  - Use `uv` for local Python tooling when applicable
+- Docker:
+  - `docker compose up -d`
+  - `docker compose down`
+
+## Pre-Commit
+Run in order: format → lint → check → build.
+
+## Known Issues
+- `bun run check`: 0 errors + 6 warnings expected (pre-existing in `CollectionRecommendationView.svelte` + `RegionCard.svelte`).
+- Backend tests: 6/39 pre-existing failures expected (9 new chat tests all pass).
+- Docker dev setup may show frontend-backend 500 errors beyond homepage.
+
+## Conventions
+- Use `$t('key')` for user-facing strings.
+- Use DaisyUI semantic colors/classes (`bg-primary`, `text-base-content`).
+- Chat providers: dynamic catalog from `GET /api/chat/providers/`; configured in `CHAT_PROVIDER_CONFIG`.
+- Chat model override: dropdown selector fed by `GET /api/chat/providers/{provider}/models/`; per-provider persistence via `localStorage` key `voyage_chat_model_prefs`; backend `send_message` accepts optional `model`.
+- Chat context: collection chats inject collection UUID + multi-stop itinerary context; system prompt guides `get_trip_details`-first reasoning and confirms only before first `add_to_itinerary`.
+- Chat tool output: `role=tool` messages hidden from display; tool outputs render as concise summaries; persisted tool rows reconstructed on reload via `rebuildConversationMessages()`.
+- Chat errors: `_safe_error_payload()` maps LiteLLM exceptions to sanitized user-safe categories (never raw `exc.message`).
+- Invalid tool calls (missing required args) are detected and short-circuited with a user-visible error — not replayed into history.
+- Chat agent tools (`get_trip_details`, `add_to_itinerary`) respect collection sharing — both owners and `shared_with` members can use them; `list_trips` remains owner-only.
+- Do **not** attempt to fix known test/config issues during feature work.
+- Commit and merge completed feature branches promptly once validation passes (avoid leaving finished work unmerged).
+
+## .memory Files
+- At the start of any task, read `.memory/manifest.yaml` to discover available files, then read `system.md` and relevant `knowledge/` files for project context.
+- Read `.memory/decisions.md` for architectural decisions and review verdicts.
+- Check `.memory/plans/` and `.memory/research/` for prior work on related topics.
+- These files capture decisions, review verdicts, security findings, and plans from prior sessions.
+- Do **not** duplicate this info into code comments — `.memory/` is the source of truth for project history.
+
+## Instruction File Sync
+- `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, and the Copilot CLI custom instructions must always be kept in sync.
+- Whenever any one is updated, apply the equivalent change to all the others.

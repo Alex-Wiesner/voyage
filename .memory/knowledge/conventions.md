@@ -9,6 +9,7 @@
 
 ## Backend Patterns
 - **Views**: DRF `ModelViewSet` subclasses; `get_queryset()` filters by `user=self.request.user`
+- **Shared-access queries**: Use `Q(user=user) | Q(shared_with=user)).distinct()` for collection lookups that should include shared members (e.g. chat agent tools). Always `.distinct()` to avoid `MultipleObjectsReturned` when owner is also in `shared_with`.
 - **Money**: `djmoney` MoneyField
 - **Geo**: PostGIS via `django-geojson`
 - **Chat providers**: Dynamic catalog from `GET /api/chat/providers/`; configured in `CHAT_PROVIDER_CONFIG`

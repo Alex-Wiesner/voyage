@@ -15,7 +15,7 @@ Voyage is **pre-release** — not yet in production use. During pre-release:
 - Use the API proxy pattern: never call Django directly from frontend components.
 - Route all frontend API calls through `frontend/src/routes/api/[...path]/+server.ts`.
 - Proxy target is `http://server:8000`; preserve session cookies and CSRF behavior.
-- AI chat is embedded in Collections → Recommendations via `AITravelChat.svelte`. There is no standalone `/chat` route. Chat providers are loaded dynamically from `GET /api/chat/providers/` (backed by LiteLLM runtime providers + custom entries like `opencode_zen`). Chat conversations stream via SSE through `/api/chat/conversations/`. Default AI provider/model saved via `UserAISettings` in DB (authoritative over browser localStorage). LiteLLM errors are mapped to sanitized user-safe messages via `_safe_error_payload()` (never exposes raw exception text). Invalid tool calls (missing required args) are detected and short-circuited with a user-visible error — not replayed into history.
+- AI chat is embedded in Collections → Recommendations via `AITravelChat.svelte`. There is no standalone `/chat` route. Chat providers are loaded dynamically from `GET /api/chat/providers/` (backed by LiteLLM runtime providers + custom entries like `opencode_zen`). Chat conversations stream via SSE through `/api/chat/conversations/`. Default AI provider/model saved via `UserAISettings` in DB (authoritative over browser localStorage). LiteLLM errors are mapped to sanitized user-safe messages via `_safe_error_payload()` (never exposes raw exception text). Invalid tool calls (missing required args) are detected and short-circuited with a user-visible error — not replayed into history. Chat agent tools (`get_trip_details`, `add_to_itinerary`) respect collection sharing — both owners and `shared_with` members can use them; `list_trips` remains owner-only.
 - Service ports:
   - `web` → `:8015`
   - `server` → `:8016`
@@ -65,7 +65,7 @@ Run in this exact order:
 
 ## Known Issues (Expected)
 - Frontend `bun run check`: **0 errors + 6 warnings** expected (pre-existing in `CollectionRecommendationView.svelte` + `RegionCard.svelte`)
-- Backend tests: **6/30 fail** (pre-existing: 2 user email key errors + 4 geocoding API mocks)
+- Backend tests: **6/39 fail** (pre-existing: 2 user email key errors + 4 geocoding API mocks; 9 new chat tests all pass)
 - Docker dev setup has frontend-backend communication issues (500 errors beyond homepage)
 
 ## Key Patterns

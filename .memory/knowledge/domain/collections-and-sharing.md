@@ -26,6 +26,12 @@
 - On unshare/leave, departing user's locations are removed from collection (not deleted)
 - `duplicate` action creates a private copy with no `shared_with` transfer
 
+### Chat Agent Tool Access
+- `get_trip_details` and `add_to_itinerary` tools authorize using `Q(user=user) | Q(shared_with=user)` — shared members can use AI chat tools on shared collections.
+- `list_trips` remains owner-only (shared collections not listed).
+- `add_to_itinerary` assigns `Location.user = shared_user` (shared users own their contributed locations), consistent with REST API behavior.
+- See [patterns/chat-and-llm.md](../patterns/chat-and-llm.md#shared-trip-tool-access).
+
 ## Itinerary Architecture
 
 ### Primary Component

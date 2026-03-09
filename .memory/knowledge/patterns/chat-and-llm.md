@@ -41,7 +41,12 @@
 - UUID injection only occurs when collection lookup succeeds AND user is owner or `shared_with` member (authorization gate).
 - System prompt includes two-phase confirmation guidance: confirm only before the **first** `add_to_itinerary` action; after explicit user approval phrases ("yes", "go ahead", "add them"), proceed directly without re-confirming.
 - `get_trip_details` DoesNotExist returns `"collection_id is required and must reference a trip you can access"` (does NOT match short-circuit regex due to `fullmatch` — correct, this is an invalid-value error, not missing-param).
-- Known pre-existing: `get_trip_details` filters `user=user` only — shared-collection members get UUID context but tool returns DoesNotExist. Low severity.
+
+### Shared-Trip Tool Access
+- `get_trip_details` and `add_to_itinerary` authorize collections using `Q(user=user) | Q(shared_with=user)` with `.distinct()` — both owners and shared members can access.
+- `list_trips` remains owner-only by design.
+- `.distinct()` prevents `MultipleObjectsReturned` when the owner is also present in `shared_with`.
+- Non-members receive `DoesNotExist` errors through existing error paths.
 
 ## Tool Output Rendering
 - Frontend `AITravelChat.svelte` hides raw `role=tool` messages via `visibleMessages` filter (`messages.filter(msg => msg.role !== 'tool')`).
@@ -62,7 +67,8 @@
 - Sidebar defaults to closed in embedded mode (`let sidebarOpen = !embedded;`); `lg:flex` ensures always-visible on desktop.
 - Quick-action chips use `btn-xs` + `overflow-x-auto` for compact embedded fit.
 - Streaming indicator visible inside last assistant bubble throughout entire generation (conditioned on `isStreaming && msg.id === lastVisibleMessageId`).
-- Known low-priority: `aria-label` values on sidebar toggle and settings button are hardcoded English (should use `$t()`). `<details>` dropdown does not auto-close on outside click.
+- Aria-label values on sidebar toggle and settings button use i18n keys (`chat_a11y.show_conversations_aria`, `chat_a11y.hide_conversations_aria`, `chat_a11y.ai_settings_aria`); key parity across all 20 locale files.
+- Settings dropdown closes on outside click (`pointerdown`/`mousedown`/`touchstart` listeners) and `Escape` keypress, with mount-time listener cleanup.
 
 ## OpenCode Zen Provider
 - Provider ID: `opencode_zen`
