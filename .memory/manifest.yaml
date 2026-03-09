@@ -74,7 +74,7 @@ categories:
     group: sessions
 
   - path: plans/chat-provider-fixes.md
-    description: "Chat provider fixes plan (COMPLETE) — chat-loop-hardening, default-ai-settings, suggestion-add-flow workstreams with full review/test records"
+    description: "Chat provider fixes plan (COMPLETE) — chat-loop-hardening, default-ai-settings, suggestion-add-flow, chat-tool-grounding-and-confirmation, chat-tool-output-cleanup, embedded-chat-ux-polish workstreams with full review/test records"
     group: plans
 
   # Deprecated (content migrated)

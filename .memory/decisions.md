@@ -296,3 +296,79 @@
 - **Prior findings**: hardcoded `gpt-4o-mini` WARNING (decisions.md:224) confirmed resolved. `_safe_error_payload` sanitization guardrail (decisions.md:120) confirmed satisfied.
 - **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#suggestion-add-flow)
 - **Date**: 2026-03-09
+
+## Correctness Review: chat-tool-grounding-and-confirmation
+- **Verdict**: APPROVED (score 3)
+- **Lens**: Correctness
+- **Scope**: UUID grounding in trip context, reduced re-confirmation behavior in system prompt, error wording alignment with required-arg short-circuit regex.
+- **Files reviewed**: `backend/server/chat/views/__init__.py` (lines 255-296, 135-153), `backend/server/chat/llm_client.py` (lines 322-350), `backend/server/chat/agent_tools.py` (lines 319-406, 590-618)
+- **Acceptance criteria verification**:
+  - AC1 (grounded UUID): ✅ — `views/__init__.py:256-259` injects validated `collection.id` into system prompt `## Trip Context` with explicit tool-usage instruction ("use this exact collection_id for get_trip_details and add_to_itinerary"). Collection validated for ownership/sharing at lines 242-253.
+  - AC2 (reduced re-confirmation): ✅ — `llm_client.py:340-341` provides two-phase instruction: confirm before first `add_to_itinerary`, then proceed directly after approval phrases. Prompt-level instruction is the correct approach (hard-coded confirmation state would be fragile).
+  - AC3 (error wording alignment): ✅ — All error strings traced through `_is_required_param_tool_error`:
+    - `"dates is required"` (agent_tools.py:603) → matches regex. **Closes prior known gap** (decisions.md:166, tester:183).
+    - `"collection_id is required"` (agent_tools.py:322) → matches regex. Correct.
+    - `"collection_id is required and must reference a trip you can access"` (agent_tools.py:402) → does NOT match `fullmatch` regex. Correct — this is an invalid-value error, not a missing-param error; should NOT trigger short-circuit.
+    - No false positives introduced. No successful tool flows degraded.
+- **Findings**:
+  - WARNING: [agent_tools.py:401-403] Semantic ambiguity in `get_trip_details` DoesNotExist error: `"collection_id is required and must reference a trip you can access"` conflates missing-param and invalid-value failure modes. The prefix "collection_id is required" may mislead the LLM into thinking it omitted the parameter rather than supplied a wrong one, reducing chance it retries with the grounded UUID from context. Compare `add_to_itinerary` DoesNotExist which returns the clearer `"Trip not found"`. A better message: `"No accessible trip found for the given collection_id"`. (confidence: MEDIUM)
+- **Suggestions**: (1) Reword `get_trip_details` DoesNotExist to `"No accessible trip found for the given collection_id"` for clearer LLM self-correction. (2) `get_trip_details` only filters `user=user` (not `shared_with`) — shared users will get DoesNotExist despite having `send_message` access. Pre-existing, now more visible with UUID grounding. (3) Malformed UUID strings fall to generic "unexpected error" handler — a `ValidationError` catch returning `"collection_id must be a valid UUID"` would improve LLM self-correction. Pre-existing.
+- **No regressions**: `_build_llm_messages` orphan trimming intact. Streaming loop structure unchanged. `MAX_TOOL_ITERATIONS` guard intact.
+- **Prior findings**: `get_weather` "dates must be a non-empty list" gap (decisions.md:166) now **RESOLVED** — changed to "dates is required". Multi-tool orphan fixes (decisions.md:272-281) confirmed intact.
+- **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#chat-tool-grounding-and-confirmation)
+- **Date**: 2026-03-09
+
+## Correctness Review: embedded-chat-ux-polish
+- **Verdict**: CHANGES-REQUESTED (score 3)
+- **Lens**: Correctness
+- **Scope**: Embedded chat header de-crowding (settings dropdown), height constraints, sidebar accessibility, streaming indicator visibility, and visual language preservation.
+- **File reviewed**: `frontend/src/lib/components/AITravelChat.svelte`
+- **Acceptance criteria**:
+  - AC1 (header de-crowded): ✅ — Provider/model selectors moved into `<details>` gear-icon dropdown, leaving header with only toggle + title + ⚙️ button.
+  - AC2 (layout stability): ✅ — `h-[65vh]` with `min-h-[30rem]`/`max-h-[46rem]` bounds. Embedded uses `bg-base-100` + border (softer treatment). Quick-action chips use `btn-xs` + `overflow-x-auto` for embedded.
+  - AC3 (streaming indicator visible): ✅ — Indicator inside last assistant bubble, conditioned on `isStreaming && msg.id === lastVisibleMessageId`. Visible throughout entire generation, not just before first token.
+  - AC4 (existing features preserved): ✅ — All tool result rendering, conversation management, date selector modal, quick actions, send button states intact.
+- **Findings**:
+  - WARNING: [AITravelChat.svelte:61,624] `sidebarOpen` defaults to `true`; sidebar uses fixed `w-60` inline layout. On narrow/mobile viewports (≤640px) in embedded mode, sidebar consumes 240px leaving ≈135px for chat content — functionally unusable. Fix: `let sidebarOpen = !embedded;` or media-aware init. (confidence: HIGH)
+- **Suggestions**: (1) `aria-label` values at lines 678 and 706 are hardcoded English — should use `$t()` per project i18n convention. (2) `<details>` dropdown doesn't auto-close on outside click, unlike focus-based dropdowns elsewhere in codebase — consider tabindex-based pattern or click-outside handler for consistency.
+- **Next**: Set `sidebarOpen` default to `false` for embedded mode (e.g., `let sidebarOpen = !embedded;`).
+- **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#embedded-chat-ux-polish)
+- **Date**: 2026-03-09
+
+## Re-Review: embedded-chat-ux-polish — sidebar default fix
+- **Verdict**: APPROVED (score 0)
+- **Lens**: Correctness
+- **Scope**: Targeted re-review of `sidebarOpen` initialization fix only.
+- **File reviewed**: `frontend/src/lib/components/AITravelChat.svelte`
+- **Finding resolution**: Original WARNING (`sidebarOpen` defaulting `true` in embedded mode, line 61→63) is resolved. Line 63 now reads `let sidebarOpen = !embedded;`, which initializes to `false` when `embedded=true`. Sidebar CSS at line 688 applies `hidden` when `sidebarOpen=false`, overridden by `lg:flex` on desktop — correct responsive pattern. Non-embedded mode unaffected (`!false = true`). No new issues introduced.
+- **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#embedded-chat-ux-polish)
+- **Date**: 2026-03-09
+
+## Re-Review: chat-tool-output-cleanup — tool_results reconstruction on reload
+- **Verdict**: APPROVED (score 0)
+- **Lens**: Correctness (targeted re-review)
+- **Scope**: Fix for CRITICAL finding (decisions.md:262-267) — tool summaries and rich cards lost on conversation reload because `tool_results` was ephemeral and never reconstructed from persisted `role=tool` messages.
+- **File reviewed**: `frontend/src/lib/components/AITravelChat.svelte` (lines 31-39, 271-340, 598)
+- **Original finding status**: **RESOLVED**. `selectConversation()` now pipes `data.messages` through `rebuildConversationMessages()` (line 276), which iterates persisted messages, parses `role=tool` rows via `parseStoredToolResult()`, and attaches them as `tool_results` on the preceding assistant message. `visibleMessages` filter (line 598) still hides raw tool rows. Both streaming and reload paths now produce identical `tool_results` data.
+- **Verification of fix correctness**:
+  - `ChatMessage` type (lines 36-37) adds `tool_calls?: Array<{ id?: string }>` and `tool_call_id?: string` — matches backend serializer fields exactly (`ChatMessageSerializer` returns `tool_calls`, `tool_call_id`, `name`).
+  - `rebuildConversationMessages` (lines 298-340): creates shallow copies (no input mutation), tracks `activeAssistant` for messages with non-empty `tool_calls`, attaches parsed tool results to assistant, auto-detaches when all expected results collected (`tool_results.length >= toolCallIds.length`). Correctly handles: (a) legacy data without `tool_call_id` (positional attachment), (b) `tool_call_id`-based matching when IDs are present, (c) multi-tool-call assistant messages, (d) assistant messages without `tool_calls` (skipped).
+  - `parseStoredToolResult` (lines 280-296): guards on `role !== 'tool'`, uses `msg.name` from serializer, JSON.parse with graceful fallback on non-JSON content. No null dereference risks.
+  - Streaming path (lines 432-438) independently populates `tool_results` during live SSE — no interference with reload path.
+- **No new issues introduced**: No async misuse, no null dereference, no off-by-one, no mutation of shared state, no contract mismatch with backend serializer.
+- **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#chat-tool-output-cleanup), original CRITICAL at decisions.md:262-267
+- **Date**: 2026-03-09
+
+## Tester Validation: embedded-chat-ux-polish
+- **Status**: PASS (Both Standard + Adversarial passes)
+- **Scope**: Sidebar default closed for embedded mode, compact header with settings dropdown, bounded height, chip scroll behavior, streaming indicator visibility.
+- **Key findings**:
+  - `sidebarOpen = !embedded` (line 63) correctly initializes to `false` in embedded mode; `lg:flex` on sidebar ensures always-visible on desktop as intended — correct responsive pattern.
+  - `lastVisibleMessageId` reactive (`$:`) — no stale-indicator risk during streaming.
+  - All i18n keys used in header/settings dropdown confirmed present in `en.json`.
+  - `<details>` dropdown does not auto-close on outside click — UX inconvenience, not a defect.
+  - `aria-label` at lines 743 and 771 are hardcoded English (i18n convention violation, low severity).
+- **MUTATION_ESCAPES**: 0/4
+- **Residual**: Two low-priority follow-ups (aria-label i18n, dropdown outside-click behavior) — not blocking.
+- **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#tester-validation--embedded-chat-ux-polish)
+- **Date**: 2026-03-09

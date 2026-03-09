@@ -253,6 +253,10 @@ class ChatViewSet(viewsets.ModelViewSet):
                 pass
 
         if collection:
+            context_parts.append(
+                "Collection UUID (use this exact collection_id for get_trip_details and add_to_itinerary): "
+                f"{collection.id}"
+            )
             itinerary_stops = []
             seen_stops = set()
             for location in collection.locations.select_related(

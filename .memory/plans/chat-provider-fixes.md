@@ -246,3 +246,151 @@ Alternative (Vercel AI SDK):
 **Cleanup required:** Two test artifact files left on host (not git-tracked, safe to delete):
 - `/home/alex/projects/voyage/test_suggestion_flow.py`
 - `/home/alex/projects/voyage/suggestion-modal-error-state.png`
+
+## Completion Note — `embedded-chat-ux-polish` (2026-03-09)
+
+- Updated `frontend/src/lib/components/AITravelChat.svelte` embedded UX only: moved provider/model selectors into a compact header settings dropdown, reduced embedded sidebar width, and added sidebar toggle accessibility attributes (`aria-label`, `aria-expanded`, `aria-controls`).
+- Replaced rigid embedded height (`h-[70vh]`) with a bounded strategy (`h-[65vh]` + min/max constraints) and softened embedded card treatment for better fit in recommendations layouts across desktop/mobile.
+- Kept streaming status visible throughout generation (not only before first token) and tightened embedded quick-action/input alignment with compact chip sizing + scrollable chip row behavior.
+
+## Completion Note — `chat-tool-output-cleanup` (2026-03-09)
+
+- Updated `frontend/src/lib/components/AITravelChat.svelte` to suppress standalone rendering of persisted `role=tool` messages, so reloaded conversations no longer surface raw tool payload rows.
+- Replaced inline raw-JSON fallback rendering with concise user-facing summaries for `get_trip_details`, `list_trips`, `add_to_itinerary`, and `get_weather`, while keeping existing rich cards for `search_places` and `web_search`.
+- Added safe error summarization for inline tool results so tool error payloads no longer display raw JSON in the normal chat UI.
+
+## Review Verdict — `chat-tool-output-cleanup` (2026-03-09)
+
+### STATUS: CHANGES-REQUESTED (score 13)
+
+**CRITICAL: Tool summaries and rich cards lost on conversation reload** (`AITravelChat.svelte:534,782`). `tool_results` is a frontend-only ephemeral field populated exclusively during SSE streaming (line 373). When a conversation is reloaded via `selectConversation()`, the backend serializer returns `role=tool` messages with raw payloads, but the new `visibleMessages` filter (line 534) hides them. No reconstruction step maps persisted `role=tool` messages back onto their preceding assistant message's `tool_results` array. Result: after page refresh or conversation switch, all tool activity indicators (summaries, search_places cards, web_search links) silently vanish. The user sees only the assistant's text with no tool context. (confidence: HIGH)
+
+**WARNING: Acceptance criterion partially unmet — "reloaded conversations do not expose raw tool payloads"** is satisfied (filter works), but the related user expectation that tool activity "remains understandable" on reload is violated because no tool indicators appear at all on reloaded conversations.
+
+**What was checked and confirmed safe:**
+- `visibleMessages` filter correctly excludes `role=tool` messages from display (line 534). No raw JSON blobs shown during streaming or on reload.
+- `getToolSummary()` logic is safe: uses Svelte text interpolation (not `{@html}`), so LLM-sourced names (trip names, location names) are auto-escaped. No XSS vector.
+- Error tool results render a generic "could not be completed" message rather than raw error JSON. Correct and safe.
+- Streaming state management is correct: `streamingContent` reset on each send (line 302), `isStreaming` cleared in `finally` (line 387). No stale state.
+- `lastVisibleMessageId` correctly tracks the last visible (non-tool) message for the streaming indicator.
+- `asRecord()` null guard is correct — rejects null, arrays, and non-objects.
+- Fallback summary for unknown tool names (line 599-602) is generic and safe.
+
+**NEXT (fix actions):**
+In `selectConversation()`, after loading `data.messages`, reconstruct `tool_results` on each assistant message by scanning the immediately following `role=tool` messages (which share `tool_call_id` with the assistant's `tool_calls` entries). For each tool message, parse its `content` (JSON string from `serialize_tool_result`), extract the tool `name` from the message's `name` field, and push a `ToolResultEntry` onto the preceding assistant message's `tool_results`. This ensures summaries and rich cards appear on reload. The `visibleMessages` filter continues to hide the raw tool rows.
+
+## Tester Validation — `chat-tool-output-cleanup` (2026-03-09)
+
+### STATUS: PASS
+
+**Evidence from lead (runtime):** Page reload of seeded conversation with persisted `get_trip_details` assistant tool call + `role=tool` result showed `🗺️ Loaded details for test (0 itinerary items).` — no raw JSON. Sidebar remained functional. Reviewer-APPROVED follow-up fix confirmed implemented and working.
+
+**Standard pass findings:**
+
+- `visibleMessages` filter (`messages.filter(msg => msg.role !== 'tool')`) correctly suppresses raw `role=tool` rows from display. Live DOM scan of 10 chat bubbles across two conversations found zero raw JSON blobs (`"itinerary":`, `"tool_call_id":` patterns absent).
+- `rebuildConversationMessages()` scans messages in one pass: sets `activeAssistant` on each assistant-with-tool-calls message; attaches subsequent `role=tool` rows as `ToolResultEntry` objects matched via `tool_call_id`. `activeAssistant` overridden on each new assistant message, preventing cross-turn leakage.
+- `parseStoredToolResult()` JSON-parses tool content; falls back to raw string on failure. Both paths produce a valid `ToolResultEntry` — no crash.
+- `getToolSummary()` produces human-readable summaries for `get_trip_details`, `list_trips`, `add_to_itinerary`, `get_weather`; generic fallback for unknown tools. Error payloads render `"<name> could not be completed."` — no raw JSON.
+- Backend `ChatMessageSerializer` confirmed to include `name`, `tool_call_id`, and `tool_calls` fields required for reconstruction.
+- Multi-turn live conversation validated: `⚠️ get trip details could not be completed.` + `🧳 Found 1 trip.` + `🗺️ Loaded details for test (6 itinerary items).` — all clean summaries, no raw JSON.
+- Text-only conversation (no tool calls) unaffected — loads correctly with zero tool artifacts.
+- Frontend build: `bun run lint`, `bun run check`, `bun run build` all passed (per lead).
+
+**Adversarial pass findings (7 hypotheses, all safe):**
+
+1. **Hypothesis: `assistant.tool_calls` with null IDs causes cross-turn leakage.** When `toolCallIds=[]`, the guard `msg.tool_call_id && toolCallIds.length > 0 && !includes` short-circuits at `length=0` → tool IS attached (permissive loose match). But the next `assistant` message overrides `activeAssistant` before its own tool rows, so no cross-turn pollution occurs. **Acceptable; null IDs cannot arise from correctly persisted backend rows.**
+2. **Hypothesis: orphaned `role=tool` after non-tool-call assistant attaches to wrong message.** `activeAssistant=null` when `tool_calls` absent/empty. Tool row skipped. **Not vulnerable.**
+3. **Hypothesis: malformed JSON in tool content crashes reconstruction.** Try/catch fallback returns `result: rawString`. `asRecord(string)` → `null`; `getToolSummary` hits generic branch. **Safe; no crash, no raw JSON exposed.**
+4. **Hypothesis: `name=null` on tool message causes downstream crash.** `msg.name || 'tool'` guard → `'tool'`. Generic fallback renders `"tool completed."` **Safe.**
+5. **Hypothesis: multi-tool assistant reconstructs both in correct order.** Both `call_A` and `call_B` rows attach to same assistant; `activeAssistant` cleared after count reaches `toolCallIds.length`. **Verified: 2 results attached in correct order.**
+6. **Hypothesis: empty `messages` array crashes.** Returns `[]` immediately. **Safe.**
+7. **Hypothesis: `role=tool` before any assistant crashes or attaches to user message.** `activeAssistant=null` at start; tool row skipped. **Safe.**
+
+**MUTATION_ESCAPES: 1/7** — The `toolCallIds.length > 0` guard in the clear condition means an assistant with all-null tool_call IDs never has `activeAssistant` cleared post-attachment. A second stray tool row would attach to the same assistant. Extremely low practical likelihood (backend always persists real IDs from LiteLLM); no production scenario produces this DB state.
+
+**FLAKY: 0**
+
+**COVERAGE: N/A** — No automated frontend test suite for `AITravelChat.svelte`. All validation via in-browser function evaluation (7 unit-level cases) + visual browser confirmation. Recommended follow-up: Playwright e2e test seeding a conversation with `role=tool` rows and verifying summary cards render on reload.
+
+**Screenshot evidence:** Captured `tool-summary-reload-verification.png` — showed `Tool summary reload test` conversation with assistant text + `🗺️ Loaded details for test (0 itinerary items).` summary card, no raw JSON. Screenshot deleted post-verification (artifact not git-tracked).
+
+## Tester Validation — `embedded-chat-ux-polish` (2026-03-09)
+
+### STATUS: PASS
+
+**Lead evidence accepted:**
+- `bun run lint`, `bun run check` (0 errors, 6 pre-existing warnings), and `bun run build` all passed.
+- Browser-validated: embedded chat opens with sidebar closed, compact header (`Show conversations` toggle + title + ⚙️ gear), recommendations area remains visible. Sidebar toggle opens conversation list correctly.
+- Reviewer APPROVED after sidebar-default follow-up fix (`let sidebarOpen = !embedded;` at line 63 confirmed in code).
+
+**Standard pass findings (code inspection):**
+
+- AC1 (header de-crowded): ✅ Provider/model selectors moved into `<details class="dropdown dropdown-end">` at line 768. Header contains only: hamburger toggle (mobile) + ✈️ title + ⚙️ gear summary button.
+- AC2 (layout stability): ✅ `h-[65vh]` + `min-h-[30rem]` + `max-h-[46rem]` on embedded mode (lines 683–685). `bg-base-100` + border treatment for embedded card (lines 674–677). Quick-action chips use `btn-xs` + `overflow-x-auto` + `pb-1` for embedded (lines 927–922).
+- AC3 (streaming indicator): ✅ `isStreaming && msg.id === lastVisibleMessageId` condition (line 903) inside last assistant bubble. `lastVisibleMessageId` is a reactive derived value from `visibleMessages` (line 599) — stays current throughout stream.
+- AC4 (sidebar default): ✅ `let sidebarOpen = !embedded;` (line 63). Sidebar CSS `{sidebarOpen ? '' : 'hidden'} lg:flex` (line 691) — starts hidden in embedded mode on mobile/tablet, always visible on lg+ (correct responsive pattern). Toggle button is `lg:hidden` (line 739).
+- AC5 (existing features preserved): ✅ Tool result rendering, conversation management, date selector modal, quick actions, send button states unchanged.
+
+**Adversarial pass findings:**
+
+1. **Hypothesis: desktop (lg+) embedded layout still crushes content because sidebar is always visible via `lg:flex`.** Expected: content area unusable. Observed: `lg:flex` overrides `hidden` on lg+ — this is the intended responsive pattern. On lg+ screens there is enough horizontal space for sidebar (`w-60`) + chat content. `min-w-0` on chat panel prevents overflow. **Not a defect; designed behavior confirmed by reviewer.**
+
+2. **Hypothesis: `<details>` settings dropdown doesn't close on outside click — user trapped.** Expected: frustration UX. Observed: DaisyUI `<details>` requires another click on summary to close. `settingsOpen = false` init confirmed (line 80). **Non-blocking UX inconvenience; pre-existing SUGGESTION from reviewer, not a blocking defect.**
+
+3. **Hypothesis: `lastVisibleMessageId` becomes stale during streaming, causing indicator to appear on wrong message.** Expected: indicator shows on previous message. Observed: `lastVisibleMessageId` is reactive (`$:` at line 599) — updates synchronously when `visibleMessages` changes. No stale-closure risk. **Not vulnerable.**
+
+4. **Hypothesis: `visibleMessages` filter excludes only `role=tool` — if all messages are tool messages, `lastVisibleMessageId` is `undefined` and streaming indicator never shows.** Expected: silent stream with no indicator. Observed: In practice, every send appends a `user` message and then an `assistant` streaming message — there will always be a non-tool message for the indicator to attach to. **Acceptable; degenerate case impossible in normal flow.**
+
+5. **Hypothesis: `aria-label` hardcoded English strings at lines 743 and 771 violate i18n convention.** Expected: non-English users see English screen-reader labels. Observed: lines 743 (`'Hide conversations'`/`'Show conversations'`) and 771 (`"AI settings"`) are hardcoded. **Low-severity SUGGESTION from reviewer — non-blocking, accessibility-only impact.**
+
+**MUTATION_ESCAPES: 0/4** — all critical logic paths for this UX-only feature are covered by the responsive CSS (no off-by-one possible) and the reactive `lastVisibleMessageId` derivation.
+
+**FLAKY: 0**
+
+**COVERAGE: N/A** — No automated test suite for frontend component; all validation via code inspection + lead browser evidence.
+
+**Residual low-priority items (follow-up suggested, not blocking):**
+- `aria-label` values at lines 743 and 771 should use `$t()` per i18n convention.
+- `<details>` dropdown does not auto-close on outside click (SUGGESTION from reviewer).
+
+## Completion Note — `chat-tool-grounding-and-confirmation` (2026-03-09)
+
+- `send_message()` trip context now injects the active collection UUID with explicit instruction that it is the `collection_id` for `get_trip_details` and `add_to_itinerary`, reducing wrong-trip-id hallucinations.
+- System prompt itinerary guidance now requires confirmation only before the first `add_to_itinerary` action; after explicit user approval phrases (e.g., "yes", "go ahead", "add them", "just add things there"), the assistant is instructed to stop re-confirming and call tools directly.
+- Tool error wording was tightened to align with required-arg short-circuit behavior: `get_trip_details` inaccessible/missing trips now return a required-arg-style `collection_id` error string, and `get_weather` empty dates now return `"dates is required"`.
+- Review verdict (2026-03-09): **APPROVED** (score 3). One WARNING: `get_trip_details` DoesNotExist error `"collection_id is required and must reference a trip you can access"` conflates missing-param and invalid-value semantics — may mislead LLM into thinking param was omitted rather than wrong. Does NOT create false-positive short-circuit (regex `fullmatch` correctly rejects the trailing clause). Closes prior known gap: `get_weather` "dates must be a non-empty list" now "dates is required" (matches regex). See [decisions.md](../decisions.md#correctness-review-chat-tool-grounding-and-confirmation).
+
+## Tester Validation — `chat-tool-grounding-and-confirmation` (2026-03-09)
+
+### STATUS: PASS
+
+**Test run:** `docker compose exec server python3 manage.py test chat integrations --keepdb` — 5/5 PASS. Full Django baseline 24/30 (6 pre-existing failures unchanged; zero new regressions).
+
+**Standard pass findings:**
+
+- UUID context injection confirmed: `send_message()` lines 255–258 append `"Collection UUID (use this exact collection_id for get_trip_details and add_to_itinerary): {collection.id}"` into `context_parts`, embedded in `system_prompt` (lines 295–296). UUID appears in the `role=system` message on every conversation turn.
+- Authorization gate confirmed: UUID injection block is inside `if collection:` (line 255); `collection` is only assigned when lookup succeeds AND user is owner or `shared_with` member (lines 244–251). Unauthorized collection_id → `collection = None` → block skipped.
+- System prompt confirmation guidance verified (`llm_client.py:340–341`): confirms only before first `add_to_itinerary` action; after user approval phrases ("yes", "go ahead", "add them", "just add things there"), stops re-confirming.
+- Regex validation — 11 test cases all pass:
+  - `"collection_id is required"` → **True** (short-circuits)
+  - `"collection_id is required and must reference a trip you can access"` → **False** (DoesNotExist; `fullmatch` rejects trailing clause — no false short-circuit)
+  - `"dates is required"` → **True** (prior `chat-loop-hardening` gap now **RESOLVED**)
+  - All legacy required-arg strings continue matching; non-matching strings correctly return False.
+- `get_weather` empty dates: string changed from `"dates must be a non-empty list"` to `"dates is required"` — now matches regex and short-circuits. Prior known gap closed.
+
+**Adversarial pass findings:**
+
+1. **Unauthorized collection_id leaks UUID?** `if collection:` gate prevents injection when lookup fails/unauthorized. **NOT VULNERABLE.**
+2. **DoesNotExist error creates false-positive short-circuit?** `fullmatch` returns `False` for trailing text. **NOT VULNERABLE.**
+3. **UUID grounding lost between turns?** UUID is in `system_prompt` (role=system), rebuilt fresh on every `send_message`. **Grounding persists for entire conversation.**
+4. **Null collection_id crashes injection block?** `if collection_id:` at line 242 gates the lookup; null → block skipped. **NOT VULNERABLE.**
+5. **Shared member gets UUID in context but `get_trip_details` fails (filter excludes shared_with)?** Confirmed pre-existing bug: `get_trip_details` filters `user=user` only. Shared members get UUID context but tool returns DoesNotExist. Does not short-circuit (trailing text); falls to `MAX_TOOL_ITERATIONS`. **PRE-EXISTING, LOW severity, not introduced here.**
+6. **`get_weather` short-circuit gap (prior MUTATION_ESCAPE) resolved?** Confirmed resolved — new `"dates is required"` string matches regex.
+
+**MUTATION_ESCAPES: 0/5** — all mutation checks detected. DoesNotExist false-positive (reviewer WARNING) confirmed benign.
+
+**FLAKY: 0**
+
+**COVERAGE: N/A** — No automated test suite for `chat` app. All validation via in-container regex checks + lead's live-run evidence. Recommended follow-up: add Django TestCase for (a) UUID context injection with authorized vs unauthorized collection_id, (b) DoesNotExist path does not trigger short-circuit, (c) empty dates triggers short-circuit.
+
+**Non-blocking known issues (accepted, pre-existing):** `get_trip_details` DoesNotExist wording semantically ambiguous (reviewer WARNING); `get_trip_details` excludes shared-collection members from `filter(user=user)` — both pre-existing, not introduced by this feature.

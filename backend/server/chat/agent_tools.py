@@ -398,7 +398,9 @@ def get_trip_details(user, collection_id: str | None = None):
             }
         }
     except Collection.DoesNotExist:
-        return {"error": "Trip not found"}
+        return {
+            "error": "collection_id is required and must reference a trip you can access"
+        }
     except Exception:
         logger.exception("get_trip_details failed")
         return {"error": "An unexpected error occurred while fetching trip details"}
@@ -598,7 +600,7 @@ def get_weather(user, latitude=None, longitude=None, dates=None):
         dates = dates or []
 
         if not isinstance(dates, list) or not dates:
-            return {"error": "dates must be a non-empty list"}
+            return {"error": "dates is required"}
 
         results = [
             _fetch_temperature_for_date(latitude, longitude, date_value)

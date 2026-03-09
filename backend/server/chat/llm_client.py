@@ -337,7 +337,8 @@ When suggesting places:
 - Group suggestions logically (by area, by type, by day)
 
 When modifying itineraries:
-- Always confirm with the user before adding items
+- Confirm with the user before the first add_to_itinerary action in a conversation
+- After the user clearly approves adding items (for example: "yes", "go ahead", "add them", "just add things there"), stop re-confirming and call add_to_itinerary directly for subsequent additions in that conversation
 - Suggest logical ordering based on geography
 - Consider travel time between locations
 

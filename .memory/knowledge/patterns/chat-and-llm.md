@@ -33,8 +33,36 @@
 - **Persistence skip**: Invalid tool call results (and the tool_call entry itself) are NOT persisted to the database, preventing replay into future conversation turns.
 - **Historical cleanup**: `_build_llm_messages()` filters persisted tool-role messages containing required-param errors AND trims the corresponding assistant `tool_calls` array to only IDs that have non-filtered tool messages. Empty `tool_calls` arrays are omitted entirely.
 - **Multi-tool partial success**: When model returns N tool calls and call K fails, calls 1..K-1 (the successful prefix) are persisted normally. Only the failed call and subsequent calls are dropped.
-- **Tool iteration guard**: `MAX_TOOL_ITERATIONS = 10` with correctly-incremented counter prevents unbounded loops from other error classes (e.g. `"dates must be a non-empty list"` from `get_weather` does NOT match the required-arg regex but is bounded by iteration limit).
-- **Known gap**: `get_weather` error `"dates must be a non-empty list"` does not trigger the short-circuit — mitigated by `MAX_TOOL_ITERATIONS`.
+- **Tool iteration guard**: `MAX_TOOL_ITERATIONS = 10` with correctly-incremented counter prevents unbounded loops from non-required-arg error classes that don't match the regex.
+- **Resolved gap**: `get_weather` error was changed from `"dates must be a non-empty list"` to `"dates is required"` — now matches the regex and triggers the short-circuit. Resolved 2026-03-09.
+
+## Trip Context UUID Grounding
+- `send_message()` injects the active collection UUID into the system prompt `## Trip Context` section with explicit instruction: `"use this exact collection_id for get_trip_details and add_to_itinerary"`.
+- UUID injection only occurs when collection lookup succeeds AND user is owner or `shared_with` member (authorization gate).
+- System prompt includes two-phase confirmation guidance: confirm only before the **first** `add_to_itinerary` action; after explicit user approval phrases ("yes", "go ahead", "add them"), proceed directly without re-confirming.
+- `get_trip_details` DoesNotExist returns `"collection_id is required and must reference a trip you can access"` (does NOT match short-circuit regex due to `fullmatch` — correct, this is an invalid-value error, not missing-param).
+- Known pre-existing: `get_trip_details` filters `user=user` only — shared-collection members get UUID context but tool returns DoesNotExist. Low severity.
+
+## Tool Output Rendering
+- Frontend `AITravelChat.svelte` hides raw `role=tool` messages via `visibleMessages` filter (`messages.filter(msg => msg.role !== 'tool')`).
+- Tool results render as concise user-facing summaries via `getToolSummary()`:
+  - `get_trip_details` → "Loaded details for {name} ({N} itinerary items)."
+  - `list_trips` → "Found {N} trip(s)."
+  - `add_to_itinerary` → "Added {name} to itinerary."
+  - `get_weather` → "Retrieved weather data."
+  - `search_places` / `web_search` → existing rich cards (place cards, linked cards).
+  - Error payloads → "{name} could not be completed." (no raw JSON).
+  - Unknown tools → generic fallback.
+- **Reload reconstruction**: `rebuildConversationMessages()` scans persisted messages after conversation load, parses `role=tool` rows via `parseStoredToolResult()`, and attaches them as `tool_results` on the preceding assistant message (matched by `tool_call_id`). Both streaming and reload paths produce identical `tool_results` data.
+- Text rendered via Svelte text interpolation (not `{@html}`), so LLM-sourced names are auto-escaped (no XSS vector).
+
+## Embedded Chat UX
+- Provider/model selectors moved into a compact `<details>` gear-icon dropdown in the header — header contains only hamburger toggle + title + settings gear.
+- Embedded mode uses bounded height: `h-[65vh]` with `min-h-[30rem]` / `max-h-[46rem]`; softened card treatment (`bg-base-100` + border).
+- Sidebar defaults to closed in embedded mode (`let sidebarOpen = !embedded;`); `lg:flex` ensures always-visible on desktop.
+- Quick-action chips use `btn-xs` + `overflow-x-auto` for compact embedded fit.
+- Streaming indicator visible inside last assistant bubble throughout entire generation (conditioned on `isStreaming && msg.id === lastVisibleMessageId`).
+- Known low-priority: `aria-label` values on sidebar toggle and settings button are hardcoded English (should use `$t()`). `<details>` dropdown does not auto-close on outside click.
 
 ## OpenCode Zen Provider
 - Provider ID: `opencode_zen`
