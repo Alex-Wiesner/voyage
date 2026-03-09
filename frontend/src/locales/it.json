@@ -1,4 +1,9 @@
 {
+	"chat_a11y": {
+		"show_conversations_aria": "Show conversations",
+		"hide_conversations_aria": "Hide conversations",
+		"ai_settings_aria": "AI settings"
+	},
 	"about": {
 		"about": "Di",
 		"close": "Chiudi",

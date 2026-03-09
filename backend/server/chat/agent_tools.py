@@ -6,6 +6,7 @@ from datetime import date as date_cls
 import requests
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Q
 
 from adventures.models import Collection, CollectionItineraryItem, Location
 
@@ -322,7 +323,8 @@ def get_trip_details(user, collection_id: str | None = None):
             return {"error": "collection_id is required"}
 
         collection = (
-            Collection.objects.filter(user=user)
+            Collection.objects.filter(Q(user=user) | Q(shared_with=user))
+            .distinct()
             .prefetch_related(
                 "locations",
                 "transportation_set",
@@ -460,7 +462,11 @@ def add_to_itinerary(
                 "error": "collection_id, name, latitude, and longitude are required"
             }
 
-        collection = Collection.objects.get(id=collection_id, user=user)
+        collection = (
+            Collection.objects.filter(Q(user=user) | Q(shared_with=user))
+            .distinct()
+            .get(id=collection_id)
+        )
 
         location = Location.objects.create(
             user=user,

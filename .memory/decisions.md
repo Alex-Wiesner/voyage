@@ -359,6 +359,16 @@
 - **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#chat-tool-output-cleanup), original CRITICAL at decisions.md:262-267
 - **Date**: 2026-03-09
 
+## Correctness Review: chat-regression-tests
+- **Verdict**: APPROVED (score 0)
+- **Lens**: Correctness
+- **Scope**: `backend/server/chat/tests.py` — shared-trip tool access regressions (owner/shared-member/non-member for `get_trip_details` and `add_to_itinerary`) and required-param regex boundary tests (`_is_required_param_tool_error`, `_is_required_param_tool_error_message_content`).
+- **Acceptance criteria**: All 4 verified — tests match current source (correct mock targets, return shapes, error strings), shared-trip access regression fully covered, regex boundaries covered for both gap-closure and false-positive-prevention cases, no new test infrastructure dependencies.
+- **No defects found**. Tests are behavior-focused (call actual tool functions, assert on documented return contracts) without coupling to implementation internals.
+- **Prior findings confirmed**: Shared-trip fix at `agent_tools.py:326,464-466` (plans/chat-provider-fixes.md:404-407) matches test expectations. Regex boundaries match source at `views/__init__.py:135-153` and error strings at `agent_tools.py:401-403,603-607`. Prior known gap (`dates must be a non-empty list` bypassing regex, decisions.md:166) confirmed resolved by `"dates is required"` change.
+- **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#review-verdict--chat-regression-tests)
+- **Date**: 2026-03-09
+
 ## Tester Validation: embedded-chat-ux-polish
 - **Status**: PASS (Both Standard + Adversarial passes)
 - **Scope**: Sidebar default closed for embedded mode, compact header with settings dropdown, bounded height, chip scroll behavior, streaming indicator visibility.
@@ -371,4 +381,14 @@
 - **MUTATION_ESCAPES**: 0/4
 - **Residual**: Two low-priority follow-ups (aria-label i18n, dropdown outside-click behavior) — not blocking.
 - **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#tester-validation--embedded-chat-ux-polish)
+- **Date**: 2026-03-09
+
+## Re-Review: shared-trip-tool-access — .distinct() fix
+- **Verdict**: APPROVED (score 0)
+- **Lens**: Correctness (targeted re-review)
+- **Scope**: `.distinct()` addition to shared-aware collection lookups in `agent_tools.py` and owner-in-shared_with regression tests in `tests.py`.
+- **Original finding status**: **RESOLVED**. Both `get_trip_details` (line 327) and `add_to_itinerary` (line 467) now chain `.distinct()` after `Q(user=user) | Q(shared_with=user)` filter, preventing `MultipleObjectsReturned` when owner is also in `shared_with`. Pattern matches established codebase convention (`adventures/mcp.py:41`, `collection_view.py:174-175`).
+- **Regression tests verified**: `test_get_trip_details_owner_also_in_shared_with_avoids_duplicates` (tests.py:53-59) and `test_add_to_itinerary_owner_also_in_shared_with_avoids_duplicates` (tests.py:81-96) both add owner to `shared_with` and exercise the exact codepath that would raise `MultipleObjectsReturned` without `.distinct()`.
+- **No new issues introduced**: `.distinct()` placement in ORM chain is correct, no logic changes to error handling or return shapes, no mutations to other code paths.
+- **Reference**: See [Plan: Chat provider fixes](plans/chat-provider-fixes.md#shared-trip-tool-access)
 - **Date**: 2026-03-09

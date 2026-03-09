@@ -78,6 +78,7 @@
 	let selectedPlaceToAdd: PlaceResult | null = null;
 	let selectedDate = '';
 	let settingsOpen = false;
+	let settingsDropdownRef: HTMLDetailsElement;
 
 	const dispatch = createEventDispatcher<{
 		close: void;
@@ -87,10 +88,44 @@
 	const MODEL_PREFS_STORAGE_KEY = 'voyage_chat_model_prefs';
 	$: promptTripContext = collectionName || destination || '';
 
-	onMount(async () => {
+	onMount(() => {
+		void initializeChat();
+
+		const handleOutsideSettings = (event: Event) => {
+			if (!settingsOpen || !settingsDropdownRef) {
+				return;
+			}
+
+			const target = event.target as Node | null;
+			if (target && !settingsDropdownRef.contains(target)) {
+				settingsOpen = false;
+			}
+		};
+
+		const handleSettingsEscape = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') {
+				settingsOpen = false;
+			}
+		};
+
+		const outsideEvents: Array<keyof DocumentEventMap> = ['pointerdown', 'mousedown', 'touchstart'];
+		outsideEvents.forEach((eventName) => {
+			document.addEventListener(eventName, handleOutsideSettings);
+		});
+		document.addEventListener('keydown', handleSettingsEscape);
+
+		return () => {
+			outsideEvents.forEach((eventName) => {
+				document.removeEventListener(eventName, handleOutsideSettings);
+			});
+			document.removeEventListener('keydown', handleSettingsEscape);
+		};
+	});
+
+	async function initializeChat(): Promise<void> {
 		await Promise.all([loadConversations(), loadProviderCatalog(), loadUserAISettings()]);
 		await applyInitialDefaults();
-	});
+	}
 
 	async function loadUserAISettings(): Promise<void> {
 		try {
@@ -740,7 +775,9 @@
 						on:click={() => (sidebarOpen = !sidebarOpen)}
 						aria-controls="chat-conversations-sidebar"
 						aria-expanded={sidebarOpen}
-						aria-label={sidebarOpen ? 'Hide conversations' : 'Show conversations'}
+						aria-label={sidebarOpen
+							? $t('chat_a11y.hide_conversations_aria')
+							: $t('chat_a11y.show_conversations_aria')}
 					>
 						{#if sidebarOpen}
 							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -765,10 +802,14 @@
 						</div>
 					</div>
 					<div class="ml-auto flex items-center gap-2">
-						<details class="dropdown dropdown-end" bind:open={settingsOpen}>
+						<details
+							class="dropdown dropdown-end"
+							bind:open={settingsOpen}
+							bind:this={settingsDropdownRef}
+						>
 							<summary
 								class="btn btn-sm btn-ghost"
-								aria-label="AI settings"
+								aria-label={$t('chat_a11y.ai_settings_aria')}
 								aria-expanded={settingsOpen}
 							>
 								⚙️

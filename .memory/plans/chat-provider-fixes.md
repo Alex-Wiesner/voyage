@@ -394,3 +394,190 @@ In `selectConversation()`, after loading `data.messages`, reconstruct `tool_resu
 **COVERAGE: N/A** — No automated test suite for `chat` app. All validation via in-container regex checks + lead's live-run evidence. Recommended follow-up: add Django TestCase for (a) UUID context injection with authorized vs unauthorized collection_id, (b) DoesNotExist path does not trigger short-circuit, (c) empty dates triggers short-circuit.
 
 **Non-blocking known issues (accepted, pre-existing):** `get_trip_details` DoesNotExist wording semantically ambiguous (reviewer WARNING); `get_trip_details` excludes shared-collection members from `filter(user=user)` — both pre-existing, not introduced by this feature.
+
+## Completion Note — `chat-a11y-and-dropdown-polish` (2026-03-09)
+
+- Replaced embedded chat header hardcoded aria labels with i18n keys (`chat_a11y.show_conversations_aria`, `chat_a11y.hide_conversations_aria`, `chat_a11y.ai_settings_aria`) in `AITravelChat.svelte`.
+- Added `chat_a11y` key group to all locale JSON files to keep key parity.
+- Added settings dropdown close behavior on outside interaction (`pointerdown`/`mousedown`/`touchstart`) and `Escape`, with mount-time listener cleanup mirroring the existing dropdown pattern used elsewhere.
+
+## Review Verdict — `chat-a11y-and-dropdown-polish` (2026-03-09)
+
+### STATUS: APPROVED (score 3)
+
+**Lens**: Correctness
+
+**Checked and confirmed safe:**
+- All hardcoded English `aria-label` strings replaced with `$t('chat_a11y.*')` calls (lines 778–781, 810). Zero raw strings remain.
+- All 20 locale JSON files have key parity: `chat_a11y.{show_conversations_aria, hide_conversations_aria, ai_settings_aria}` present in each (English placeholders — correct for fallback, content translation is a separate concern).
+- Outside-click listeners (`pointerdown`/`mousedown`/`touchstart`) correctly close dropdown via `settingsDropdownRef.contains(target)` check + `bind:open` two-way sync with native `<details>`.
+- Escape handler closes dropdown on `keydown` Escape.
+- `onMount` cleanup function removes all 4 listeners (3 outside-click + 1 keydown) using the same references. No leak.
+- `<details bind:open={settingsOpen}>` bidirectional binding ensures no conflict between native summary toggle and programmatic close.
+- No interaction regression with textarea `handleKeydown` (Enter-only) or date-selector modal.
+
+**WARNING (1):** Escape handler (line 106) fires on every Escape keypress globally, even when `settingsOpen` is already `false`. No functional bug (idempotent assignment) but lacks a `settingsOpen` guard. (confidence: LOW)
+
+**SUGGESTIONS (2):**
+1. Non-English locale `chat_a11y` values are English placeholders — track for human translation.
+2. `outsideEvents` includes both `pointerdown` and `mousedown` — handler fires twice per click on most browsers (second is no-op). Using only `pointerdown` + `touchstart` would be cleaner.
+
+**Closes prior residual items** from `embedded-chat-ux-polish` tester validation: both the hardcoded aria-label i18n issue and the dropdown outside-click behavior are now resolved.
+
+## Tester Validation — `chat-a11y-and-dropdown-polish` (2026-03-09)
+
+### STATUS: PASS
+
+**Lead evidence accepted:**
+- `bun run format`, `bun run lint`, `bun run check` (0 errors, 6 pre-existing warnings), `bun run build` all passed.
+- Reviewer APPROVED (score 3); two low-priority SUGGESTIONS (non-English locale placeholders + `pointerdown`/`mousedown` double-registration) confirmed non-blocking.
+
+**Backend test suite:** `docker compose exec server python3 manage.py test chat --keepdb` — **9/9 PASS**. Zero regressions.
+
+**Standard pass findings (code inspection + live browser):**
+
+- AC1 (i18n aria-labels): ✅ All three hardcoded English strings replaced with `$t('chat_a11y.*')` calls (lines 778–781, 812). Live DOM confirmed: `allAriaLabels.filter(key.startsWith('chat_a11y'))` returned `[]` — no raw key strings leaked.
+- AC2 (locale key parity): ✅ `chat_a11y` group present in all 20 locale JSON files confirmed. English values are real strings; non-English locales use English placeholders (accepted — translation is out of scope).
+- AC3 (Escape closes dropdown): ✅ Live browser: `settingsDetails.open === true` before Escape, `false` after `keyboard.press('Escape')`.
+- AC4 (outside click closes dropdown): ✅ Live browser: click on header h3 (outside `settingsDropdownRef.contains(target)`) → `settingsDetails.open === false`.
+- AC5 (sidebar toggle aria updates): ✅ Before click: `aria-label="Show conversations"`, `aria-expanded="false"`. After click: `aria-label="Hide conversations"`, `[expanded]` state confirmed in accessibility snapshot. Sidebar conversation list rendered correctly.
+- AC6 (listener cleanup): ✅ `onMount` return removes all 4 listeners using same references. No leak.
+- AC7 (`bind:open` bidirectionality): ✅ `<details bind:open={settingsOpen}>` at line 807. `aria-expanded={settingsOpen}` on summary tracks in sync.
+
+**Screenshot evidence:** Captured embedded chat header with Conversations sidebar open, hamburger (×) button and gear icon visible, "Travel Assistant · test" title, Recommendations tab active. Screenshot deleted post-verification (saved to MCP temp dir, not git-tracked).
+
+**Adversarial pass findings:**
+
+1. **Hypothesis: `pointerdown`+`mousedown` double-fire causes open→close→open flicker.** Synthesized both events on outside element after Svelte-bound open. Observed: `open_after_outside_events: false`, `double_fire_safe: true`. Second handler fires on already-false value — idempotent. **Not vulnerable.**
+
+2. **Hypothesis: raw i18n key strings leak to DOM on locale fallback.** All `[aria-label]` values checked for `chat_a11y` prefix. Zero raw keys found. svelte-i18n falls back to English strings, not key names. **Not vulnerable.**
+
+3. **Hypothesis: Escape key fires globally when dropdown already closed (reviewer WARNING).** Confirmed true — no `settingsOpen` guard. Assignment `settingsOpen = false` when already `false` is a no-op. **Accepted non-functional defect per reviewer.**
+
+4. **Hypothesis: `aria-expanded` on `<summary>` desyncs when `<details>` closed by native browser toggle.** `bind:open={settingsOpen}` is bidirectional — native toggle updates `settingsOpen` → `aria-expanded`. **Not vulnerable.**
+
+5. **Hypothesis: sidebar `aria-controls` target missing on desktop (button is `lg:hidden`).** `id="chat-conversations-sidebar"` is always rendered; `aria-controls` reference always valid. **Not vulnerable.**
+
+**MUTATION_ESCAPES: 0/4** — All i18n, event handler, aria-sync, and listener-cleanup paths cover mutations. The reviewer WARNING about the missing `settingsOpen` guard is a superficial mutation (no functional impact).
+
+**FLAKY: 0**
+
+**COVERAGE: N/A** — No automated frontend test suite. All validation via in-browser DOM evaluation + keyboard/click interaction tests.
+
+**Residual low-priority items (not blocking):**
+- Non-English locale `chat_a11y` values are English placeholders — requires human translation (separate concern).
+- `outsideEvents` includes both `pointerdown` and `mousedown` — double-fires but idempotent. Could simplify to `['pointerdown', 'touchstart']`.
+- Escape handler lacks `settingsOpen` guard — idempotent no-op, no functional consequence.
+
+## Completion Note — `shared-trip-tool-access` (2026-03-09)
+
+- Updated `backend/server/chat/agent_tools.py` so `get_trip_details` and `add_to_itinerary` now authorize collections with the existing shared-access pattern `Q(user=user) | Q(shared_with=user)`.
+- Preserved existing owner-only behavior for `list_trips` and kept prior error responses unchanged (`collection_id ... you can access` for trip-details misses, `Trip not found` for itinerary-add misses).
+- Follow-up applied: added `.distinct()` to both shared-aware collection lookups to avoid `MultipleObjectsReturned` when an owner is also present in `shared_with`, and added regression tests in `backend/server/chat/tests.py` for that edge case.
+
+## Completion Note — `chat-regression-tests` (2026-03-09)
+
+- Added `backend/server/chat/tests.py` with focused backend regressions for shared-trip tool access: owner + shared-member success for `get_trip_details`, shared-member success for `add_to_itinerary`, and non-member denial behavior for both tools.
+- Added required-parameter boundary tests against `ChatViewSet._is_required_param_tool_error` and `_is_required_param_tool_error_message_content`, confirming `dates is required` matches while `dates must be a non-empty list` and `collection_id is required and must reference a trip you can access` do not short-circuit.
+
+## Review Verdict — `chat-regression-tests` (2026-03-09)
+
+### STATUS: APPROVED (score 0)
+
+**Lens**: Correctness
+
+**Acceptance criteria verified**:
+- Tests pass with current codebase: all tool function calls and static method invocations match current source signatures and return shapes. Mock targets (`adventures.models.background_geocode_and_assign`) are correct.
+- Shared-trip access regression covered: 4 test methods exercise owner access, shared-member access (both get_trip_details and add_to_itinerary), and non-member denial for both tools — covering the `Q(user=user)|Q(shared_with=user)` fix at `agent_tools.py:326,464-466`.
+- Required-param regex boundaries covered: 3 boundary tests confirm `"dates is required"` matches (closes prior gap), `"dates must be a non-empty list"` does not match, and `"collection_id is required and must reference a trip you can access"` does not false-positive short-circuit (both `_is_required_param_tool_error` and `_is_required_param_tool_error_message_content`).
+- No new test infrastructure: only stdlib, Django TestCase, and existing project models/views imported. No new pip packages or external services.
+
+**No defects found.** Tests are behavior-focused (call actual tool functions, assert documented return contracts) without overfitting to implementation details. Regex boundary tests use exact production error strings — appropriate since these are stable API-level contracts.
+
+**SUGGESTIONS**: (1) `test_non_member_access_remains_denied` bundles two independent assertions; splitting would improve diagnostic granularity. (2) Multi-param positive match (`"collection_id, name, latitude, and longitude are required"`) not covered but was validated in prior tester sessions.
+
+See [decisions.md](../decisions.md#correctness-review-chat-regression-tests).
+
+## Tester Validation — `shared-trip-tool-access` (2026-03-09)
+
+### STATUS: PASS
+
+**Test run:** `docker compose exec server python3 manage.py test chat --keepdb --verbosity=2` — **9/9 PASS** (0 failures, 0 errors). Full baseline: 24/30 Django-wide pass; 6/30 pre-existing failures unchanged. Zero new regressions.
+
+**Standard pass — code inspection + live test results:**
+
+- `get_trip_details` (line 326): `Collection.objects.filter(Q(user=user) | Q(shared_with=user)).distinct().get(id=collection_id)` — correct shared-access pattern. `Collection.shared_with` is a `ManyToManyField(User)` (line 288 of `adventures/models.py`), so both predicates are valid FK/M2M joins. `.distinct()` prevents `MultipleObjectsReturned` when the requesting user appears in both `user=user` (owner) and `shared_with=user` (also added as member).
+- `add_to_itinerary` (line 466): Identical filter pattern. `.distinct()` applied. The `Location.objects.create(user=user, ...)` at line 471 correctly assigns the location to the shared user's account (not the owner's) — consistent with how the REST API handles shared-user writes (`day_suggestions.py:55` also checks shared membership before allowing writes).
+- `list_trips` (line 214): Remains owner-only (`filter(user=user)`) by design — consistent with the feature's accepted scope. This is not a regression.
+- `send_message` collection-context gate (views/__init__.py:244-253): Uses same pattern (`owner == user OR shared_with.filter(id=user.id).exists()`). Consistent with tool-layer access.
+- Non-member denial: `Collection.DoesNotExist` propagates correctly from `.get()` → caught at lines 402 and 526 → returns appropriate error strings.
+
+**Test coverage of core acceptance criteria:**
+
+| Criterion | Test method | Result |
+|---|---|---|
+| Owner can call `get_trip_details` | `test_get_trip_details_allows_owner_access` | PASS |
+| Shared user can call `get_trip_details` | `test_get_trip_details_allows_shared_user_access` | PASS |
+| Owner also-in-shared_with doesn't crash | `test_get_trip_details_owner_also_in_shared_with_avoids_duplicates` | PASS |
+| Shared user can call `add_to_itinerary` | `test_add_to_itinerary_allows_shared_user_access` | PASS |
+| Owner also-in-shared_with add doesn't crash | `test_add_to_itinerary_owner_also_in_shared_with_avoids_duplicates` | PASS |
+| Non-member denied for both tools | `test_non_member_access_remains_denied` | PASS |
+| DoesNotExist error not false-positive short-circuit | `test_collection_access_error_does_not_short_circuit_required_param_regex` | PASS |
+| `dates is required` matches short-circuit | `test_dates_is_required_matches_required_param_short_circuit` | PASS |
+| Old "dates must be non-empty list" does not match | `test_dates_non_empty_list_error_does_not_match_required_param_short_circuit` | PASS |
+
+**Adversarial pass (4 hypotheses):**
+
+1. **Hypothesis: invalid (non-UUID) `collection_id` causes unhandled exception, not a clean DoesNotExist.** Django UUIDField `.get(id="not-a-uuid")` raises `ValidationError` or `ValueError`, not `DoesNotExist` — the `except Exception` fallback at lines 406-408 catches it and returns `{"error": "An unexpected error occurred while fetching trip details"}`. No crash. **Not vulnerable** (exception absorbed, graceful error).
+   - _For `add_to_itinerary`_: Same — caught by `except Exception` at lines 528-530. Returns `{"error": "An unexpected error occurred while adding to itinerary"}`. **Not vulnerable.**
+
+2. **Hypothesis: shared user can overwrite collection membership by being added to `shared_with` of a collection they do not own.** `add_to_itinerary` creates a `Location` with `user=shared_user` and then calls `collection.locations.add(location)` — this adds the new location to the owner's collection. The location's user FK is `shared_user`, which is correct (shared users own their own contributed locations). **No privilege escalation.**
+
+3. **Hypothesis: race condition — user removed from `shared_with` between filter and write inside `add_to_itinerary`.** Filter + `.get()` runs in a single DB query; the `Collection.DoesNotExist` path fires before any write occurs. No partial write possible. **Not vulnerable** (read-before-write order is safe in this non-transactional case).
+
+4. **Hypothesis: `list_trips` leaks shared collections to non-owners by exposing collections where `shared_with=user`.** Confirmed: `list_trips` uses `filter(user=user)` only (line 214). Shared collections do not appear in `list_trips` output for shared users. **No information leak; intentionally owner-scoped.**
+
+**MUTATION_ESCAPES: 1/5** — Invalid UUID input to `get_trip_details`/`add_to_itinerary` falls through to the generic `except Exception` handler rather than `DoesNotExist`, so test `test_non_member_access_remains_denied` would NOT detect a mutation that accidentally drops the `Q(shared_with=user)` clause for malformed UUIDs. However, valid UUID non-member inputs (the primary production scenario) are correctly caught. Risk is very low.
+
+**FLAKY: 0**
+
+**COVERAGE: N/A** — No coverage tooling configured. 6 of 9 tests directly exercise the changed lines (326, 466). The `.distinct()` edge case has its own dedicated test methods.
+
+**LESSON_CHECKS:**
+- Prior lesson (chat-tool-grounding-and-confirmation, adversarial item 5): shared member gets UUID in context but `get_trip_details` returns DoesNotExist — **CONTRADICTED / RESOLVED** by this feature. The fix (`Q(user=user) | Q(shared_with=user)`) means shared members now successfully retrieve trip details. The prior finding is no longer valid.
+- Prior lesson (pre-existing, pre-release): shared-user write ownership for `add_to_itinerary` sets `user=shared_user` not `user=collection.user` — **confirmed** acceptable, consistent with REST API pattern.
+
+**Known residual non-issue:** `test_non_member_access_remains_denied` bundles two independent assertions (noted by reviewer SUGGESTION); splitting would improve diagnostic granularity but does not affect correctness of the test outcome.
+
+## Tester Validation — `chat-regression-tests` (2026-03-09)
+
+### STATUS: PASS
+
+**Test run:** `docker compose exec server python3 manage.py test chat --keepdb -v 2` — **9/9 PASS** (independently verified by tester; not just lead-reported). Full Django suite: 39 tests — 33 pass, 6 fail (all 6 pre-existing: 2 user email key errors + 4 geocoding mock failures). Zero new regressions.
+
+**Standard pass findings:**
+
+- All 6 `ChatAgentToolSharedTripAccessTests` exercise the `Q(user=user) | Q(shared_with=user)` fix with real DB operations: owner access, shared-member access for both `get_trip_details` and `add_to_itinerary`, `MultipleObjectsReturned` guard (owner also in `shared_with`), and non-member denial.
+- All 3 `ChatViewSetToolValidationBoundaryTests` cover the exact boundary cases that are production contracts: `"dates is required"` short-circuits (gap closed by `chat-tool-grounding-and-confirmation`), `"dates must be a non-empty list"` does not short-circuit (regression guard), `"collection_id is required and must reference a trip you can access"` does not false-positive (DoesNotExist variant). Both `_is_required_param_tool_error` and `_is_required_param_tool_error_message_content` paths tested for the DoesNotExist string.
+- Mock target `adventures.models.background_geocode_and_assign` is correct.
+- Tests are behavior-focused; reviewer confirmed signature and return shape matches current source.
+
+**Adversarial pass findings (5 hypotheses):**
+
+1. **Hypothesis: regex accepts trailing text as false positive.** `re.fullmatch` with `r"[a-z0-9_,\-\s]+ (is|are) required"` rejects `"collection_id is required and must reference..."` because trailing text breaks fullmatch. **Confirmed safe; covered by test.**
+2. **Hypothesis: `latitude=0.0` treated as falsy, bypassing `add_to_itinerary` guard.** Guard is `latitude is None` (line 460), not truthiness check. `0.0 is None` → False, guard passes. **Not vulnerable — code-inspection confirmed.**
+3. **Hypothesis: non-existent UUID raises unhandled exception.** `Collection.DoesNotExist` caught at line 402; invalid UUID string caught by broad `except Exception` at line 406. Both return error dicts, no exception escapes. **Not vulnerable.**
+4. **Hypothesis: `"collection_id is required"` positive case absent creates regression blind spot.** This was validated in the `chat-loop-hardening` pass (18 regex cases). New tests target the delta boundary cases only. **Acceptable scope.**
+5. **Hypothesis: additional regex adversarial inputs (unicode injection, newline injection, whitespace-only) match unexpectedly.** Verified directly against production function in-container: all return `False`. **Not vulnerable.**
+
+**MUTATION_ESCAPES: 0/5** — All five mutation checks detected by the executed suite. `fullmatch` boundary tested; `.distinct()` regression tested; shared-member positive path tested; non-member denial tested; both regex helper methods exercised.
+
+**FLAKY: 0**
+
+**COVERAGE: N/A** — Backend `chat` app now has 9 tests covering all critical paths for the `shared-trip-tool-access` and regression-test workstreams. No frontend test infrastructure exists (out of scope).
+
+**LESSON_CHECKS:**
+- Prior tester finding (chat-tool-grounding-and-confirmation adversarial item 5): shared-member `get_trip_details` returns DoesNotExist — **CONTRADICTED / RESOLVED** by `shared-trip-tool-access` fix. Confirmed by `test_get_trip_details_allows_shared_user_access` passing in this run.
+- Prior tester finding (chat-loop-hardening): `get_weather` "dates must be a non-empty list" did not short-circuit — **RESOLVED** by `chat-tool-grounding-and-confirmation`. Confirmed by `test_dates_is_required_matches_required_param_short_circuit` passing.
+
+**Reviewer optional suggestions** (not blocking, not addressed): (1) split `test_non_member_access_remains_denied` into two test methods; (2) add explicit multi-param positive regex case. Neither represents a coverage gap for the fixed behavior.

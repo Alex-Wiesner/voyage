@@ -77,6 +77,10 @@ categories:
     description: "Chat provider fixes plan (COMPLETE) — chat-loop-hardening, default-ai-settings, suggestion-add-flow, chat-tool-grounding-and-confirmation, chat-tool-output-cleanup, embedded-chat-ux-polish workstreams with full review/test records"
     group: plans
 
+  - path: research/chat-regression-coverage-gaps.md
+    description: Identified test coverage gaps for chat fixes — get_trip_details shared access, tool short-circuit, UI output cleanup
+    group: research
+
   # Deprecated (content migrated)
   - path: knowledge.md
     description: "DEPRECATED — migrated to knowledge/ nested structure. See knowledge/ files."
