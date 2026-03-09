@@ -4,13 +4,19 @@ Voyage is a self-hosted travel companion web application built with SvelteKit fr
 
 **ALWAYS follow these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
 
+## Pre-Release Policy
+Voyage is **pre-release** — not yet in production use. During pre-release:
+- Architecture-level changes are allowed, including replacing core libraries (e.g. LiteLLM).
+- Prioritize correctness, simplicity, and maintainability over backward compatibility.
+- Before launch, this policy must be revisited and tightened for production stability.
+
 ## Architecture
 
 **Stack**: SvelteKit 2 (TypeScript) frontend · Django REST Framework (Python) backend · PostgreSQL + PostGIS database · Memcached · Docker · Bun (frontend package manager)
 
 **Key architectural pattern — API Proxy**: The frontend never calls the Django backend directly. All API calls go to `src/routes/api/[...path]/+server.ts`, which proxies requests to the Django server (`http://server:8000`), injecting CSRF tokens and managing session cookies. This means frontend fetches use relative URLs like `/api/locations/`.
 
-**AI Chat**: The AI travel chat assistant is embedded in Collections → Recommendations (component: `AITravelChat.svelte`). There is no standalone `/chat` route. Chat providers are loaded dynamically from `GET /api/chat/providers/` (backed by LiteLLM runtime list + custom entries like `opencode_zen`). Chat conversations stream via SSE through `/api/chat/conversations/`. Provider config lives in `backend/server/chat/llm_client.py` (`CHAT_PROVIDER_CONFIG`).
+**AI Chat**: The AI travel chat assistant is embedded in Collections → Recommendations (component: `AITravelChat.svelte`). There is no standalone `/chat` route. Chat providers are loaded dynamically from `GET /api/chat/providers/` (backed by LiteLLM runtime list + custom entries like `opencode_zen`). Chat conversations stream via SSE through `/api/chat/conversations/`. Provider config lives in `backend/server/chat/llm_client.py` (`CHAT_PROVIDER_CONFIG`). Chat composer supports per-provider model override via dropdown selector fed by `GET /api/chat/providers/{provider}/models/` (persisted in browser `localStorage` key `voyage_chat_model_prefs`). Collection chats inject multi-stop itinerary context and the system prompt guides `get_trip_details`-first reasoning. LiteLLM errors are mapped to sanitized user-safe messages via `_safe_error_payload()` (never exposes raw exception text).
 
 **Services** (docker-compose):
 - `web` → SvelteKit frontend at `:8015`
@@ -65,11 +71,11 @@ Run these commands in order:
 - `cd frontend && bun run dev` - Start development server (requires backend running)
 - `cd frontend && bun run format` - **6 seconds** - Fix code formatting (ALWAYS run before committing)
 - `cd frontend && bun run lint` - **6 seconds** - Check code formatting
-- `cd frontend && bun run check` - **12 seconds** - Run Svelte type checking (3 errors, 19 warnings expected)
+- `cd frontend && bun run check` - **12 seconds** - Run Svelte type checking (0 errors, 6 warnings expected)
 
 **Backend (Django with Python — prefer uv for local tooling):**
 - Backend development requires Docker - local Python pip install fails due to network timeouts
-- `docker compose exec server python3 manage.py test` - **7 seconds** - Run tests (2/3 tests fail, this is expected)
+- `docker compose exec server python3 manage.py test` - **7 seconds** - Run tests (6/30 pre-existing failures expected)
 - `docker compose exec server python3 manage.py help` - View Django commands
 - `docker compose exec server python3 manage.py migrate` - Run database migrations
 - Use `uv` for local Python dependency/tooling commands when applicable
@@ -113,8 +119,8 @@ Run these commands in order:
 - Do not leave finished work lingering in long-lived feature branches or worktrees.
 
 ### Expected Test Failures
-- Frontend check: 3 errors and 19 warnings expected (accessibility and TypeScript issues)
-- Backend tests: 2 out of 3 Django tests fail (API endpoint issues) - **DO NOT fix unrelated test failures**
+- Frontend check: 0 errors and 6 warnings expected (pre-existing in `CollectionRecommendationView.svelte` + `RegionCard.svelte`)
+- Backend tests: 6 out of 30 Django tests fail (pre-existing: 2 user email key errors + 4 geocoding API mocks) - **DO NOT fix unrelated test failures**
 
 ### Build Timing (NEVER CANCEL)
 - **Docker first startup**: 25+ minutes (image downloads)

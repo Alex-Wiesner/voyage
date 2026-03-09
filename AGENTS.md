@@ -5,6 +5,12 @@
 - **Purpose**: Self-hosted travel companion web app (fork of AdventureLog)
 - **Stack**: SvelteKit 2 (TypeScript) frontend · Django REST Framework (Python) backend · PostgreSQL + PostGIS · Memcached · Docker · Bun (frontend package manager)
 
+## Pre-Release Policy
+Voyage is **pre-release** — not yet in production use. During pre-release:
+- Architecture-level changes are allowed, including replacing core libraries (e.g. LiteLLM).
+- Prioritize correctness, simplicity, and maintainability over backward compatibility.
+- Before launch, this policy must be revisited and tightened for production stability.
+
 ## Architecture Overview
 - **API proxy pattern**: Frontend never calls Django directly. All API calls go through `frontend/src/routes/api/[...path]/+server.ts`, which proxies to `http://server:8000`, handles cookies, and injects CSRF behavior.
 - **AI chat**: Embedded in Collections → Recommendations via `AITravelChat.svelte` component. No standalone `/chat` route. Provider list is dynamic from backend `GET /api/chat/providers/` (sourced from LiteLLM runtime + custom entries like `opencode_zen`). Chat conversations use SSE streaming via `/api/chat/conversations/`. Chat composer supports per-provider model override (persisted in browser `localStorage`). LiteLLM errors are mapped to sanitized user-safe messages via `_safe_error_payload()` (never exposes raw exception text).
@@ -60,7 +66,8 @@ Run in this order:
 - Styling: use DaisyUI semantic colors/classes (`bg-primary`, `text-base-content`, etc.)
 - Security: handle CSRF tokens via `/auth/csrf/` and `X-CSRFToken`
 - Chat providers: dynamic catalog from `GET /api/chat/providers/`; configured in `CHAT_PROVIDER_CONFIG`
-- Chat model override: composer text input for per-provider model selection; persisted in `localStorage` key `voyage_chat_model_prefs`; backend accepts optional `model` param in `send_message`
+- Chat model override: dropdown selector fed by `GET /api/chat/providers/{provider}/models/`; persisted in `localStorage` key `voyage_chat_model_prefs`; backend accepts optional `model` param in `send_message`
+- Chat context: collection chats inject multi-stop itinerary context; system prompt guides `get_trip_details`-first reasoning
 - Chat error surfacing: `_safe_error_payload()` maps LiteLLM exceptions to sanitized user-safe categories (never forwards raw `exc.message`)
 
 ## Conventions
@@ -69,7 +76,8 @@ Run in this order:
 - Commit and merge completed feature branches promptly once validation passes (avoid leaving finished work unmerged).
 
 ## .memory Files
-- At the start of any task, read `.memory/knowledge.md` and `.memory/decisions.md` for project context.
+- At the start of any task, read `.memory/manifest.yaml` to discover available files, then read `system.md` and relevant `knowledge/` files for project context.
+- Read `.memory/decisions.md` for architectural decisions and review verdicts.
 - Check relevant files in `.memory/plans/` and `.memory/research/` for prior work on related topics.
 - These files capture architectural decisions, code review verdicts, security findings, and implementation plans from prior sessions.
 - Do **not** duplicate information from `.memory/` into code comments — keep `.memory/` as the single source of truth for project history.
