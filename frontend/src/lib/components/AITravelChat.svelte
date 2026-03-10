@@ -50,6 +50,7 @@
 	};
 
 	export let embedded = false;
+	export let panelMode = false;
 	export let collectionId: string | undefined = undefined;
 	export let collectionName: string | undefined = undefined;
 	export let startDate: string | undefined = undefined;
@@ -87,6 +88,7 @@
 	}>();
 
 	const MODEL_PREFS_STORAGE_KEY = 'voyage_chat_model_prefs';
+	const ACTIVE_CONV_KEY = 'voyage_active_conversation';
 	$: promptTripContext = collectionName || destination || '';
 
 	onMount(() => {
@@ -125,7 +127,40 @@
 
 	async function initializeChat(): Promise<void> {
 		await Promise.all([loadConversations(), loadProviderCatalog(), loadUserAISettings()]);
+		await restoreActiveConversation();
 		await applyInitialDefaults();
+	}
+
+	function persistConversation(convId: string | null) {
+		if (typeof window === 'undefined') {
+			return;
+		}
+
+		try {
+			if (convId) {
+				window.localStorage.setItem(ACTIVE_CONV_KEY, convId);
+			} else {
+				window.localStorage.removeItem(ACTIVE_CONV_KEY);
+			}
+		} catch {
+			// ignore localStorage persistence failures
+		}
+	}
+
+	async function restoreActiveConversation() {
+		if (typeof window === 'undefined' || conversations.length === 0) {
+			return;
+		}
+
+		const savedId = window.localStorage.getItem(ACTIVE_CONV_KEY);
+		if (!savedId) {
+			return;
+		}
+
+		const savedConversation = conversations.find((conversation) => conversation.id === savedId);
+		if (savedConversation) {
+			await selectConversation(savedConversation);
+		}
 	}
 
 	async function loadUserAISettings(): Promise<void> {
@@ -300,12 +335,14 @@
 		const conv: Conversation = await res.json();
 		conversations = [conv, ...conversations];
 		activeConversation = conv;
+		persistConversation(conv.id);
 		messages = [];
 		return conv;
 	}
 
 	async function selectConversation(conv: Conversation) {
 		activeConversation = conv;
+		persistConversation(conv.id);
 		const res = await fetch(`/api/chat/conversations/${conv.id}/`);
 		if (res.ok) {
 			const data = await res.json();
@@ -440,6 +477,7 @@
 		conversations = conversations.filter((conversation) => conversation.id !== conv.id);
 		if (activeConversation?.id === conv.id) {
 			activeConversation = null;
+			persistConversation(null);
 			messages = [];
 		}
 	}
@@ -782,9 +820,10 @@
 		<div
 			class="flex"
 			class:h-[calc(100vh-64px)]={!embedded}
-			class:h-[65vh]={embedded}
-			class:min-h-[30rem]={embedded}
-			class:max-h-[46rem]={embedded}
+			class:h-full={panelMode}
+			class:h-[65vh]={embedded && !panelMode}
+			class:min-h-[30rem]={embedded && !panelMode}
+			class:max-h-[46rem]={embedded && !panelMode}
 		>
 			<div
 				id="chat-conversations-sidebar"
