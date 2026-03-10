@@ -338,6 +338,7 @@
 		const conv: Conversation = await res.json();
 		conversations = [conv, ...conversations];
 		activeConversation = conv;
+		if (panelMode) sidebarOpen = false;
 		persistConversation(conv.id);
 		messages = [];
 		return conv;
@@ -345,6 +346,7 @@
 
 	async function selectConversation(conv: Conversation) {
 		activeConversation = conv;
+		if (panelMode) sidebarOpen = false;
 		persistConversation(conv.id);
 		const res = await fetch(`/api/chat/conversations/${conv.id}/`);
 		if (res.ok) {
@@ -830,9 +832,11 @@
 		>
 			<div
 				id="chat-conversations-sidebar"
-				class="bg-base-200 flex flex-col border-r border-base-300 {embedded
-					? 'w-60'
-					: 'w-72'} {sidebarOpen ? '' : 'hidden'} lg:flex"
+				class="bg-base-200 flex flex-col border-r border-base-300 {panelMode && sidebarOpen
+					? 'w-full'
+					: embedded
+						? 'w-60'
+						: 'w-72'} {sidebarOpen ? '' : 'hidden'} {panelMode ? '' : 'lg:flex'}"
 			>
 				<div class="p-3 flex items-center justify-between border-b border-base-300">
 					<h2 class="text-lg font-semibold">{$t('chat.conversations')}</h2>
@@ -877,10 +881,10 @@
 				</div>
 			</div>
 
-			<div class="flex-1 flex flex-col min-w-0">
+			<div class="flex-1 flex flex-col min-w-0 {panelMode && sidebarOpen ? 'hidden' : ''}">
 				<div class="p-3 border-b border-base-300 flex items-center gap-3">
 					<button
-						class="btn btn-sm btn-ghost lg:hidden"
+						class="btn btn-sm btn-ghost {panelMode ? '' : 'lg:hidden'}"
 						on:click={() => (sidebarOpen = !sidebarOpen)}
 						aria-controls="chat-conversations-sidebar"
 						aria-expanded={sidebarOpen}
@@ -898,11 +902,11 @@
 							</svg>
 						{/if}
 					</button>
-					<div class="flex items-center gap-2">
-						<span class="text-2xl">✈️</span>
-						<div>
-							<h3 class="text-lg font-bold">
-								{#if collectionName}
+					<div class="flex items-center gap-2 min-w-0">
+						<span class={panelMode ? 'text-xl' : 'text-2xl'}>✈️</span>
+						<div class="min-w-0">
+							<h3 class="{panelMode ? 'text-base' : 'text-lg'} font-bold truncate">
+								{#if collectionName && !panelMode}
 									{$t('travel_assistant')} · {collectionName}
 								{:else}
 									{$t('travel_assistant')}
@@ -981,10 +985,14 @@
 				{:else}
 					<div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={messagesContainer}>
 						{#if messages.length === 0 && !activeConversation}
-							<div class="flex flex-col items-center justify-center h-full text-center">
-								<div class="text-6xl opacity-40 mb-4">🌍</div>
-								<h3 class="text-2xl font-bold mb-2">{$t('chat.welcome_title')}</h3>
-								<p class="text-base-content/60 max-w-md">{$t('chat.welcome_message')}</p>
+							<div class="flex flex-col items-center justify-center h-full text-center px-4">
+								<div class="{panelMode ? 'text-4xl' : 'text-6xl'} opacity-40 mb-3">🌍</div>
+								<h3 class="{panelMode ? 'text-lg' : 'text-2xl'} font-bold mb-2">
+									{$t('chat.welcome_title')}
+								</h3>
+								<p class="text-base-content/60 {panelMode ? 'text-sm' : 'max-w-md'}">
+									{$t('chat.welcome_message')}
+								</p>
 							</div>
 						{:else}
 							{#each visibleMessages as msg}
@@ -1068,15 +1076,15 @@
 							<div
 								class="mb-3 flex gap-2"
 								class:flex-wrap={!embedded}
-								class:overflow-x-auto={embedded}
-								class:pb-1={embedded}
+								class:overflow-x-auto={embedded || panelMode}
+								class:pb-1={embedded || panelMode}
 							>
 								{#if promptTripContext}
 									<button
 										class="btn btn-ghost"
-										class:btn-xs={embedded}
-										class:btn-sm={!embedded}
-										class:whitespace-nowrap={embedded}
+										class:btn-xs={embedded || panelMode}
+										class:btn-sm={!embedded && !panelMode}
+										class:whitespace-nowrap={embedded || panelMode}
 										on:click={() =>
 											sendPresetMessage(
 												`What are the best restaurants to include across my ${promptTripContext} itinerary?`
@@ -1087,9 +1095,9 @@
 									</button>
 									<button
 										class="btn btn-ghost"
-										class:btn-xs={embedded}
-										class:btn-sm={!embedded}
-										class:whitespace-nowrap={embedded}
+										class:btn-xs={embedded || panelMode}
+										class:btn-sm={!embedded && !panelMode}
+										class:whitespace-nowrap={embedded || panelMode}
 										on:click={() =>
 											sendPresetMessage(
 												`What activities should I plan across my ${promptTripContext} itinerary?`
@@ -1102,9 +1110,9 @@
 								{#if startDate && endDate}
 									<button
 										class="btn btn-ghost"
-										class:btn-xs={embedded}
-										class:btn-sm={!embedded}
-										class:whitespace-nowrap={embedded}
+										class:btn-xs={embedded || panelMode}
+										class:btn-sm={!embedded && !panelMode}
+										class:whitespace-nowrap={embedded || panelMode}
 										on:click={() =>
 											sendPresetMessage(
 												`What should I pack for my trip from ${startDate} to ${endDate}?`
@@ -1116,9 +1124,9 @@
 								{/if}
 								<button
 									class="btn btn-ghost"
-									class:btn-xs={embedded}
-									class:btn-sm={!embedded}
-									class:whitespace-nowrap={embedded}
+									class:btn-xs={embedded || panelMode}
+									class:btn-sm={!embedded && !panelMode}
+									class:whitespace-nowrap={embedded || panelMode}
 									on:click={() =>
 										sendPresetMessage('Can you help me plan a day-by-day itinerary for this trip?')}
 									disabled={isStreaming || chatProviders.length === 0}
