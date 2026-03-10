@@ -986,7 +986,6 @@
 		"google_maps_integration_desc_no_staff": "Bu entegrasyon öncelikle bu sunucudaki yönetici tarafından etkinleştirilmelidir."
 	},
 	"recomendations": {
-		"recommendations": "Önerilenler",
 		"food": "Yemek",
 		"tourism": "Turizm",
 		"any": "Herhangi",

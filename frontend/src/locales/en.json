@@ -1085,7 +1085,6 @@
 		"google_maps_integration_desc_no_staff": "This integration must first be enabled by the admin on this server."
 	},
 	"recomendations": {
-		"recommendations": "Recommendations",
 		"food": "Food",
 		"tourism": "Tourism",
 		"discover_places": "Discover Places",

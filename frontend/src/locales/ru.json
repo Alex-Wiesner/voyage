@@ -983,7 +983,6 @@
 		"google_maps_integration_desc_no_staff": "Эта интеграция должна сначала быть включена администратором на этом сервере."
 	},
 	"recomendations": {
-		"recommendations": "Рекомендации",
 		"food": "Еда",
 		"tourism": "Туризм",
 		"any": "Любой",

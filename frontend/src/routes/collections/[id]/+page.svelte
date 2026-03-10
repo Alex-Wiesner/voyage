@@ -1,12 +1,5 @@
 <script lang="ts">
-	import type {
-		Collection,
-		ContentImage,
-		Location,
-		Collaborator,
-		Lodging,
-		CollectionItineraryItem
-	} from '$lib/types';
+	import type { Collection, ContentImage, Location, Collaborator, Lodging } from '$lib/types';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
@@ -25,8 +18,6 @@
 	import ImageDisplayModal from '$lib/components/ImageDisplayModal.svelte';
 	import CollectionAllItems from '$lib/components/collections/CollectionAllItems.svelte';
 	import CollectionItineraryPlanner from '$lib/components/collections/CollectionItineraryPlanner.svelte';
-	import CollectionRecommendationView from '$lib/components/CollectionRecommendationView.svelte';
-	import AITravelChat from '$lib/components/AITravelChat.svelte';
 	import CollectionMap from '$lib/components/collections/CollectionMap.svelte';
 	import CollectionStats from '$lib/components/collections/CollectionStats.svelte';
 	import LocationLink from '$lib/components/LocationLink.svelte';
@@ -36,7 +27,6 @@
 	import FormatListBulleted from '~icons/mdi/format-list-bulleted';
 	import Timeline from '~icons/mdi/timeline';
 	import MapIcon from '~icons/mdi/map';
-	import Lightbulb from '~icons/mdi/lightbulb';
 	import ChartBar from '~icons/mdi/chart-bar';
 	import Plus from '~icons/mdi/plus';
 	import { addToast } from '$lib/toasts';
@@ -97,115 +87,8 @@
 		collection = { ...collection }; // trigger reactivity so cost summary & UI refresh immediately
 	}
 
-	type AssistantItemAddedDetail = {
-		location: Location;
-		itineraryItem: CollectionItineraryItem;
-		date: string;
-	};
-
-	function handleAssistantItemAdded(event: CustomEvent<AssistantItemAddedDetail>) {
-		const { location, itineraryItem } = event.detail;
-
-		upsertCollectionItem('locations', location);
-
-		if (!itineraryItem || itineraryItem.id === undefined || itineraryItem.id === null) {
-			return;
-		}
-
-		const items = collection.itinerary || [];
-		const exists = items.some((entry) => String(entry.id) === String(itineraryItem.id));
-		collection = {
-			...collection,
-			itinerary: exists
-				? items.map((entry) =>
-						String(entry.id) === String(itineraryItem.id) ? itineraryItem : entry
-					)
-				: [...items, itineraryItem]
-		};
-	}
-
-	// Helper to upload prefilled images (temp ids starting with 'rec-') sequentially
-	async function importPrefilledImagesForItem(
-		item: any,
-		contentType: string,
-		collectionKey: 'locations' | 'lodging'
-	) {
-		if (!item || !item.images || item.images.length === 0) return;
-		const prefilled = item.images.filter((img: any) => img.id && String(img.id).startsWith('rec-'));
-		if (prefilled.length === 0) return;
-
-		// If we don't have a server id yet, retry a few times because the modal flow may set it asynchronously.
-		let attempts = 0;
-		const maxAttempts = 6;
-		const attemptDelayMs = 2000;
-
-		while ((!item.id || String(item.id).trim() === '') && attempts < maxAttempts) {
-			attempts += 1;
-			console.debug(`Waiting for server id for item (attempt ${attempts}/${maxAttempts})`);
-			// Try to find an updated item in the collection by matching name and collection membership
-			const candidates = (collection as any)[collectionKey] || [];
-			const match = candidates.find(
-				(c: any) =>
-					c.name === item.name &&
-					(c.collections || c.collection) &&
-					String(c.collections || c.collection || '') === String(collection.id)
-			);
-			if (match && match.id) {
-				item.id = match.id;
-				break;
-			}
-			await new Promise((r) => setTimeout(r, attemptDelayMs));
-		}
-
-		if (!item.id || String(item.id).trim() === '') {
-			console.warn('Unable to obtain server id for item; skipping image import for', item);
-			return;
-		}
-
-		for (const img of prefilled) {
-			try {
-				const res = await fetch(img.image);
-				if (!res.ok) throw new Error('Failed to fetch image');
-				const blob = await res.blob();
-				const file = new File([blob], 'image.jpg', { type: blob.type || 'image/jpeg' });
-				const form = new FormData();
-				form.append('image', file);
-				form.append('object_id', item.id);
-				form.append('content_type', contentType || 'location');
-
-				const upload = await fetch('/locations?/image', {
-					method: 'POST',
-					body: form,
-					credentials: 'same-origin'
-				});
-				if (!upload.ok) throw new Error('Upload failed');
-				const newData = await upload.json();
-				const newImage = newData && newData.data ? newData.data : newData;
-
-				// Replace temporary image in the item and in the collection
-				item.images = item.images.map((i: any) =>
-					String(i.id) === String(img.id)
-						? {
-								id: newImage.id,
-								image: newImage.image,
-								is_primary: newImage.is_primary || false,
-								immich_id: newImage.immich_id || null
-							}
-						: i
-				);
-
-				// Upsert the updated item back into the collection to refresh UI bindings
-				upsertCollectionItem(collectionKey, item);
-				addToast('success', $t('adventures.image_upload_success'));
-			} catch (err) {
-				console.error('Error importing prefilled image for item:', err);
-				addToast('error', $t('adventures.image_upload_error'));
-			}
-		}
-	}
-
 	// View state from URL params
-	type ViewType = 'all' | 'itinerary' | 'map' | 'calendar' | 'recommendations' | 'stats';
+	type ViewType = 'all' | 'itinerary' | 'map' | 'calendar' | 'stats';
 	let currentView: ViewType = 'itinerary';
 
 	// Determine if this is a folder view (no dates) or itinerary view (has dates)
@@ -240,7 +123,6 @@
 			) ||
 			false,
 		calendar: !isFolderView,
-		recommendations: true, // may be overridden by permission check below
 		stats: true
 	};
 
@@ -253,7 +135,7 @@
 		const view = $page.url.searchParams.get('view') as ViewType;
 		if (
 			view &&
-			['all', 'itinerary', 'map', 'calendar', 'recommendations', 'stats'].includes(view) &&
+			['all', 'itinerary', 'map', 'calendar', 'stats'].includes(view) &&
 			availableViews[view]
 		) {
 			currentView = view;
@@ -286,55 +168,6 @@
 
 		return false;
 	})();
-
-	// Enforce recommendations visibility only for owner/shared users
-	$: availableViews.recommendations = !!canModifyCollection;
-
-	function deriveCollectionDestination(current: Collection | null): string | undefined {
-		if (!current?.locations?.length) {
-			return undefined;
-		}
-
-		const maxStops = 4;
-		const stops: string[] = [];
-		const seen = new Set<string>();
-
-		for (const loc of current.locations) {
-			const cityName = loc.city?.name?.trim();
-			const countryName = loc.country?.name?.trim();
-
-			if (cityName || countryName) {
-				const label =
-					cityName && countryName ? `${cityName}, ${countryName}` : cityName || countryName;
-				if (!label) continue;
-				const key = `geo:${(cityName || '').toLowerCase()}|${(countryName || '').toLowerCase()}`;
-				if (seen.has(key)) continue;
-				seen.add(key);
-				stops.push(label);
-				continue;
-			}
-
-			const fallbackName = (loc.location || loc.name || '').trim();
-			if (!fallbackName) continue;
-			const key = `name:${fallbackName.toLowerCase()}`;
-			if (seen.has(key)) continue;
-			seen.add(key);
-			stops.push(fallbackName);
-		}
-
-		if (stops.length === 0) {
-			return undefined;
-		}
-
-		const summarizedStops = stops.slice(0, maxStops).join('; ');
-		if (stops.length > maxStops) {
-			return `${summarizedStops}; +${stops.length - maxStops} more`;
-		}
-
-		return summarizedStops;
-	}
-
-	$: collectionDestination = deriveCollectionDestination(collection);
 
 	// Build calendar events from collection visits
 	type TimezoneMode = 'event' | 'local';
@@ -761,6 +594,14 @@
 	function openImageModal(imageIndex: number) {
 		modalInitialIndex = imageIndex;
 		isImageModalOpen = true;
+	}
+
+	function createImageKeydownHandler(index: number) {
+		return (event: KeyboardEvent) => {
+			if (event.key === 'Enter') {
+				openImageModal(index);
+			}
+		};
 	}
 
 	function formatDate(dateString: string | null) {
@@ -1209,16 +1050,6 @@
 						<span class="hidden sm:inline">{$t('navbar.calendar')}</span>
 					</button>
 				{/if}
-				{#if availableViews.recommendations}
-					<button
-						class="btn join-item"
-						class:btn-active={currentView === 'recommendations'}
-						on:click={() => switchView('recommendations')}
-					>
-						<Lightbulb class="w-5 h-5 sm:mr-2" aria-hidden="true" />
-						<span class="hidden sm:inline">{$t('recomendations.recommendations')}</span>
-					</button>
-				{/if}
 				{#if availableViews.stats}
 					<button
 						class="btn join-item"
@@ -1336,22 +1167,6 @@
 							</div>
 						</div>
 					{/if}
-				{/if}
-
-				<!-- Recommendations View -->
-				{#if currentView === 'recommendations'}
-					<div class="space-y-8">
-						<AITravelChat
-							embedded={true}
-							collectionId={collection.id}
-							collectionName={collection.name}
-							startDate={collection.start_date || undefined}
-							endDate={collection.end_date || undefined}
-							destination={collectionDestination}
-							on:itemAdded={handleAssistantItemAdded}
-						/>
-						<CollectionRecommendationView bind:collection user={data.user} />
-					</div>
 				{/if}
 			</div>
 
@@ -1591,7 +1406,7 @@
 											class="aspect-square bg-cover bg-center rounded-lg cursor-pointer transition-transform duration-200 group-hover:scale-105"
 											style="background-image: url({image.image})"
 											on:click={() => openImageModal(index)}
-											on:keydown={(e) => e.key === 'Enter' && openImageModal(index)}
+											on:keydown={createImageKeydownHandler(index)}
 											role="button"
 											tabindex="0"
 										></div>

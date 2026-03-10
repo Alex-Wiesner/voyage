@@ -983,7 +983,6 @@
 		"google_maps_integration_desc_no_staff": "Ezt az integrációt először a szerver adminisztrátorának kell engedélyeznie."
 	},
 	"recomendations": {
-		"recommendations": "Ajánlások",
 		"food": "Étel",
 		"tourism": "Turizmus",
 		"any": "Bármilyen",
