@@ -16,3 +16,9 @@ BUGFIX_DOCUMENTATION.md
 
 # Local agent knowledge DB / cache
 .memory/
+decisions/
+gates/
+knowledge/
+plans/
+voyage/
+.worktrees/
