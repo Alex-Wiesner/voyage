@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from rest_framework.test import APITestCase
+from rest_framework.test import APITransactionTestCase
 
 from adventures.models import Collection, CollectionItineraryItem
 from chat.agent_tools import add_to_itinerary, get_trip_details
@@ -165,7 +165,7 @@ class ChatViewSetToolValidationBoundaryTests(TestCase):
         )
 
 
-class ChatViewSetSearchPlacesClarificationTests(APITestCase):
+class ChatViewSetSearchPlacesClarificationTests(APITransactionTestCase):
     @patch("chat.views.execute_tool")
     @patch("chat.views.stream_chat_completion")
     @patch("integrations.utils.auto_profile.update_auto_preference_profile")
