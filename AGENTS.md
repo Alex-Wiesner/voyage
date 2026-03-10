@@ -1,3 +1,9 @@
+---
+title: AGENTS
+type: note
+permalink: voyage/agents
+---
+
 # Voyage Development Instructions (OpenCode)
 
 ## Project
@@ -57,7 +63,7 @@ Run in this order:
 
 ## Known Issues (Expected)
 - Frontend `bun run check`: **0 errors + 6 warnings** expected (pre-existing in `CollectionRecommendationView.svelte` + `RegionCard.svelte`)
-- Backend tests: **6/39 fail** (pre-existing: 2 user email key errors + 4 geocoding API mocks; 9 new chat tests all pass)
+- Backend tests: **6/39 fail** (pre-existing: 2 user email key errors + 4 geocoding API mocks; 32 chat tests all pass)
 - Docker dev setup has frontend-backend communication issues (500 errors beyond homepage)
 
 ## Key Patterns
@@ -68,9 +74,11 @@ Run in this order:
 - Chat providers: dynamic catalog from `GET /api/chat/providers/`; configured in `CHAT_PROVIDER_CONFIG`
 - Chat model override: dropdown selector fed by `GET /api/chat/providers/{provider}/models/`; persisted in `localStorage` key `voyage_chat_model_prefs`; backend accepts optional `model` param in `send_message`
 - Chat context: collection chats inject collection UUID + multi-stop itinerary context; system prompt guides `get_trip_details`-first reasoning and confirms only before first `add_to_itinerary`; `search_places` has a deterministic context-retry fallback — when the LLM omits `location`, the backend retries using the trip destination or first itinerary stop before asking the user for clarification; a dining-intent heuristic infers `category="food"` from user messages when the LLM omits category for restaurant/dining requests
-- Chat tool output: `role=tool` messages hidden from display; tool outputs render as concise summaries; persisted tool rows reconstructed on reload via `rebuildConversationMessages()`
-- Chat error surfacing: `_safe_error_payload()` maps LiteLLM exceptions to sanitized user-safe categories (never forwards raw `exc.message`)
+- Chat tool output: `role=tool` messages hidden from display; tool outputs render as concise summaries; persisted tool rows reconstructed on reload via `rebuildConversationMessages()`; tool results are deduplicated by `tool_call_id` at three layers — rebuild from persisted rows (discards server-side pre-populated `tool_results`), SSE ingestion (`appendToolResultDedup`), and render-time (`uniqueToolResultsByCallId`)
+- Chat error surfacing: `_safe_error_payload()` maps LiteLLM exceptions to sanitized user-safe categories (never forwards raw `exc.message`); `execute_tool()` catch-all returns a generic sanitized message (never raw `str(exc)`)
 - Invalid tool calls (missing required args) are detected and short-circuited with a user-visible error — not replayed into history
+- Tool execution failures (`search_places`, `web_search`, catch-all errors) are classified separately from required-param validation errors; execution failures emit a bounded `tool_execution_error` SSE event and stop — they are never replayed into LLM context; `tool_iterations` increments only on successful tool calls; all-failure rounds are capped at `MAX_ALL_FAILURE_ROUNDS` (3); permanent failures (e.g. `web_search` import error with `retryable: false`) stop immediately
+- Geocoding failures in `search_places` (`Could not geocode location: ...`) are eligible for the existing context-retry path (trip destination → first itinerary stop → user clarification)
 - Geocoding: `background_geocode_and_assign()` runs in a thread after Location save; populates `region`, `city`, `country`, and also fills `Location.location` from reverse geocode `display_name` (truncated to field max_length) if blank or different
 
 ## Conventions
