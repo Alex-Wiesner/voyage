@@ -566,6 +566,70 @@ class ChatViewSetSearchPlacesClarificationTests(APITransactionTestCase):
     @patch("chat.views.execute_tool")
     @patch("chat.views.stream_chat_completion")
     @patch("integrations.utils.auto_profile.update_auto_preference_profile")
+    def test_collection_context_retry_extracts_city_from_fallback_address(
+        self,
+        _mock_auto_profile,
+        mock_stream_chat_completion,
+        mock_execute_tool,
+    ):
+        user = User.objects.create_user(
+            username="chat-city-extract-user",
+            email="chat-city-extract-user@example.com",
+            password="password123",
+        )
+        self.client.force_authenticate(user=user)
+
+        collection = Collection.objects.create(user=user, name="London Food Trip")
+        trip_stop = Location.objects.create(
+            user=user,
+            name="Turnstile",
+            location="Little Turnstile 6, London",
+        )
+        collection.locations.add(trip_stop)
+
+        conversation_response = self.client.post(
+            "/api/chat/conversations/",
+            {"title": "Fallback City Extraction Test"},
+            format="json",
+        )
+        self.assertEqual(conversation_response.status_code, 201)
+        conversation_id = conversation_response.json()["id"]
+
+        async def first_stream(*args, **kwargs):
+            yield 'data: {"tool_calls": [{"index": 0, "id": "call_1", "type": "function", "function": {"name": "search_places", "arguments": "{}"}}]}\n\n'
+            yield "data: [DONE]\n\n"
+
+        async def second_stream(*args, **kwargs):
+            yield 'data: {"content": "Here are options in London."}\n\n'
+            yield "data: [DONE]\n\n"
+
+        mock_stream_chat_completion.side_effect = [first_stream(), second_stream()]
+        mock_execute_tool.side_effect = [
+            {"error": "location is required"},
+            {"results": [{"name": "Rules Restaurant"}]},
+        ]
+
+        response = self.client.post(
+            f"/api/chat/conversations/{conversation_id}/send_message/",
+            {
+                "message": "Find restaurants",
+                "collection_id": str(collection.id),
+                "collection_name": collection.name,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        # Consume the streaming response before checking mock call counts;
+        # the event_stream generator only runs when streaming_content is iterated.
+        list(response.streaming_content)
+        self.assertEqual(mock_execute_tool.call_count, 2)
+        second_call_kwargs = mock_execute_tool.call_args_list[1].kwargs
+        self.assertEqual(second_call_kwargs.get("location"), "London")
+
+    @patch("chat.views.execute_tool")
+    @patch("chat.views.stream_chat_completion")
+    @patch("integrations.utils.auto_profile.update_auto_preference_profile")
     def test_trip_context_retry_uses_normalized_summary_destination_for_search_places(
         self,
         _mock_auto_profile,
@@ -857,3 +921,79 @@ class ChatViewSetToolExecutionFailureLoopTests(APITransactionTestCase):
         )
         self.assertEqual(mock_stream_chat_completion.call_count, 1)
         self.assertEqual(mock_execute_tool.call_count, 1)
+
+    @patch("chat.views.execute_tool")
+    @patch("chat.views.stream_chat_completion")
+    @patch("integrations.utils.auto_profile.update_auto_preference_profile")
+    def test_context_retry_failure_does_not_emit_location_clarification(
+        self,
+        _mock_auto_profile,
+        mock_stream_chat_completion,
+        mock_execute_tool,
+    ):
+        user = User.objects.create_user(
+            username="chat-retry-no-clarify-user",
+            email="chat-retry-no-clarify-user@example.com",
+            password="password123",
+        )
+        self.client.force_authenticate(user=user)
+
+        conversation_response = self.client.post(
+            "/api/chat/conversations/",
+            {"title": "Retry Failure No Clarify Test"},
+            format="json",
+        )
+        self.assertEqual(conversation_response.status_code, 201)
+        conversation_id = conversation_response.json()["id"]
+
+        async def failing_stream(*args, **kwargs):
+            yield 'data: {"tool_calls": [{"index": 0, "id": "call_s", "type": "function", "function": {"name": "search_places", "arguments": "{}"}}]}\n\n'
+            yield "data: [DONE]\n\n"
+
+        mock_stream_chat_completion.side_effect = failing_stream
+        mock_execute_tool.side_effect = [
+            {"error": "location is required"},
+            {"error": "location is required"},
+            {"error": "location is required"},
+            {"error": "location is required"},
+            {"error": "location is required"},
+            {"error": "location is required"},
+        ]
+
+        response = self.client.post(
+            f"/api/chat/conversations/{conversation_id}/send_message/",
+            {
+                "message": "Find restaurants",
+                "destination": "Lisbon, Portugal",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        chunks = [
+            chunk.decode("utf-8")
+            if isinstance(chunk, (bytes, bytearray))
+            else str(chunk)
+            for chunk in response.streaming_content
+        ]
+        payload_lines = [
+            chunk.strip()[len("data: ") :]
+            for chunk in chunks
+            if chunk.strip().startswith("data: ")
+        ]
+        json_payloads = [
+            json.loads(payload) for payload in payload_lines if payload != "[DONE]"
+        ]
+
+        self.assertTrue(
+            any(
+                payload.get("error_category") == "tool_execution_error"
+                for payload in json_payloads
+            )
+        )
+        self.assertFalse(
+            any(
+                "specific location" in payload.get("content", "").lower()
+                for payload in json_payloads
+            )
+        )

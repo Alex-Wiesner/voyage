@@ -326,8 +326,35 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         return None
 
-    @staticmethod
-    def _is_likely_location_reply(user_content):
+    # Verbs that indicate a command/request rather than a location reply.
+    _COMMAND_VERBS = frozenset(
+        [
+            "find",
+            "search",
+            "show",
+            "get",
+            "look",
+            "give",
+            "tell",
+            "help",
+            "recommend",
+            "suggest",
+            "list",
+            "fetch",
+            "what",
+            "where",
+            "which",
+            "who",
+            "how",
+            "can",
+            "could",
+            "would",
+            "please",
+        ]
+    )
+
+    @classmethod
+    def _is_likely_location_reply(cls, user_content):
         if not isinstance(user_content, str):
             return False
 
@@ -343,6 +370,12 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         parts = normalized.split()
         if len(parts) > 6:
+            return False
+
+        # Exclude messages that start with a command/request verb — those are
+        # original requests, not replies to a "where?" clarification prompt.
+        first_word = parts[0].lower().rstrip(".,!;:")
+        if first_word in cls._COMMAND_VERBS:
             return False
 
         return bool(re.search(r"[a-z0-9]", normalized, re.IGNORECASE))
@@ -445,8 +478,21 @@ class ChatViewSet(viewsets.ModelViewSet):
                     fallback_name = (location.location or location.name or "").strip()
                     if not fallback_name:
                         continue
-                    stop_label = fallback_name
-                    stop_key = f"name:{fallback_name.lower()}"
+                    # When city/country FKs are not set, try to extract a geocodable
+                    # city name from a comma-separated address string.
+                    # e.g. "Little Turnstile 6, London" → "London"
+                    # e.g. "Kingsway 58, London" → "London"
+                    if "," in fallback_name:
+                        parts = [p.strip() for p in fallback_name.split(",")]
+                        # Last non-empty, non-purely-numeric segment is typically the city
+                        city_hint = next(
+                            (p for p in reversed(parts) if p and not p.isdigit()),
+                            None,
+                        )
+                        stop_label = city_hint if city_hint else fallback_name
+                    else:
+                        stop_label = fallback_name
+                    stop_key = f"name:{stop_label.lower()}"
 
                 if stop_key in seen_stops:
                     continue
@@ -595,6 +641,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                             **prepared_arguments,
                         )
 
+                        attempted_location_retry = False
                         if self._is_search_places_location_retry_candidate_error(
                             function_name,
                             result,
@@ -616,6 +663,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                                 ):
                                     continue
                                 seen_retry_locations.add(normalized_retry_location)
+                                attempted_location_retry = True
 
                                 retry_arguments = dict(prepared_arguments)
                                 retry_arguments["location"] = retry_location
@@ -644,6 +692,17 @@ class ChatViewSet(viewsets.ModelViewSet):
                                     }
                                     break
 
+                            # If we attempted context retries but all failed, convert
+                            # to an execution failure so we never ask the user for a
+                            # location they already implied via itinerary context.
+                            if (
+                                attempted_location_retry
+                                and self._is_required_param_tool_error(result)
+                            ):
+                                result = {
+                                    "error": "Could not search places at the provided itinerary locations"
+                                }
+
                         if self._is_required_param_tool_error(result):
                             assistant_message_kwargs = {
                                 "conversation": conversation,
@@ -665,9 +724,12 @@ class ChatViewSet(viewsets.ModelViewSet):
                                     thread_sensitive=True,
                                 )(**tool_message)
 
-                            if self._is_search_places_missing_location_required_error(
-                                function_name,
-                                result,
+                            if (
+                                not attempted_location_retry
+                                and self._is_search_places_missing_location_required_error(
+                                    function_name,
+                                    result,
+                                )
                             ):
                                 clarification_content = self._build_search_places_location_clarification_message()
                                 await sync_to_async(
