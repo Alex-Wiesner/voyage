@@ -49,9 +49,19 @@ def background_geocode_and_assign(location_id: str):
             if country:
                 location.country = country
 
-        # Save updated location info
+        update_fields = ["region", "city", "country"]
+        display_name = (result.get("display_name") or "").strip()
+        if display_name:
+            max_length = Location._meta.get_field("location").max_length
+            if max_length:
+                display_name = display_name[:max_length]
+
+            if location.location != display_name:
+                location.location = display_name
+                update_fields.append("location")
+
         # Save updated location info, skip geocode threading
-        location.save(update_fields=["region", "city", "country"], _skip_geocode=True)
+        location.save(update_fields=update_fields, _skip_geocode=True)
 
     except Exception as e:
         # Optional: log or print the error

@@ -2,7 +2,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { t } from 'svelte-i18n';
 	import { mdiSend, mdiPlus, mdiDelete, mdiMenu, mdiClose } from '@mdi/js';
-	import type { ChatProviderCatalogEntry } from '$lib/types.js';
+	import type { ChatProviderCatalogEntry, CollectionItineraryItem, Location } from '$lib/types.js';
 	import { addToast } from '$lib/toasts';
 
 	type ToolResultEntry = {
@@ -82,7 +82,7 @@
 
 	const dispatch = createEventDispatcher<{
 		close: void;
-		itemAdded: { locationId: string; date: string };
+		itemAdded: { location: Location; itineraryItem: CollectionItineraryItem; date: string };
 	}>();
 
 	const MODEL_PREFS_STORAGE_KEY = 'voyage_chat_model_prefs';
@@ -620,7 +620,9 @@
 				throw new Error('Failed to add to itinerary');
 			}
 
-			dispatch('itemAdded', { locationId: location.id, date });
+			const itineraryItem = await itineraryResponse.json();
+
+			dispatch('itemAdded', { location, itineraryItem, date });
 			addToast('success', $t('added_successfully'));
 			closeDateSelector();
 		} catch (error) {

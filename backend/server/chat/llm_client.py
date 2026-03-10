@@ -346,6 +346,7 @@ When chat context includes a trip collection:
 - Treat context as itinerary-wide (potentially multiple stops), not a single destination
 - Use get_trip_details first when you need complete collection context before searching for places
 - Ground place searches in trip stops and dates from the provided trip context
+- Only call search_places when you have a concrete, non-empty location string; if location is missing or unclear, ask a clarifying question to obtain it first
 
 Be conversational, helpful, and enthusiastic about travel. Keep responses concise but informative."""
 

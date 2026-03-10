@@ -1,5 +1,12 @@
 <script lang="ts">
-	import type { Collection, ContentImage, Location, Collaborator, Lodging } from '$lib/types';
+	import type {
+		Collection,
+		ContentImage,
+		Location,
+		Collaborator,
+		Lodging,
+		CollectionItineraryItem
+	} from '$lib/types';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
@@ -88,6 +95,33 @@
 			? items.map((entry: any) => (String(entry.id) === String(item.id) ? item : entry))
 			: [...items, item];
 		collection = { ...collection }; // trigger reactivity so cost summary & UI refresh immediately
+	}
+
+	type AssistantItemAddedDetail = {
+		location: Location;
+		itineraryItem: CollectionItineraryItem;
+		date: string;
+	};
+
+	function handleAssistantItemAdded(event: CustomEvent<AssistantItemAddedDetail>) {
+		const { location, itineraryItem } = event.detail;
+
+		upsertCollectionItem('locations', location);
+
+		if (!itineraryItem || itineraryItem.id === undefined || itineraryItem.id === null) {
+			return;
+		}
+
+		const items = collection.itinerary || [];
+		const exists = items.some((entry) => String(entry.id) === String(itineraryItem.id));
+		collection = {
+			...collection,
+			itinerary: exists
+				? items.map((entry) =>
+						String(entry.id) === String(itineraryItem.id) ? itineraryItem : entry
+					)
+				: [...items, itineraryItem]
+		};
 	}
 
 	// Helper to upload prefilled images (temp ids starting with 'rec-') sequentially
@@ -1314,6 +1348,7 @@
 							startDate={collection.start_date || undefined}
 							endDate={collection.end_date || undefined}
 							destination={collectionDestination}
+							on:itemAdded={handleAssistantItemAdded}
 						/>
 						<CollectionRecommendationView bind:collection user={data.user} />
 					</div>
