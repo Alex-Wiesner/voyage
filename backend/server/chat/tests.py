@@ -152,6 +152,77 @@ class ChatAgentToolSharedTripAccessTests(TestCase):
         self.assertEqual(result["location"]["name"], "Louvre Museum")
 
     @patch("adventures.models.background_geocode_and_assign")
+    def test_add_to_itinerary_reuses_same_day_location_without_duplicate_rows(
+        self,
+        _mock_background_geocode,
+    ):
+        first = add_to_itinerary(
+            self.owner,
+            collection_id=str(self.collection.id),
+            name="Eiffel Tower",
+            latitude=48.85837,
+            longitude=2.294481,
+            date="2026-06-01",
+        )
+        second = add_to_itinerary(
+            self.owner,
+            collection_id=str(self.collection.id),
+            name="Eiffel Tower",
+            latitude=48.858370001,
+            longitude=2.294480999,
+            date="2026-06-01",
+        )
+
+        self.assertTrue(first.get("success"))
+        self.assertTrue(second.get("success"))
+        self.assertEqual(
+            second.get("note"),
+            "Location is already in the itinerary for this date",
+        )
+        self.assertEqual(first["location"]["id"], second["location"]["id"])
+        self.assertEqual(first["itinerary_item"]["id"], second["itinerary_item"]["id"])
+        self.assertEqual(Location.objects.filter(user=self.owner).count(), 1)
+        self.assertEqual(
+            CollectionItineraryItem.objects.filter(collection=self.collection).count(),
+            1,
+        )
+
+    @patch("adventures.models.background_geocode_and_assign")
+    def test_add_to_itinerary_allows_reusing_same_location_on_different_dates(
+        self,
+        _mock_background_geocode,
+    ):
+        first = add_to_itinerary(
+            self.owner,
+            collection_id=str(self.collection.id),
+            name="Eiffel Tower",
+            latitude=48.85837,
+            longitude=2.294481,
+            date="2026-06-01",
+        )
+        second = add_to_itinerary(
+            self.owner,
+            collection_id=str(self.collection.id),
+            name="Eiffel Tower",
+            latitude=48.858370001,
+            longitude=2.294480999,
+            date="2026-06-02",
+        )
+
+        self.assertTrue(first.get("success"))
+        self.assertTrue(second.get("success"))
+        self.assertNotIn("note", second)
+        self.assertEqual(first["location"]["id"], second["location"]["id"])
+        self.assertNotEqual(
+            first["itinerary_item"]["id"], second["itinerary_item"]["id"]
+        )
+        self.assertEqual(Location.objects.filter(user=self.owner).count(), 1)
+        self.assertEqual(
+            CollectionItineraryItem.objects.filter(collection=self.collection).count(),
+            2,
+        )
+
+    @patch("adventures.models.background_geocode_and_assign")
     def test_non_member_access_remains_denied(self, _mock_background_geocode):
         trip_result = get_trip_details(
             self.non_member,

@@ -62,6 +62,7 @@ OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 OPEN_METEO_ARCHIVE_URL = "https://archive-api.open-meteo.com/v1/archive"
 OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 REQUEST_HEADERS = {"User-Agent": "Voyage/1.0"}
+LOCATION_COORD_TOLERANCE = 0.00001
 
 
 def _build_overpass_query(latitude, longitude, radius_meters, category):
@@ -341,7 +342,7 @@ def get_trip_details(user, collection_id: str | None = None):
         )
 
         itinerary = []
-        for item in collection.itinerary_items.all().order_by("date", "order"):
+        for item in collection.itinerary_items.all():
             content_obj = item.item
             itinerary.append(
                 {
@@ -474,18 +475,6 @@ def add_to_itinerary(
             .get(id=collection_id)
         )
 
-        location = Location.objects.create(
-            user=user,
-            name=name,
-            latitude=latitude,
-            longitude=longitude,
-            description=description or "",
-            location=location_address or "",
-        )
-
-        collection.locations.add(location)
-        content_type = ContentType.objects.get_for_model(Location)
-
         itinerary_date = date
         if not itinerary_date:
             if collection.start_date:
@@ -497,6 +486,62 @@ def add_to_itinerary(
             itinerary_date_obj = date_cls.fromisoformat(itinerary_date)
         except ValueError:
             return {"error": "date must be in YYYY-MM-DD format"}
+
+        latitude_min = latitude - LOCATION_COORD_TOLERANCE
+        latitude_max = latitude + LOCATION_COORD_TOLERANCE
+        longitude_min = longitude - LOCATION_COORD_TOLERANCE
+        longitude_max = longitude + LOCATION_COORD_TOLERANCE
+
+        location = (
+            Location.objects.filter(
+                user=user,
+                name=name,
+                latitude__gte=latitude_min,
+                latitude__lte=latitude_max,
+                longitude__gte=longitude_min,
+                longitude__lte=longitude_max,
+            )
+            .order_by("created_at")
+            .first()
+        )
+
+        if location is None:
+            location = Location.objects.create(
+                user=user,
+                name=name,
+                latitude=latitude,
+                longitude=longitude,
+                description=description or "",
+                location=location_address or "",
+            )
+
+        collection.locations.add(location)
+        content_type = ContentType.objects.get_for_model(Location)
+
+        existing_item = CollectionItineraryItem.objects.filter(
+            collection=collection,
+            content_type=content_type,
+            object_id=location.id,
+            date=itinerary_date_obj,
+            is_global=False,
+        ).first()
+
+        if existing_item:
+            return {
+                "success": True,
+                "note": "Location is already in the itinerary for this date",
+                "location": {
+                    "id": str(location.id),
+                    "name": location.name,
+                    "latitude": float(location.latitude),
+                    "longitude": float(location.longitude),
+                },
+                "itinerary_item": {
+                    "id": str(existing_item.id),
+                    "date": itinerary_date_obj.isoformat(),
+                    "order": existing_item.order,
+                },
+            }
 
         max_order = (
             CollectionItineraryItem.objects.filter(
