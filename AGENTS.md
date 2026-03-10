@@ -86,5 +86,5 @@ Run in this order:
 - Do **not** duplicate information from `.memory/` into code comments — keep `.memory/` as the single source of truth for project history.
 
 ## Instruction File Sync
-- `AGENTS.md` (OpenCode), `CLAUDE.md` (Claude Code), `.cursorrules` (Cursor), and the Copilot CLI custom instructions must always be kept in sync.
-- Whenever any of these files is updated (new convention, new decision, new workflow rule), apply the equivalent change to all the others.
+- `AGENTS.md` is the single source of truth for repository instructions.
+- Do not maintain mirrored instruction files for other tools in this repo.

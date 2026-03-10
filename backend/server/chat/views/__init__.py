@@ -176,6 +176,28 @@ class ChatViewSet(viewsets.ModelViewSet):
             "error_category": "tool_validation_error",
         }
 
+    @classmethod
+    def _is_search_places_missing_location_required_error(cls, tool_name, result):
+        if tool_name != "search_places" or not cls._is_required_param_tool_error(
+            result
+        ):
+            return False
+
+        error_text = (result or {}).get("error") if isinstance(result, dict) else ""
+        if not isinstance(error_text, str):
+            return False
+
+        normalized_error = error_text.strip().lower()
+        return "location" in normalized_error
+
+    @staticmethod
+    def _build_search_places_location_clarification_message():
+        return (
+            "Could you share the specific location you'd like me to search near "
+            "(city, neighborhood, or address)? I can also focus on food, "
+            "activities, or lodging."
+        )
+
     @action(detail=True, methods=["post"])
     def send_message(self, request, pk=None):
         # Auto-learn preferences from user's travel history
@@ -410,6 +432,33 @@ class ChatViewSet(viewsets.ModelViewSet):
                                     ChatMessage.objects.create,
                                     thread_sensitive=True,
                                 )(**tool_message)
+
+                            if self._is_search_places_missing_location_required_error(
+                                function_name,
+                                result,
+                            ):
+                                clarification_content = self._build_search_places_location_clarification_message()
+                                await sync_to_async(
+                                    ChatMessage.objects.create,
+                                    thread_sensitive=True,
+                                )(
+                                    conversation=conversation,
+                                    role="assistant",
+                                    content=clarification_content,
+                                )
+
+                                await sync_to_async(
+                                    conversation.save,
+                                    thread_sensitive=True,
+                                )(update_fields=["updated_at"])
+
+                                yield (
+                                    "data: "
+                                    f"{json.dumps({'content': clarification_content})}"
+                                    "\n\n"
+                                )
+                                yield "data: [DONE]\n\n"
+                                return
 
                             await sync_to_async(
                                 conversation.save,
