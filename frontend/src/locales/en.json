@@ -34,6 +34,7 @@
 	},
 	"chat": {
 		"title": "Travel Agent",
+		"travel_assistant": "Travel Assistant",
 		"conversations": "Conversations",
 		"new_conversation": "New Conversation",
 		"untitled": "Untitled Conversation",

@@ -30,6 +30,7 @@
 	import CollectionMap from '$lib/components/collections/CollectionMap.svelte';
 	import CollectionStats from '$lib/components/collections/CollectionStats.svelte';
 	import LocationLink from '$lib/components/LocationLink.svelte';
+	import { MessageCircle, X } from 'lucide-svelte';
 	import { getBasemapUrl } from '$lib';
 	import { formatMoney, toMoneyValue, DEFAULT_CURRENCY } from '$lib/money';
 	import FolderMultiple from '~icons/mdi/folder-multiple';
@@ -207,6 +208,8 @@
 	// View state from URL params
 	type ViewType = 'all' | 'itinerary' | 'map' | 'calendar' | 'recommendations' | 'stats';
 	let currentView: ViewType = 'itinerary';
+	let chatPanelOpen = false;
+	let innerWidth = 1024;
 
 	// Determine if this is a folder view (no dates) or itinerary view (has dates)
 	$: isFolderView = !collection?.start_date && !collection?.end_date;
@@ -289,6 +292,10 @@
 
 	// Enforce recommendations visibility only for owner/shared users
 	$: availableViews.recommendations = !!canModifyCollection;
+
+	$: if (!canModifyCollection && chatPanelOpen) {
+		chatPanelOpen = false;
+	}
 
 	function deriveCollectionDestination(current: Collection | null): string | undefined {
 		if (!current?.locations?.length) {
@@ -763,6 +770,12 @@
 		isImageModalOpen = true;
 	}
 
+	function handleImageKeydown(event: KeyboardEvent, imageIndex: number) {
+		if (event.key === 'Enter') {
+			openImageModal(imageIndex);
+		}
+	}
+
 	function formatDate(dateString: string | null) {
 		if (!dateString) return '';
 		return DateTime.fromISO(dateString).toLocaleString(DateTime.DATE_MED, { locale: 'en-GB' });
@@ -1028,6 +1041,8 @@
 	onClose={closeCalendarModal}
 />
 
+<svelte:window bind:innerWidth />
+
 {#if !collection && !notFound}
 	<div class="hero min-h-screen overflow-x-hidden">
 		<div class="hero-content">
@@ -1168,457 +1183,525 @@
 	<div class="container mx-auto px-2 sm:px-4 py-6 sm:py-8 max-w-7xl">
 		<!-- View Switcher -->
 		<div class="flex justify-center mb-6">
-			<div class="join">
-				{#if availableViews.all}
+			<div class="flex items-center">
+				<div class="join">
+					{#if availableViews.all}
+						<button
+							class="btn join-item"
+							class:btn-active={currentView === 'all'}
+							on:click={() => switchView('all')}
+						>
+							<FormatListBulleted class="w-5 h-5 sm:mr-2" aria-hidden="true" />
+							<span class="hidden sm:inline">{$t('collections.all_items')}</span>
+						</button>
+					{/if}
+					{#if availableViews.itinerary}
+						<button
+							class="btn join-item"
+							class:btn-active={currentView === 'itinerary'}
+							on:click={() => switchView('itinerary')}
+						>
+							<Timeline class="w-5 h-5 sm:mr-2" aria-hidden="true" />
+							<span class="hidden sm:inline">{$t('adventures.itinerary')}</span>
+						</button>
+					{/if}
+					{#if availableViews.map}
+						<button
+							class="btn join-item"
+							class:btn-active={currentView === 'map'}
+							on:click={() => switchView('map')}
+						>
+							<MapIcon class="w-5 h-5 sm:mr-2" aria-hidden="true" />
+							<span class="hidden sm:inline">{$t('navbar.map')}</span>
+						</button>
+					{/if}
+					{#if availableViews.calendar}
+						<button
+							class="btn join-item"
+							class:btn-active={currentView === 'calendar'}
+							on:click={() => switchView('calendar')}
+						>
+							<Calendar class="w-5 h-5 sm:mr-2" aria-hidden="true" />
+							<span class="hidden sm:inline">{$t('navbar.calendar')}</span>
+						</button>
+					{/if}
+					{#if availableViews.recommendations}
+						<button
+							class="btn join-item"
+							class:btn-active={currentView === 'recommendations'}
+							on:click={() => switchView('recommendations')}
+						>
+							<Lightbulb class="w-5 h-5 sm:mr-2" aria-hidden="true" />
+							<span class="hidden sm:inline">{$t('recomendations.recommendations')}</span>
+						</button>
+					{/if}
+					{#if availableViews.stats}
+						<button
+							class="btn join-item"
+							class:btn-active={currentView === 'stats'}
+							on:click={() => switchView('stats')}
+						>
+							<ChartBar class="w-5 h-5 sm:mr-2" aria-hidden="true" />
+							<span class="hidden sm:inline">{$t('collections.statistics')}</span>
+						</button>
+					{/if}
+				</div>
+				{#if canModifyCollection}
 					<button
-						class="btn join-item"
-						class:btn-active={currentView === 'all'}
-						on:click={() => switchView('all')}
+						class="btn btn-primary btn-sm gap-2 ml-4"
+						class:btn-outline={!chatPanelOpen}
+						on:click={() => (chatPanelOpen = !chatPanelOpen)}
+						title={$t('chat.travel_assistant')}
 					>
-						<FormatListBulleted class="w-5 h-5 sm:mr-2" aria-hidden="true" />
-						<span class="hidden sm:inline">{$t('collections.all_items')}</span>
-					</button>
-				{/if}
-				{#if availableViews.itinerary}
-					<button
-						class="btn join-item"
-						class:btn-active={currentView === 'itinerary'}
-						on:click={() => switchView('itinerary')}
-					>
-						<Timeline class="w-5 h-5 sm:mr-2" aria-hidden="true" />
-						<span class="hidden sm:inline">{$t('adventures.itinerary')}</span>
-					</button>
-				{/if}
-				{#if availableViews.map}
-					<button
-						class="btn join-item"
-						class:btn-active={currentView === 'map'}
-						on:click={() => switchView('map')}
-					>
-						<MapIcon class="w-5 h-5 sm:mr-2" aria-hidden="true" />
-						<span class="hidden sm:inline">{$t('navbar.map')}</span>
-					</button>
-				{/if}
-				{#if availableViews.calendar}
-					<button
-						class="btn join-item"
-						class:btn-active={currentView === 'calendar'}
-						on:click={() => switchView('calendar')}
-					>
-						<Calendar class="w-5 h-5 sm:mr-2" aria-hidden="true" />
-						<span class="hidden sm:inline">{$t('navbar.calendar')}</span>
-					</button>
-				{/if}
-				{#if availableViews.recommendations}
-					<button
-						class="btn join-item"
-						class:btn-active={currentView === 'recommendations'}
-						on:click={() => switchView('recommendations')}
-					>
-						<Lightbulb class="w-5 h-5 sm:mr-2" aria-hidden="true" />
-						<span class="hidden sm:inline">{$t('recomendations.recommendations')}</span>
-					</button>
-				{/if}
-				{#if availableViews.stats}
-					<button
-						class="btn join-item"
-						class:btn-active={currentView === 'stats'}
-						on:click={() => switchView('stats')}
-					>
-						<ChartBar class="w-5 h-5 sm:mr-2" aria-hidden="true" />
-						<span class="hidden sm:inline">{$t('collections.statistics')}</span>
+						<MessageCircle class="w-4 h-4" />
+						<span class="hidden sm:inline">{$t('chat.travel_assistant')}</span>
 					</button>
 				{/if}
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-10">
-			<!-- Left Column - Main Content -->
-			<div class="lg:col-span-3 space-y-8 sm:space-y-10">
-				<!-- Description Card (always visible) -->
-				{#if collection.description}
-					<div class="card bg-base-200 shadow-xl">
-						<div class="card-body">
-							<h2 class="card-title text-2xl mb-4">📝 Description</h2>
-							<article class="prose max-w-none">
-								{@html DOMPurify.sanitize(renderMarkdown(collection.description))}
-							</article>
-						</div>
-					</div>
-				{/if}
+		<div
+			class="drawer drawer-end"
+			class:drawer-open={canModifyCollection && chatPanelOpen && innerWidth >= 1024}
+		>
+			<input
+				id="collection-chat-drawer"
+				type="checkbox"
+				class="drawer-toggle"
+				bind:checked={chatPanelOpen}
+			/>
 
-				<!-- All Items View -->
-				{#if currentView === 'all'}
-					<CollectionAllItems
-						bind:collection
-						user={data.user}
-						{isFolderView}
-						on:openEdit={handleOpenEdit}
-					/>
-				{/if}
-
-				<!-- Itinerary View -->
-				{#if currentView === 'itinerary'}
-					<CollectionItineraryPlanner
-						bind:collection
-						user={data.user}
-						canModify={canModifyCollection}
-					/>
-				{/if}
-
-				<!-- Stats View -->
-				{#if currentView === 'stats'}
-					<CollectionStats {collection} user={data.user} />
-				{/if}
-
-				<!-- Map View -->
-				{#if currentView === 'map'}
-					<div class="card bg-base-200 shadow-xl">
-						<div class="card-body">
-							<h2 class="card-title text-2xl mb-4">🗺️ {$t('navbar.map')}</h2>
-							<div class="rounded-lg overflow-hidden shadow-lg">
-								<CollectionMap bind:collection user={data.user} />
+			<div class="drawer-content">
+				<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-10">
+					<!-- Left Column - Main Content -->
+					<div class="{chatPanelOpen ? 'lg:col-span-4' : 'lg:col-span-3'} space-y-8 sm:space-y-10">
+						<!-- Description Card (always visible) -->
+						{#if collection.description}
+							<div class="card bg-base-200 shadow-xl">
+								<div class="card-body">
+									<h2 class="card-title text-2xl mb-4">📝 Description</h2>
+									<article class="prose max-w-none">
+										{@html DOMPurify.sanitize(renderMarkdown(collection.description))}
+									</article>
+								</div>
 							</div>
-						</div>
-					</div>
-				{/if}
+						{/if}
 
-				<!-- Calendar View -->
-				{#if currentView === 'calendar'}
-					{#if collectionEvents.length === 0}
-						<div class="card bg-base-200 shadow-xl">
-							<div class="card-body">
-								<h2 class="card-title text-2xl mb-4">📆 {$t('navbar.calendar')}</h2>
-								<p class="text-base-content/70">{$t('collections.no_calendar_events')}</p>
+						<!-- All Items View -->
+						{#if currentView === 'all'}
+							<CollectionAllItems
+								bind:collection
+								user={data.user}
+								{isFolderView}
+								on:openEdit={handleOpenEdit}
+							/>
+						{/if}
+
+						<!-- Itinerary View -->
+						{#if currentView === 'itinerary'}
+							<CollectionItineraryPlanner
+								bind:collection
+								user={data.user}
+								canModify={canModifyCollection}
+							/>
+						{/if}
+
+						<!-- Stats View -->
+						{#if currentView === 'stats'}
+							<CollectionStats {collection} user={data.user} />
+						{/if}
+
+						<!-- Map View -->
+						{#if currentView === 'map'}
+							<div class="card bg-base-200 shadow-xl">
+								<div class="card-body">
+									<h2 class="card-title text-2xl mb-4">🗺️ {$t('navbar.map')}</h2>
+									<div class="rounded-lg overflow-hidden shadow-lg">
+										<CollectionMap bind:collection user={data.user} />
+									</div>
+								</div>
 							</div>
-						</div>
-					{:else}
-						<div class="card bg-base-200 shadow-xl">
-							<div class="card-body space-y-4">
-								<h2 class="card-title text-2xl flex items-center gap-2">
-									📆 {$t('navbar.calendar')}
-								</h2>
-								<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-									<div class="flex items-center gap-2 text-sm text-base-content/80">
-										<span class="badge badge-ghost"
-											>{collectionEvents.length} {$t('collections.events')}</span
-										>
-									</div>
-									<div class="flex items-center gap-2">
-										<span class="text-xs opacity-70">{$t('collections.times_shown_in')}</span>
-										<div class="join">
-											<button
-												class="btn btn-xs sm:btn-sm join-item"
-												class:btn-active={timezoneMode === 'event'}
-												on:click={() => (timezoneMode = 'event')}
-											>
-												{$t('collections.event_timezone')}
-											</button>
-											<button
-												class="btn btn-xs sm:btn-sm join-item"
-												class:btn-active={timezoneMode === 'local'}
-												on:click={() => (timezoneMode = 'local')}
-											>
-												{$t('collections.local_timezone')}
-											</button>
-										</div>
-									</div>
-								</div>
-								<p class="text-xs text-base-content/70">
-									{$t('collections.event_timezone_desc')}
-									{userTimezone}.
-								</p>
-								<CalendarComponent
-									events={collectionEvents}
-									onEventClick={handleCalendarEventClick}
-									initialDate={calendarInitialDate}
-								/>
-							</div>
-						</div>
-					{/if}
-				{/if}
+						{/if}
 
-				<!-- Recommendations View -->
-				{#if currentView === 'recommendations'}
-					<div class="space-y-8">
-						<AITravelChat
-							embedded={true}
-							collectionId={collection.id}
-							collectionName={collection.name}
-							startDate={collection.start_date || undefined}
-							endDate={collection.end_date || undefined}
-							destination={collectionDestination}
-							on:itemAdded={handleAssistantItemAdded}
-						/>
-						<CollectionRecommendationView bind:collection user={data.user} />
-					</div>
-				{/if}
-			</div>
-
-			<!-- Right Column - Sidebar -->
-			<div class="lg:col-span-1 space-y-4 sm:space-y-6">
-				<!-- Progress Tracker (only for folder views) -->
-				{#if isFolderView && collection.locations && collection.locations.length > 0}
-					{@const visitedCount = collection.locations.filter((l) => l.is_visited).length}
-					{@const totalCount = collection.locations.length}
-					{@const progressPercent = totalCount > 0 ? (visitedCount / totalCount) * 100 : 0}
-					<div class="card bg-base-200 shadow-xl">
-						<div class="card-body">
-							<h3 class="card-title text-lg mb-4">✅ {$t('worldtravel.progress')}</h3>
-							<div class="space-y-4">
-								<div class="flex justify-between text-sm">
-									<span class="opacity-70">Visited</span>
-									<span class="font-bold">{visitedCount} / {totalCount}</span>
-								</div>
-								<div class="w-full bg-base-300 rounded-full h-4 overflow-hidden">
-									<div
-										class="bg-success h-full transition-all duration-500 rounded-full flex items-center justify-center text-xs font-bold text-success-content"
-										style="width: {progressPercent}%"
-									>
-										{#if progressPercent > 20}
-											{Math.round(progressPercent)}%
-										{/if}
+						<!-- Calendar View -->
+						{#if currentView === 'calendar'}
+							{#if collectionEvents.length === 0}
+								<div class="card bg-base-200 shadow-xl">
+									<div class="card-body">
+										<h2 class="card-title text-2xl mb-4">📆 {$t('navbar.calendar')}</h2>
+										<p class="text-base-content/70">{$t('collections.no_calendar_events')}</p>
 									</div>
 								</div>
-								{#if progressPercent < 20 && progressPercent > 0}
-									<div class="text-center text-xs opacity-70">{Math.round(progressPercent)}%</div>
-								{/if}
-								<div class="grid grid-cols-2 gap-2 pt-2">
-									<div class="stat bg-base-300 rounded-lg p-3">
-										<div class="stat-title text-xs">{$t('adventures.visited')}</div>
-										<div class="stat-value text-lg text-success">{visitedCount}</div>
-									</div>
-									<div class="stat bg-base-300 rounded-lg p-3">
-										<div class="stat-title text-xs">{$t('adventures.planned')}</div>
-										<div class="stat-value text-lg text-warning">{totalCount - visitedCount}</div>
-									</div>
-								</div>
-								{#if visitedCount === totalCount && totalCount > 0}
-									<div class="alert alert-success text-sm py-2">
-										<span>🎉 {$t('worldtravel.all_locations_visited')}</span>
-									</div>
-								{/if}
-							</div>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Quick Info Card -->
-				<div class="card bg-base-200 shadow-xl">
-					<div class="card-body">
-						<h3 class="card-title text-lg mb-4">ℹ️ {$t('adventures.basic_information')}</h3>
-						<div class="space-y-3">
-							{#if collection.start_date || collection.end_date}
-								<div>
-									<div class="text-sm opacity-70 mb-1">{$t('adventures.dates')}</div>
-									<div class="text-sm">
-										{#if collection.start_date && collection.end_date}
-											{formatDate(collection.start_date)} - {formatDate(collection.end_date)}
-										{:else if collection.start_date}
-											From {formatDate(collection.start_date)}
-										{:else if collection.end_date}
-											Until {formatDate(collection.end_date)}
-										{/if}
-									</div>
-								</div>
-							{/if}
-							{#if collection.link}
-								<div>
-									<div class="text-sm opacity-70 mb-1">{$t('adventures.link')}</div>
-									<a
-										href={collection.link}
-										class="link link-primary text-sm break-all"
-										target="_blank"
-									>
-										{collection.link.length > 30
-											? `${collection.link.slice(0, 30)}...`
-											: collection.link}
-									</a>
-								</div>
-							{/if}
-							{#if collection.collaborators && collection.collaborators.length > 0}
-								<div>
-									<div class="text-sm opacity-70 mb-1">{$t('collection.collaborators')}</div>
-									<div class="avatar-group -space-x-3">
-										{#each collection.collaborators as person (person.uuid)}
-											{#if person.public_profile}
-												<a
-													href={`/profile/${person.username}`}
-													class="avatar tooltip"
-													data-tip={collaboratorDisplayName(person)}
-													title={collaboratorDisplayName(person)}
-													tabindex="0"
+							{:else}
+								<div class="card bg-base-200 shadow-xl">
+									<div class="card-body space-y-4">
+										<h2 class="card-title text-2xl flex items-center gap-2">
+											📆 {$t('navbar.calendar')}
+										</h2>
+										<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+											<div class="flex items-center gap-2 text-sm text-base-content/80">
+												<span class="badge badge-ghost"
+													>{collectionEvents.length} {$t('collections.events')}</span
 												>
-													<div
-														class="w-9 h-9 rounded-full ring ring-base-200 ring-offset-base-100 ring-offset-2 bg-base-300 overflow-hidden"
-													>
-														{#if person.profile_pic}
-															<img src={person.profile_pic} alt={collaboratorDisplayName(person)} />
-														{:else}
-															<span
-																class="text-xs font-semibold text-base-content/80 flex items-center justify-center w-full h-full bg-primary/10"
-															>
-																{collaboratorInitials(person)}
-															</span>
-														{/if}
-													</div>
-												</a>
-											{:else}
-												<div class="avatar tooltip" data-tip={collaboratorDisplayName(person)}>
-													<div
-														class="w-9 h-9 rounded-full ring ring-base-200 ring-offset-base-100 ring-offset-2 bg-base-300 overflow-hidden"
-													>
-														{#if person.profile_pic}
-															<img src={person.profile_pic} alt={collaboratorDisplayName(person)} />
-														{:else}
-															<span
-																class="text-xs font-semibold text-base-content/80 flex items-center justify-center w-full h-full bg-primary/10"
-															>
-																{collaboratorInitials(person)}
-															</span>
-														{/if}
-													</div>
-												</div>
-											{/if}
-										{/each}
-									</div>
-								</div>
-							{:else if collection.shared_with && collection.shared_with.length > 0}
-								<div>
-									<div class="text-sm opacity-70 mb-1">{$t('share.shared_with')}</div>
-									<div class="flex flex-wrap gap-1">
-										{#each collection.shared_with as username}
-											<span class="badge badge-sm badge-outline">{username}</span>
-										{/each}
-									</div>
-								</div>
-							{/if}
-						</div>
-					</div>
-				</div>
-
-				<!-- Cost Summary Card -->
-				<div class="card bg-base-200 shadow-xl">
-					<div class="card-body space-y-4">
-						<div class="flex items-center justify-between">
-							<h3 class="card-title text-lg">💰 {$t('collections.trip_costs')}</h3>
-							{#if currencyCount > 0}
-								<span class="badge badge-primary badge-sm">
-									{currencyCount}
-									{currencyCount === 1 ? $t('collections.currency') : $t('collections.currencies')}
-								</span>
-							{/if}
-						</div>
-
-						{#if pricedItemCount === 0}
-							<p class="text-sm opacity-70">
-								{$t('collections.no_priced_items')}
-							</p>
-						{:else}
-							<div class="space-y-3">
-								{#each costSummary as summary}
-									<div class="bg-base-300 rounded-lg p-3 space-y-2">
-										<div class="flex items-center justify-between">
-											<div class="flex items-center gap-2">
-												<span class="badge badge-outline badge-sm">{summary.currency}</span>
-												<span class="text-xs opacity-70">{$t('adventures.total')}</span>
 											</div>
-											<span class="text-lg font-bold">{summary.formattedTotal}</span>
-										</div>
-										<div class="grid grid-cols-1 gap-1 text-sm">
-											{#each summary.categories as category}
-												<div class="flex items-center justify-between">
-													<span class="opacity-70">{category.label} ({category.count})</span>
-													<span class="font-semibold">{category.formattedTotal}</span>
+											<div class="flex items-center gap-2">
+												<span class="text-xs opacity-70">{$t('collections.times_shown_in')}</span>
+												<div class="join">
+													<button
+														class="btn btn-xs sm:btn-sm join-item"
+														class:btn-active={timezoneMode === 'event'}
+														on:click={() => (timezoneMode = 'event')}
+													>
+														{$t('collections.event_timezone')}
+													</button>
+													<button
+														class="btn btn-xs sm:btn-sm join-item"
+														class:btn-active={timezoneMode === 'local'}
+														on:click={() => (timezoneMode = 'local')}
+													>
+														{$t('collections.local_timezone')}
+													</button>
 												</div>
-											{/each}
+											</div>
 										</div>
+										<p class="text-xs text-base-content/70">
+											{$t('collections.event_timezone_desc')}
+											{userTimezone}.
+										</p>
+										<CalendarComponent
+											events={collectionEvents}
+											onEventClick={handleCalendarEventClick}
+											initialDate={calendarInitialDate}
+										/>
 									</div>
-								{/each}
+								</div>
+							{/if}
+						{/if}
+
+						<!-- Recommendations View -->
+						{#if currentView === 'recommendations'}
+							<div class="space-y-8">
+								<CollectionRecommendationView bind:collection user={data.user} />
 							</div>
 						{/if}
 					</div>
-				</div>
 
-				<!-- Collection Stats Card -->
-				<div class="card bg-base-200 shadow-xl">
-					<div class="card-body">
-						<h3 class="card-title text-lg mb-4">📊 {$t('collections.statistics')}</h3>
-						<div class="stats stats-vertical shadow">
-							{#if collection.locations}
-								<div class="stat">
-									<div class="stat-title">{$t('locations.locations')}</div>
-									<div class="stat-value text-2xl">{collection.locations.length}</div>
+					<!-- Right Column - Sidebar -->
+					{#if !chatPanelOpen || innerWidth < 1024}
+						<div class="lg:col-span-1 space-y-4 sm:space-y-6">
+							<!-- Progress Tracker (only for folder views) -->
+							{#if isFolderView && collection.locations && collection.locations.length > 0}
+								{@const visitedCount = collection.locations.filter((l) => l.is_visited).length}
+								{@const totalCount = collection.locations.length}
+								{@const progressPercent = totalCount > 0 ? (visitedCount / totalCount) * 100 : 0}
+								<div class="card bg-base-200 shadow-xl">
+									<div class="card-body">
+										<h3 class="card-title text-lg mb-4">✅ {$t('worldtravel.progress')}</h3>
+										<div class="space-y-4">
+											<div class="flex justify-between text-sm">
+												<span class="opacity-70">Visited</span>
+												<span class="font-bold">{visitedCount} / {totalCount}</span>
+											</div>
+											<div class="w-full bg-base-300 rounded-full h-4 overflow-hidden">
+												<div
+													class="bg-success h-full transition-all duration-500 rounded-full flex items-center justify-center text-xs font-bold text-success-content"
+													style="width: {progressPercent}%"
+												>
+													{#if progressPercent > 20}
+														{Math.round(progressPercent)}%
+													{/if}
+												</div>
+											</div>
+											{#if progressPercent < 20 && progressPercent > 0}
+												<div class="text-center text-xs opacity-70">
+													{Math.round(progressPercent)}%
+												</div>
+											{/if}
+											<div class="grid grid-cols-2 gap-2 pt-2">
+												<div class="stat bg-base-300 rounded-lg p-3">
+													<div class="stat-title text-xs">{$t('adventures.visited')}</div>
+													<div class="stat-value text-lg text-success">{visitedCount}</div>
+												</div>
+												<div class="stat bg-base-300 rounded-lg p-3">
+													<div class="stat-title text-xs">{$t('adventures.planned')}</div>
+													<div class="stat-value text-lg text-warning">
+														{totalCount - visitedCount}
+													</div>
+												</div>
+											</div>
+											{#if visitedCount === totalCount && totalCount > 0}
+												<div class="alert alert-success text-sm py-2">
+													<span>🎉 {$t('worldtravel.all_locations_visited')}</span>
+												</div>
+											{/if}
+										</div>
+									</div>
 								</div>
 							{/if}
-							{#if collection.transportations}
-								<div class="stat">
-									<div class="stat-title">{$t('adventures.transportations')}</div>
-									<div class="stat-value text-2xl">{collection.transportations.length}</div>
-								</div>
-							{/if}
-							{#if collection.lodging}
-								<div class="stat">
-									<div class="stat-title">{$t('adventures.lodging')}</div>
-									<div class="stat-value text-2xl">{collection.lodging.length}</div>
-								</div>
-							{/if}
-							{#if collection.notes}
-								<div class="stat">
-									<div class="stat-title">{$t('adventures.notes')}</div>
-									<div class="stat-value text-2xl">{collection.notes.length}</div>
-								</div>
-							{/if}
-							{#if collection.checklists}
-								<div class="stat">
-									<div class="stat-title">{$t('adventures.checklists')}</div>
-									<div class="stat-value text-2xl">{collection.checklists.length}</div>
-								</div>
-							{/if}
-						</div>
-					</div>
-				</div>
 
-				<!-- Additional Images (from locations) -->
-				{#if heroImages && heroImages.length > 0}
-					<div class="card bg-base-200 shadow-xl">
-						<div class="card-body">
-							<h3 class="card-title text-lg mb-4">🖼️ {$t('adventures.images')}</h3>
-							<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-								{#each heroImages.slice(0, 12) as image, index}
-									<div class="relative group">
-										<div
-											class="aspect-square bg-cover bg-center rounded-lg cursor-pointer transition-transform duration-200 group-hover:scale-105"
-											style="background-image: url({image.image})"
-											on:click={() => openImageModal(index)}
-											on:keydown={(e) => e.key === 'Enter' && openImageModal(index)}
-											role="button"
-											tabindex="0"
-										></div>
-										{#if image.is_primary}
-											<div class="absolute top-1 right-1">
-												<span class="badge badge-primary badge-xs">{$t('settings.primary')}</span>
+							<!-- Quick Info Card -->
+							<div class="card bg-base-200 shadow-xl">
+								<div class="card-body">
+									<h3 class="card-title text-lg mb-4">ℹ️ {$t('adventures.basic_information')}</h3>
+									<div class="space-y-3">
+										{#if collection.start_date || collection.end_date}
+											<div>
+												<div class="text-sm opacity-70 mb-1">{$t('adventures.dates')}</div>
+												<div class="text-sm">
+													{#if collection.start_date && collection.end_date}
+														{formatDate(collection.start_date)} - {formatDate(collection.end_date)}
+													{:else if collection.start_date}
+														From {formatDate(collection.start_date)}
+													{:else if collection.end_date}
+														Until {formatDate(collection.end_date)}
+													{/if}
+												</div>
+											</div>
+										{/if}
+										{#if collection.link}
+											<div>
+												<div class="text-sm opacity-70 mb-1">{$t('adventures.link')}</div>
+												<a
+													href={collection.link}
+													class="link link-primary text-sm break-all"
+													target="_blank"
+												>
+													{collection.link.length > 30
+														? `${collection.link.slice(0, 30)}...`
+														: collection.link}
+												</a>
+											</div>
+										{/if}
+										{#if collection.collaborators && collection.collaborators.length > 0}
+											<div>
+												<div class="text-sm opacity-70 mb-1">{$t('collection.collaborators')}</div>
+												<div class="avatar-group -space-x-3">
+													{#each collection.collaborators as person (person.uuid)}
+														{#if person.public_profile}
+															<a
+																href={`/profile/${person.username}`}
+																class="avatar tooltip"
+																data-tip={collaboratorDisplayName(person)}
+																title={collaboratorDisplayName(person)}
+																tabindex="0"
+															>
+																<div
+																	class="w-9 h-9 rounded-full ring ring-base-200 ring-offset-base-100 ring-offset-2 bg-base-300 overflow-hidden"
+																>
+																	{#if person.profile_pic}
+																		<img
+																			src={person.profile_pic}
+																			alt={collaboratorDisplayName(person)}
+																		/>
+																	{:else}
+																		<span
+																			class="text-xs font-semibold text-base-content/80 flex items-center justify-center w-full h-full bg-primary/10"
+																		>
+																			{collaboratorInitials(person)}
+																		</span>
+																	{/if}
+																</div>
+															</a>
+														{:else}
+															<div
+																class="avatar tooltip"
+																data-tip={collaboratorDisplayName(person)}
+															>
+																<div
+																	class="w-9 h-9 rounded-full ring ring-base-200 ring-offset-base-100 ring-offset-2 bg-base-300 overflow-hidden"
+																>
+																	{#if person.profile_pic}
+																		<img
+																			src={person.profile_pic}
+																			alt={collaboratorDisplayName(person)}
+																		/>
+																	{:else}
+																		<span
+																			class="text-xs font-semibold text-base-content/80 flex items-center justify-center w-full h-full bg-primary/10"
+																		>
+																			{collaboratorInitials(person)}
+																		</span>
+																	{/if}
+																</div>
+															</div>
+														{/if}
+													{/each}
+												</div>
+											</div>
+										{:else if collection.shared_with && collection.shared_with.length > 0}
+											<div>
+												<div class="text-sm opacity-70 mb-1">{$t('share.shared_with')}</div>
+												<div class="flex flex-wrap gap-1">
+													{#each collection.shared_with as username}
+														<span class="badge badge-sm badge-outline">{username}</span>
+													{/each}
+												</div>
 											</div>
 										{/if}
 									</div>
-								{/each}
+								</div>
 							</div>
-							{#if heroImages.length > 12}
-								<div class="text-center mt-2 text-sm opacity-70">
-									+{heroImages.length - 12} more {heroImages.length - 12 === 1 ? 'image' : 'images'}
+
+							<!-- Cost Summary Card -->
+							<div class="card bg-base-200 shadow-xl">
+								<div class="card-body space-y-4">
+									<div class="flex items-center justify-between">
+										<h3 class="card-title text-lg">💰 {$t('collections.trip_costs')}</h3>
+										{#if currencyCount > 0}
+											<span class="badge badge-primary badge-sm">
+												{currencyCount}
+												{currencyCount === 1
+													? $t('collections.currency')
+													: $t('collections.currencies')}
+											</span>
+										{/if}
+									</div>
+
+									{#if pricedItemCount === 0}
+										<p class="text-sm opacity-70">
+											{$t('collections.no_priced_items')}
+										</p>
+									{:else}
+										<div class="space-y-3">
+											{#each costSummary as summary}
+												<div class="bg-base-300 rounded-lg p-3 space-y-2">
+													<div class="flex items-center justify-between">
+														<div class="flex items-center gap-2">
+															<span class="badge badge-outline badge-sm">{summary.currency}</span>
+															<span class="text-xs opacity-70">{$t('adventures.total')}</span>
+														</div>
+														<span class="text-lg font-bold">{summary.formattedTotal}</span>
+													</div>
+													<div class="grid grid-cols-1 gap-1 text-sm">
+														{#each summary.categories as category}
+															<div class="flex items-center justify-between">
+																<span class="opacity-70">{category.label} ({category.count})</span>
+																<span class="font-semibold">{category.formattedTotal}</span>
+															</div>
+														{/each}
+													</div>
+												</div>
+											{/each}
+										</div>
+									{/if}
+								</div>
+							</div>
+
+							<!-- Collection Stats Card -->
+							<div class="card bg-base-200 shadow-xl">
+								<div class="card-body">
+									<h3 class="card-title text-lg mb-4">📊 {$t('collections.statistics')}</h3>
+									<div class="stats stats-vertical shadow">
+										{#if collection.locations}
+											<div class="stat">
+												<div class="stat-title">{$t('locations.locations')}</div>
+												<div class="stat-value text-2xl">{collection.locations.length}</div>
+											</div>
+										{/if}
+										{#if collection.transportations}
+											<div class="stat">
+												<div class="stat-title">{$t('adventures.transportations')}</div>
+												<div class="stat-value text-2xl">{collection.transportations.length}</div>
+											</div>
+										{/if}
+										{#if collection.lodging}
+											<div class="stat">
+												<div class="stat-title">{$t('adventures.lodging')}</div>
+												<div class="stat-value text-2xl">{collection.lodging.length}</div>
+											</div>
+										{/if}
+										{#if collection.notes}
+											<div class="stat">
+												<div class="stat-title">{$t('adventures.notes')}</div>
+												<div class="stat-value text-2xl">{collection.notes.length}</div>
+											</div>
+										{/if}
+										{#if collection.checklists}
+											<div class="stat">
+												<div class="stat-title">{$t('adventures.checklists')}</div>
+												<div class="stat-value text-2xl">{collection.checklists.length}</div>
+											</div>
+										{/if}
+									</div>
+								</div>
+							</div>
+
+							<!-- Additional Images (from locations) -->
+							{#if heroImages && heroImages.length > 0}
+								<div class="card bg-base-200 shadow-xl">
+									<div class="card-body">
+										<h3 class="card-title text-lg mb-4">🖼️ {$t('adventures.images')}</h3>
+										<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+											{#each heroImages.slice(0, 12) as image, index}
+												<div class="relative group">
+													<div
+														class="aspect-square bg-cover bg-center rounded-lg cursor-pointer transition-transform duration-200 group-hover:scale-105"
+														style="background-image: url({image.image})"
+														on:click={() => openImageModal(index)}
+														on:keydown={(event) => handleImageKeydown(event, index)}
+														role="button"
+														tabindex="0"
+													></div>
+													{#if image.is_primary}
+														<div class="absolute top-1 right-1">
+															<span class="badge badge-primary badge-xs"
+																>{$t('settings.primary')}</span
+															>
+														</div>
+													{/if}
+												</div>
+											{/each}
+										</div>
+										{#if heroImages.length > 12}
+											<div class="text-center mt-2 text-sm opacity-70">
+												+{heroImages.length - 12} more {heroImages.length - 12 === 1
+													? 'image'
+													: 'images'}
+											</div>
+										{/if}
+									</div>
 								</div>
 							{/if}
 						</div>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			</div>
+
+			{#if canModifyCollection}
+				<div class="drawer-side z-40">
+					<label for="collection-chat-drawer" class="drawer-overlay"></label>
+					<div class="bg-base-100 h-full w-full sm:w-96 border-l border-base-300 flex flex-col">
+						<div class="flex items-center justify-between p-3 border-b border-base-300">
+							<h3 class="font-semibold text-sm">{$t('chat.travel_assistant')}</h3>
+							<button
+								class="btn btn-ghost btn-xs btn-circle"
+								on:click={() => (chatPanelOpen = false)}
+							>
+								<X class="w-4 h-4" />
+							</button>
+						</div>
+						<div class="flex-1 overflow-hidden">
+							<AITravelChat
+								embedded={true}
+								panelMode={true}
+								collectionId={collection.id}
+								collectionName={collection.name}
+								startDate={collection.start_date || undefined}
+								endDate={collection.end_date || undefined}
+								destination={collectionDestination}
+								on:itemAdded={handleAssistantItemAdded}
+							/>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 {/if}
 
 <!-- Floating Action Button (FAB) - Only shown if user can modify collection -->
 {#if collection && canModifyCollection && !collection.is_archived}
-	<div class="fixed bottom-6 right-6 z-[999]">
+	<div class="fixed bottom-6 right-6 {chatPanelOpen ? 'z-30' : 'z-[999]'}">
 		<div class="dropdown dropdown-top dropdown-end">
 			<div
 				tabindex="0"
