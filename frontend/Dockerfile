@@ -1,5 +1,5 @@
-# Use this image as the platform to build the app
-FROM node:22-alpine AS builder
+# Use the official Bun image as the build platform (supports linux/amd64 and linux/arm64 natively)
+FROM oven/bun:1.2.22-alpine AS builder
 
 # Metadata labels for the AdventureLog image
 LABEL maintainer="Sean Morley" \
@@ -20,9 +20,6 @@ WORKDIR /app
 
 # Upgrade zlib to include Alpine security fixes
 RUN apk upgrade --no-cache zlib
-
-# Install bun toolchain
-RUN npm install -g bun@1.2.22
 
 # Copy package files first for better Docker layer caching
 COPY package.json bun.lock* ./
