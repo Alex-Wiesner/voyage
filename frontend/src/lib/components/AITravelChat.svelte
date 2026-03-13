@@ -56,6 +56,7 @@
 	export let startDate: string | undefined = undefined;
 	export let endDate: string | undefined = undefined;
 	export let destination: string | undefined = undefined;
+	export let collectionLocations: Location[] = [];
 
 	let conversations: Conversation[] = [];
 	let activeConversation: Conversation | null = null;
@@ -662,7 +663,39 @@
 		return parseCoordinate(place.latitude) !== null && parseCoordinate(place.longitude) !== null;
 	}
 
+	function normalizeLocationName(value: unknown): string {
+		if (typeof value !== 'string') {
+			return '';
+		}
+
+		return value.trim().toLowerCase();
+	}
+
+	let sessionDuplicateCollectionId: string | undefined = collectionId;
+	let sessionAddedLocationNames = new Set<string>();
+
+	$: if (sessionDuplicateCollectionId !== collectionId) {
+		sessionDuplicateCollectionId = collectionId;
+		sessionAddedLocationNames = new Set<string>();
+	}
+
+	$: existingLocationNames = new Set(
+		(collectionLocations || [])
+			.map((location) => normalizeLocationName(location?.name))
+			.filter((name) => name.length > 0)
+	);
+
+	$: mergedLocationNames = new Set([...existingLocationNames, ...sessionAddedLocationNames]);
+
+	function placeAlreadyInCollection(place: PlaceResult): boolean {
+		return mergedLocationNames.has(normalizeLocationName(place.name));
+	}
+
 	function openDateSelector(place: PlaceResult) {
+		if (placeAlreadyInCollection(place)) {
+			return;
+		}
+
 		selectedPlaceToAdd = place;
 		selectedDate = startDate || '';
 		showDateSelector = true;
@@ -676,6 +709,10 @@
 
 	async function addPlaceToItinerary(place: PlaceResult, date: string) {
 		if (!collectionId || !date) {
+			return;
+		}
+
+		if (placeAlreadyInCollection(place)) {
 			return;
 		}
 
@@ -729,6 +766,10 @@
 			}
 
 			const itineraryItem = await itineraryResponse.json();
+			const normalizedPlaceName = normalizeLocationName(place.name);
+			if (normalizedPlaceName) {
+				sessionAddedLocationNames = new Set([...sessionAddedLocationNames, normalizedPlaceName]);
+			}
 
 			dispatch('itemAdded', { location, itineraryItem, date });
 			addToast('success', $t('added_successfully'));
@@ -797,12 +838,92 @@
 			};
 		}
 
+		if (result.name === 'move_itinerary_item') {
+			const item = asRecord(payload?.itinerary_item);
+			const date = typeof item?.date === 'string' ? item.date : 'the selected day';
+			return {
+				icon: '↕️',
+				text: `Moved itinerary item to ${date}.`
+			};
+		}
+
+		if (result.name === 'remove_itinerary_item') {
+			return {
+				icon: '🗑️',
+				text: 'Removed item from itinerary.'
+			};
+		}
+
+		if (result.name === 'update_location_details') {
+			const location = asRecord(payload?.location);
+			const locationName = typeof location?.name === 'string' ? location.name : 'location';
+			return {
+				icon: '📍',
+				text: `Updated details for ${locationName}.`
+			};
+		}
+
+		if (result.name === 'add_lodging') {
+			const lodging = asRecord(payload?.lodging);
+			const lodgingName = typeof lodging?.name === 'string' ? lodging.name : 'lodging';
+			return {
+				icon: '🏨',
+				text: `Added lodging: ${lodgingName}.`
+			};
+		}
+
+		if (result.name === 'update_lodging') {
+			const lodging = asRecord(payload?.lodging);
+			const lodgingName = typeof lodging?.name === 'string' ? lodging.name : 'lodging';
+			return {
+				icon: '🏨',
+				text: `Updated lodging: ${lodgingName}.`
+			};
+		}
+
+		if (result.name === 'remove_lodging') {
+			return {
+				icon: '🧹',
+				text: 'Removed lodging from trip.'
+			};
+		}
+
+		if (result.name === 'add_transportation') {
+			const transportation = asRecord(payload?.transportation);
+			const name =
+				typeof transportation?.name === 'string' ? transportation.name : 'transportation item';
+			return {
+				icon: '🚌',
+				text: `Added transportation: ${name}.`
+			};
+		}
+
+		if (result.name === 'update_transportation') {
+			const transportation = asRecord(payload?.transportation);
+			const name =
+				typeof transportation?.name === 'string' ? transportation.name : 'transportation item';
+			return {
+				icon: '🚌',
+				text: `Updated transportation: ${name}.`
+			};
+		}
+
+		if (result.name === 'remove_transportation') {
+			return {
+				icon: '🧹',
+				text: 'Removed transportation from trip.'
+			};
+		}
+
 		if (result.name === 'get_weather') {
 			const entries = Array.isArray(payload?.results) ? payload.results : [];
 			const availableCount = entries.filter((entry) => asRecord(entry)?.available === true).length;
+			const estimatedCount = entries.filter(
+				(entry) => asRecord(entry)?.is_estimate === true
+			).length;
 			return {
 				icon: '🌤️',
-				text: `Checked weather for ${entries.length} date${entries.length === 1 ? '' : 's'} (${availableCount} available).`
+				text: `Checked weather for ${entries.length} date${entries.length === 1 ? '' : 's'} (${availableCount} available, ${estimatedCount} estimated).`
 			};
 		}
 
@@ -820,10 +941,12 @@
 	class:shadow-xl={!embedded}
 	class:border={embedded}
 	class:border-base-300={embedded}
+	class:h-full={panelMode}
+	class:min-h-0={panelMode}
 >
-	<div class="card-body p-0">
+	<div class="card-body p-0" class:h-full={panelMode} class:min-h-0={panelMode}>
 		<div
-			class="flex"
+			class="flex min-h-0 overflow-hidden"
 			class:h-[calc(100vh-64px)]={!embedded}
 			class:h-full={panelMode}
 			class:h-[65vh]={embedded && !panelMode}
@@ -881,7 +1004,7 @@
 				</div>
 			</div>
 
-			<div class="flex-1 flex flex-col min-w-0 {panelMode && sidebarOpen ? 'hidden' : ''}">
+			<div class="flex-1 flex flex-col min-w-0 min-h-0 {panelMode && sidebarOpen ? 'hidden' : ''}">
 				<div class="p-3 border-b border-base-300 flex items-center gap-3">
 					<button
 						class="btn btn-sm btn-ghost {panelMode ? '' : 'lg:hidden'}"
@@ -983,7 +1106,7 @@
 						</div>
 					</div>
 				{:else}
-					<div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={messagesContainer}>
+					<div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4" bind:this={messagesContainer}>
 						{#if messages.length === 0 && !activeConversation}
 							<div class="flex flex-col items-center justify-center h-full text-center px-4">
 								<div class="{panelMode ? 'text-4xl' : 'text-6xl'} opacity-40 mb-3">🌍</div>
@@ -1022,12 +1145,19 @@
 																			</div>
 																		{/if}
 																		{#if collectionId}
+																			{@const isDuplicate = mergedLocationNames.has(
+																				normalizeLocationName(place.name)
+																			)}
 																			<button
 																				class="btn btn-xs btn-primary btn-outline mt-2"
 																				on:click={() => openDateSelector(place)}
-																				disabled={!hasPlaceCoordinates(place)}
+																				disabled={!hasPlaceCoordinates(place) || isDuplicate}
 																			>
-																				{$t('add_to_itinerary')}
+																				{#if isDuplicate}
+																					{$t('adventures.itinerary_link_modal.already_added')}
+																				{:else}
+																					{$t('add_to_itinerary')}
+																				{/if}
 																			</button>
 																		{/if}
 																	</div>

@@ -1648,7 +1648,9 @@
 			{#if canModifyCollection}
 				<div class="drawer-side z-40">
 					<label for="collection-chat-drawer" class="drawer-overlay"></label>
-					<div class="bg-base-100 h-full w-full sm:w-96 border-l border-base-300 flex flex-col">
+					<div
+						class="bg-base-100 h-full w-full sm:w-96 border-l border-base-300 flex flex-col min-h-0 overflow-hidden"
+					>
 						<div class="flex items-center justify-between p-3 border-b border-base-300">
 							<h3 class="font-semibold text-sm">{$t('chat.travel_assistant')}</h3>
 							<button
@@ -1658,12 +1660,13 @@
 								<X class="w-4 h-4" />
 							</button>
 						</div>
-						<div class="flex-1 overflow-hidden">
+						<div class="flex-1 min-h-0 overflow-hidden flex flex-col">
 							<AITravelChat
 								embedded={true}
 								panelMode={true}
 								collectionId={collection.id}
 								collectionName={collection.name}
+								collectionLocations={collection.locations || []}
 								startDate={collection.start_date || undefined}
 								endDate={collection.end_date || undefined}
 								destination={collectionDestination}
