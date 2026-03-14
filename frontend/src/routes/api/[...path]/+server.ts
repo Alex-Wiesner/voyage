@@ -43,7 +43,7 @@ async function handleRequest(
 	const path = params.path;
 	let targetUrl = `${endpoint}/api/${path}`;
 
-	// Ensure the path ends with a trailing slash
+	// Preserve global proxy contract for mutating requests.
 	if (requreTrailingSlash && !targetUrl.endsWith('/')) {
 		targetUrl += '/';
 	}
@@ -53,27 +53,38 @@ async function handleRequest(
 
 	const headers = new Headers(request.headers);
 
-	// Delete existing csrf cookie by setting an expired date
-	cookies.delete('csrftoken', { path: '/' });
+	const isMutatingRequest = !['GET', 'HEAD', 'OPTIONS'].includes(request.method.toUpperCase());
+	const sessionId = cookies.get('sessionid');
+	let csrfToken: string | null = null;
 
-	// Generate a new csrf token (using your existing fetchCSRFToken function)
-	const csrfToken = await fetchCSRFToken();
-	if (!csrfToken) {
-		return json({ error: 'CSRF token is missing or invalid' }, { status: 400 });
+	if (isMutatingRequest) {
+		csrfToken = await fetchCSRFToken({ fetch, sessionId });
+		if (!csrfToken) {
+			return json({ error: 'CSRF token is missing or invalid' }, { status: 400 });
+		}
 	}
 
-	// Set the new csrf token in both headers and cookies
-	const sessionId = cookies.get('sessionid');
-	const cookieHeader = `csrftoken=${csrfToken}` + (sessionId ? `; sessionid=${sessionId}` : '');
+	const cookieParts: string[] = [];
+	if (csrfToken) cookieParts.push(`csrftoken=${csrfToken}`);
+	if (sessionId) cookieParts.push(`sessionid=${sessionId}`);
+	const cookieHeader = cookieParts.join('; ');
+
+	const forwardedHeaders = {
+		...Object.fromEntries(headers)
+	} as Record<string, string>;
+
+	if (csrfToken) {
+		forwardedHeaders['X-CSRFToken'] = csrfToken;
+	}
+
+	if (cookieHeader) {
+		forwardedHeaders['Cookie'] = cookieHeader;
+	}
 
 	try {
 		const response = await fetch(targetUrl, {
 			method: request.method,
-			headers: {
-				...Object.fromEntries(headers),
-				'X-CSRFToken': csrfToken,
-				Cookie: cookieHeader
-			},
+			headers: forwardedHeaders,
 			body:
 				request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined,
 			credentials: 'include' // This line ensures cookies are sent with the request
