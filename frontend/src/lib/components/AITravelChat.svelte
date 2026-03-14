@@ -24,6 +24,18 @@
 		rating?: number;
 		latitude?: number | string;
 		longitude?: number | string;
+		link?: string | null;
+		preferred_link?: string | null;
+		url?: string | null;
+		website?: string | null;
+		map_link?: string | null;
+		links?: {
+			link?: string | null;
+			preferred?: string | null;
+			official?: string | null;
+			website?: string | null;
+			map?: string | null;
+		} | null;
 	};
 
 	type Conversation = {
@@ -661,6 +673,43 @@
 		return null;
 	}
 
+	function normalizeHttpUrl(value: unknown): string | null {
+		if (typeof value !== 'string') {
+			return null;
+		}
+
+		const candidate = value.trim();
+		if (!candidate) {
+			return null;
+		}
+
+		try {
+			const parsed = new URL(candidate);
+			if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+				return null;
+			}
+
+			return parsed.toString();
+		} catch {
+			return null;
+		}
+	}
+
+	function getPreferredPlaceLink(place: PlaceResult): string | null {
+		return (
+			normalizeHttpUrl(place.link) ||
+			normalizeHttpUrl(place.preferred_link) ||
+			normalizeHttpUrl(place.url) ||
+			normalizeHttpUrl(place.website) ||
+			normalizeHttpUrl(place.map_link) ||
+			normalizeHttpUrl(place.links?.link) ||
+			normalizeHttpUrl(place.links?.preferred) ||
+			normalizeHttpUrl(place.links?.official) ||
+			normalizeHttpUrl(place.links?.website) ||
+			normalizeHttpUrl(place.links?.map)
+		);
+	}
+
 	function hasPlaceCoordinates(place: PlaceResult): boolean {
 		return parseCoordinate(place.latitude) !== null && parseCoordinate(place.longitude) !== null;
 	}
@@ -737,6 +786,7 @@
 					location: place.address || place.name,
 					latitude,
 					longitude,
+					link: getPreferredPlaceLink(place),
 					collections: [collectionId],
 					is_public: false
 				})
@@ -1146,24 +1196,37 @@
 											{#if msg.role === 'assistant' && msg.tool_results}
 												<div class="mt-2 space-y-2">
 													{#each deduplicateContextTools(uniqueToolResultsByCallId(msg.tool_results)) as result}
-														{#if hasPlaceResults(result)}
-															<div class="grid gap-2">
-																{#each getPlaceResults(result) as place}
-																	<div class="card card-compact bg-base-200 p-3">
-																		<h4 class="font-semibold">{place.name}</h4>
-																		{#if place.address}
-																			<p class="text-sm text-base-content/70">{place.address}</p>
-																		{/if}
-																		{#if place.rating}
-																			<div class="flex items-center gap-1 text-sm">
-																				<span>⭐</span>
-																				<span>{place.rating}</span>
-																			</div>
-																		{/if}
-																		{#if collectionId}
-																			{@const isDuplicate = mergedLocationNames.has(
-																				normalizeLocationName(place.name)
-																			)}
+													{#if hasPlaceResults(result)}
+														<div class="grid gap-2">
+															{#each getPlaceResults(result) as place}
+																{@const placeLink = getPreferredPlaceLink(place)}
+																<div class="card card-compact bg-base-200 p-3">
+																	<h4 class="font-semibold">{place.name}</h4>
+																	{#if place.address}
+																		<p class="text-sm text-base-content/70">{place.address}</p>
+																	{/if}
+																	{#if place.rating}
+																		<div class="flex items-center gap-1 text-sm">
+																			<span>⭐</span>
+																			<span>{place.rating}</span>
+																		</div>
+																	{/if}
+																	{#if placeLink}
+																		<div class="mt-2">
+																			<a
+																				href={placeLink}
+																				target="_blank"
+																				rel="noopener noreferrer"
+																				class="btn btn-ghost btn-xs"
+																			>
+																				↗ {$t('adventures.external_link')}
+																			</a>
+																		</div>
+																	{/if}
+																	{#if collectionId}
+																		{@const isDuplicate = mergedLocationNames.has(
+																			normalizeLocationName(place.name)
+																		)}
 																			<button
 																				class="btn btn-xs btn-primary btn-outline mt-2"
 																				on:click={() => openDateSelector(place)}
@@ -1175,10 +1238,10 @@
 																					{$t('add_to_itinerary')}
 																				{/if}
 																			</button>
-																		{/if}
-																	</div>
-																{/each}
-															</div>
+																	{/if}
+																</div>
+															{/each}
+														</div>
 														{:else if hasWebSearchResults(result)}
 															<div class="grid gap-2">
 																{#each getWebSearchResults(result) as item}

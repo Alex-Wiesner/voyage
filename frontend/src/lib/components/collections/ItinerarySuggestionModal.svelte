@@ -20,6 +20,7 @@
 		price_level?: string | null;
 		latitude?: number | string | null;
 		longitude?: number | string | null;
+		link?: string | null;
 	};
 
 	const dispatch = createEventDispatcher();
@@ -166,6 +167,40 @@
 		return null;
 	}
 
+	function normalizeHttpUrl(value: unknown): string | null {
+		if (typeof value !== 'string') return null;
+		const candidate = value.trim();
+		if (!candidate) return null;
+
+		try {
+			const parsed = new URL(candidate);
+			if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+				return null;
+			}
+			return parsed.toString();
+		} catch {
+			return null;
+		}
+	}
+
+	function getPreferredSuggestionLink(item: Record<string, unknown>): string | null {
+		const links = asRecord(item.links);
+		return (
+			normalizeHttpUrl(item.link) ||
+			normalizeHttpUrl(item.preferred_link) ||
+			normalizeHttpUrl(item.url) ||
+			normalizeHttpUrl(item.website) ||
+			normalizeHttpUrl(item.map_link) ||
+			(links
+				? normalizeHttpUrl(links.link) ||
+					normalizeHttpUrl(links.preferred) ||
+					normalizeHttpUrl(links.official) ||
+					normalizeHttpUrl(links.website) ||
+					normalizeHttpUrl(links.map)
+				: null)
+		);
+	}
+
 	function normalizeSuggestionItem(value: unknown): SuggestionItem | null {
 		const item = asRecord(value);
 		if (!item) return null;
@@ -191,6 +226,7 @@
 		const rating = normalizeRating(item.rating ?? item.score);
 		const latitude = normalizeCoordinate(item.latitude ?? item.lat);
 		const longitude = normalizeCoordinate(item.longitude ?? item.lon ?? item.lng);
+		const link = getPreferredSuggestionLink(item);
 
 		const finalName = name || location;
 		if (!finalName) return null;
@@ -204,7 +240,8 @@
 			rating,
 			price_level: priceLevel || null,
 			latitude,
-			longitude
+			longitude,
+			link
 		};
 	}
 
@@ -225,6 +262,7 @@
 		const rating = normalizeRating(suggestion.rating);
 		const latitude = normalizeCoordinate(suggestion.latitude);
 		const longitude = normalizeCoordinate(suggestion.longitude);
+		const link = normalizeHttpUrl(suggestion.link);
 
 		return {
 			name,
@@ -233,6 +271,7 @@
 			rating,
 			latitude,
 			longitude,
+			link,
 			collections: [collection.id],
 			is_public: Boolean(collection?.is_public)
 		};
@@ -508,7 +547,17 @@
 									{/if}
 								</div>
 
-								<div class="card-actions justify-end mt-3">
+							<div class="card-actions justify-between items-center mt-3">
+								{#if suggestion.link}
+									<a
+										href={suggestion.link}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="btn btn-ghost btn-xs"
+									>
+										↗ {$t('adventures.external_link')}
+									</a>
+								{/if}
 									<button
 										type="button"
 										class="btn btn-primary btn-sm"
