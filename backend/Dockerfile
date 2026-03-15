@@ -1,5 +1,6 @@
 # Stage 1: Build stage with dependencies
-FROM python:3.13-slim AS builder
+ARG PYTHON_IMAGE=python:3.13-slim
+FROM ${PYTHON_IMAGE} AS builder
 
 # Metadata labels
 LABEL maintainer="Voyage contributors" \
@@ -35,7 +36,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Final image with runtime dependencies
-FROM python:3.13-slim
+FROM ${PYTHON_IMAGE}
 WORKDIR /code
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

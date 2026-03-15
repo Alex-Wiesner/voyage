@@ -3,6 +3,8 @@ services:
     build:
       context: ./frontend/
       target: builder
+      args:
+        BUN_VERSION: ${BUN_VERSION:-1.3.10}
     # image: ghcr.io/alex-wiesner/voyage-frontend:latest
     restart: unless-stopped
     user: root
@@ -28,7 +30,10 @@ services:
       - postgres_data:/var/lib/postgresql/data/
 
   server:
-    build: ./backend/
+    build:
+      context: ./backend/
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.13-slim}
     # image: ghcr.io/alex-wiesner/voyage-backend:latest
     restart: unless-stopped
     entrypoint: []

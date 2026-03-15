@@ -41,6 +41,9 @@ jobs:
   image-scan:
     name: Trivy Docker Image Scan (Backend & Frontend)
     runs-on: ubuntu-latest
+    env:
+      BUN_VERSION: "1.3.10"
+      PYTHON_IMAGE: "python:3.13-slim"
 
     steps:
       - name: Checkout code
@@ -57,10 +60,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build backend Docker image
-        run: docker build -t voyage-backend ./backend
+        run: docker build --build-arg PYTHON_IMAGE=${{ env.PYTHON_IMAGE }} -t voyage-backend ./backend
 
       - name: Build frontend Docker image
-        run: docker build -t voyage-frontend ./frontend
+        run: docker build --build-arg BUN_VERSION=${{ env.BUN_VERSION }} -t voyage-frontend ./frontend
 
       - name: Scan backend Docker image with Trivy
         uses: aquasecurity/trivy-action@master

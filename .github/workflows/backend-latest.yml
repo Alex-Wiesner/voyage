@@ -15,6 +15,7 @@ on:
 
 env:
   IMAGE_NAME: "voyage-backend"
+  PYTHON_IMAGE: "python:3.13-slim"
 
 jobs:
   upload:
@@ -50,6 +51,8 @@ jobs:
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            PYTHON_IMAGE=${{ env.PYTHON_IMAGE }}
           push: true
           tags: |
             ghcr.io/${{ steps.repo_owner.outputs.repo_owner }}/${{ env.IMAGE_NAME }}:latest

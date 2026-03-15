@@ -1,11 +1,13 @@
 # Use an official Python image as a base
-FROM python:3.11-slim
+ARG PYTHON_IMAGE=python:3.13-slim
+FROM ${PYTHON_IMAGE}
 
 # Set the working directory
 WORKDIR /app
 
 # Install required Python packages
-RUN pip install --no-cache-dir requests osm2geojson
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy the script into the container
 COPY main.py /app/main.py
