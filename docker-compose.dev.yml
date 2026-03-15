@@ -1,3 +1,5 @@
+name: voyage-dev
+
 services:
   web:
     build:
