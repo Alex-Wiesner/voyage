@@ -2,3 +2,8 @@ node_modules
 .svelte-kit
 build
 .env
+.git
+.github
+.vscode
+coverage
+package-lock.json

@@ -1,29 +1,45 @@
-#!/bin/bash
+#!/bin/sh
 
 # Function to check PostgreSQL availability
 # Helper to get the first non-empty environment variable
 get_env() {
-  for var in "$@"; do
-    value="${!var}"
-    if [ -n "$value" ]; then
-      echo "$value"
-      return
-    fi
-  done
+    for var in "$@"; do
+        eval "value=\${$var:-}"
+        if [ -n "$value" ]; then
+            printf '%s\n' "$value"
+            return 0
+        fi
+    done
+
+    return 1
 }
 
 check_postgres() {
-  local db_host
-  local db_user
-  local db_name
-  local db_pass
+    db_host=$(get_env PGHOST)
+    db_host=${db_host:-localhost}
+    db_port=$(get_env PGPORT)
+    db_port=${db_port:-5432}
+    db_user=$(get_env PGUSER POSTGRES_USER)
+    db_name=$(get_env PGDATABASE POSTGRES_DB)
+    db_pass=$(get_env PGPASSWORD POSTGRES_PASSWORD)
 
-  db_host=$(get_env PGHOST)
-  db_user=$(get_env PGUSER POSTGRES_USER)
-  db_name=$(get_env PGDATABASE POSTGRES_DB)
-  db_pass=$(get_env PGPASSWORD POSTGRES_PASSWORD)
+    "${VIRTUAL_ENV:-/opt/venv}/bin/python" - "$db_host" "$db_port" "$db_user" "$db_name" "$db_pass" <<'PY' >/dev/null 2>&1
+import sys
 
-  PGPASSWORD="$db_pass" psql -h "$db_host" -U "$db_user" -d "$db_name" -c '\q' >/dev/null 2>&1
+import psycopg2
+
+host, port, user, dbname, password = sys.argv[1:]
+
+conn = psycopg2.connect(
+    host=host,
+    port=int(port),
+    user=user,
+    dbname=dbname,
+    password=password,
+    connect_timeout=1,
+)
+conn.close()
+PY
 }
 
 
@@ -39,12 +55,12 @@ done
 # psql -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -f /app/backend/init-postgis.sql
 
 # Apply Django migrations
-python manage.py migrate
+${VIRTUAL_ENV:-/opt/venv}/bin/python manage.py migrate
 
 # Create superuser if environment variables are set and there are no users present at all.
 if [ -n "$DJANGO_ADMIN_USERNAME" ] && [ -n "$DJANGO_ADMIN_PASSWORD" ] && [ -n "$DJANGO_ADMIN_EMAIL" ]; then
   echo "Creating superuser..."
-  python manage.py shell << EOF
+  ${VIRTUAL_ENV:-/opt/venv}/bin/python manage.py shell << EOF
 from django.contrib.auth import get_user_model
 from allauth.account.models import EmailAddress
 
@@ -76,7 +92,7 @@ fi
 
 # Sync the countries and world travel regions
 # Sync the countries and world travel regions
-python manage.py download-countries
+${VIRTUAL_ENV:-/opt/venv}/bin/python manage.py download-countries
 if [ $? -eq 137 ]; then
   >&2 echo "WARNING: The download-countries command was interrupted. This is likely due to lack of memory allocated to the container or the host. Please try again with more memory."
   exit 1
